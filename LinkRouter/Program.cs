@@ -111,6 +111,11 @@ class Program
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var dir = Path.Combine(appData, "LinkRouter");
             Directory.CreateDirectory(dir);
+            var togglePath = Path.Combine(dir, "logging.disabled");
+            if (File.Exists(togglePath))
+            {
+                return;
+            }
             var logPath = Path.Combine(dir, "args.log");
             var line = $"{DateTime.Now:O} | {string.Join(" ", args)}";
             File.AppendAllText(logPath, line + Environment.NewLine);

@@ -1,0 +1,30 @@
+<Page
+    x:Class="LinkRouter.Settings.Views.AdvancedPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:viewModels="using:LinkRouter.Settings.ViewModels"
+    x:DataType="viewModels:AdvancedViewModel"
+    mc:Ignorable="d">
+    <Page.DataContext>
+        <viewModels:AdvancedViewModel />
+    </Page.DataContext>
+
+    <StackPanel Spacing="16" Margin="16">
+        <muxc:SettingsCard Header="Logging">
+            <ToggleSwitch Header="Log CLI invocations" IsOn="{x:Bind IsLoggingEnabled, Mode=TwoWay}" />
+        </muxc:SettingsCard>
+
+        <muxc:SettingsCard Header="Open locations">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="Config folder" Command="{x:Bind OpenConfigFolderCommand}" />
+                <Button Content="Log file" Command="{x:Bind OpenLogFileCommand}" />
+                <Button Content="Default apps" Command="{x:Bind OpenDefaultAppsCommand}" />
+            </StackPanel>
+        </muxc:SettingsCard>
+
+        <TextBlock Text="{x:Bind Error}" Foreground="{ThemeResource ErrorTextBrush}" TextWrapping="Wrap" />
+    </StackPanel>
+</Page>

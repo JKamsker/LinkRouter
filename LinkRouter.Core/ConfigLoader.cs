@@ -42,6 +42,7 @@ public static class ConfigLoader
                 string? useProfile = el.TryGetProperty("useProfile", out var jup) ? jup.GetString() : null; // profile reference
                 string? browser = el.TryGetProperty("browser", out var jbr) ? jbr.GetString() : null;
                 string? argsTemplate = el.TryGetProperty("argsTemplate", out var jat) ? jat.GetString() : null;
+                bool enabled = el.TryGetProperty("enabled", out var jenabled) && jenabled.ValueKind == JsonValueKind.False ? false : true;
 
                 rules.Add(new Rule(
                     match: el.GetProperty("match").GetString()!,
@@ -51,7 +52,8 @@ public static class ConfigLoader
                     profile: profile,
                     userDataDir: userDataDir,
                     workingDirectory: workingDirectory,
-                    useProfile: useProfile
+                    useProfile: useProfile,
+                    Enabled: enabled
                 ));
             }
         }
@@ -66,6 +68,7 @@ public static class ConfigLoader
             string? dUseProfile = jd.TryGetProperty("useProfile", out var jdup) ? jdup.GetString() : null;
             string? dBrowser = jd.TryGetProperty("browser", out var jdb) ? jdb.GetString() : null;
             string? dArgsTemplate = jd.TryGetProperty("argsTemplate", out var jda) ? jda.GetString() : null;
+            bool dEnabled = jd.TryGetProperty("enabled", out var jden) && jden.ValueKind == JsonValueKind.False ? false : true;
             def = new Rule(
                 match: "default",
                 pattern: ".*",
@@ -74,7 +77,8 @@ public static class ConfigLoader
                 profile: dProfile,
                 userDataDir: dUserDataDir,
                 workingDirectory: dWorkingDirectory,
-                useProfile: dUseProfile
+                useProfile: dUseProfile,
+                Enabled: dEnabled
             );
         }
 

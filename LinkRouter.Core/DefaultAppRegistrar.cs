@@ -5,7 +5,7 @@ using Microsoft.Win32;
 
 namespace LinkRouter;
 
-internal static class DefaultAppRegistrar
+public static class DefaultAppRegistrar
 {
     private const string AppName = "LinkRouter";
     private const string ProgId = "LinkRouterURL"; // Our per-user ProgID

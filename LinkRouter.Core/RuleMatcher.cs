@@ -9,6 +9,11 @@ public static class RuleMatcher
     {
         foreach (var rule in config.rules)
         {
+            if (!rule.Enabled)
+            {
+                continue;
+            }
+
             try
             {
                 if (rule.match.Equals("domain", StringComparison.OrdinalIgnoreCase))
@@ -39,7 +44,7 @@ public static class RuleMatcher
             }
         }
 
-        return config.@default;
+        return config.@default is { Enabled: true } ? config.@default : null;
     }
 
     private static bool MatchesDomain(string host, string pattern)

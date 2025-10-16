@@ -15,6 +15,7 @@ public record Rule(
     string? profile,
     string? userDataDir,
     string? workingDirectory,
-    string? useProfile);
+    string? useProfile,
+    bool Enabled = true);
 
 public record Config(Rule[] rules, Rule? @default, Dictionary<string, Profile>? profiles);

@@ -1,0 +1,21 @@
+<Page
+    x:Class="LinkRouter.Settings.Views.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:viewModels="using:LinkRouter.Settings.ViewModels"
+    x:DataType="viewModels:AboutViewModel"
+    mc:Ignorable="d">
+    <Page.DataContext>
+        <viewModels:AboutViewModel />
+    </Page.DataContext>
+
+    <StackPanel Spacing="12" Margin="16">
+        <TextBlock Text="{x:Bind AppName}" Style="{StaticResource TitleTextBlockStyle}" />
+        <TextBlock Text="{x:Bind Version, StringFormat='Version {0}'}" />
+        <Button Content="Open repository" Command="{x:Bind OpenRepositoryCommand}" />
+        <TextBlock Text="Source code under MIT license. No telemetry." />
+    </StackPanel>
+</Page>

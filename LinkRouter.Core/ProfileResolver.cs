@@ -38,7 +38,8 @@ public static class ProfileResolver
             profile: browserProfile,
             userDataDir: userDataDir,
             workingDirectory: workingDirectory,
-            useProfile: rule.useProfile
+            useProfile: rule.useProfile,
+            Enabled: rule.Enabled
         );
     }
 

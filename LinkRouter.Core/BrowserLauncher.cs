@@ -8,7 +8,7 @@ public static class BrowserLauncher
 {
     public static void Launch(Rule rule, Uri uri)
     {
-        string argsToPass = BuildArguments(rule, uri);
+        string argsToPass = GetLaunchArguments(rule, uri);
 
         var startInfo = new ProcessStartInfo
         {
@@ -26,7 +26,7 @@ public static class BrowserLauncher
         Process.Start(startInfo);
     }
 
-    private static string BuildArguments(Rule rule, Uri uri)
+    public static string GetLaunchArguments(Rule rule, Uri uri)
     {
         string escapedUrl = uri.ToString();
         string argsToPass = rule.argsTemplate!
