@@ -8,9 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="mappings.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+        <None Include="mappings.json" />
     </ItemGroup>
 
 </Project>

@@ -1,142 +1,123 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Text.Json;
-using System.Collections.Generic;
 
 namespace LinkRouter;
-
-record Rule(string match, string pattern, string browser, string argsTemplate);
-record Config(Rule[] rules, Rule? @default);
 
 class Program
 {
     static int Main(string[] args)
     {
+        LogArgumentsToFile(args);
+
         if (args.Length == 0)
         {
-            Console.Error.WriteLine("No URL provided.");
+            Console.Error.WriteLine("No URL provided. Pass a URL or --register-defaults/--unregister-defaults.");
             return 2;
         }
 
-        string rawUrl = args[0];
-        // Normalize: ensure scheme exists
-        if (!rawUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-            !rawUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        // Handle registration commands first
+        if (args.Length >= 1)
         {
-            rawUrl = "https://" + rawUrl;
+            var cmd = args[0].Trim().ToLowerInvariant();
+            if (cmd is "--register-defaults" or "/register" or "-register")
+            {
+                try
+                {
+                    DefaultAppRegistrar.RegisterPerUser();
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Failed to register defaults: {ex.Message}");
+                    return 7;
+                }
+            }
+
+            if (cmd is "--unregister-defaults" or "/unregister" or "-unregister")
+            {
+                try
+                {
+                    DefaultAppRegistrar.UnregisterPerUser();
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Failed to unregister defaults: {ex.Message}");
+                    return 8;
+                }
+            }
         }
 
-        // Basic validation
-        if (!Uri.TryCreate(rawUrl, UriKind.Absolute, out var uri))
+        string rawUrl = args[0];
+
+        // Normalize and validate URL
+        var (success, uri, error) = UrlNormalizer.NormalizeAndValidate(rawUrl);
+        if (!success)
         {
-            Console.Error.WriteLine("Invalid URL.");
+            Console.Error.WriteLine(error);
             return 3;
         }
 
+        // Load configuration with fallback to %AppData% if not found next to the executable
         string configPath = Path.Combine(AppContext.BaseDirectory, "mappings.json");
+        if (!File.Exists(configPath))
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var altPath = Path.Combine(appData, "LinkRouter", "mappings.json");
+            if (File.Exists(altPath))
+            {
+                configPath = altPath;
+            }
+        }
+
         Config config;
         try
         {
-            var json = File.ReadAllText(configPath);
-            // Using same record for default (quick hack): default stored as single rule with key "default"
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            var rules = new List<Rule>();
-            if (root.TryGetProperty("rules", out var jr))
-            {
-                foreach (var el in jr.EnumerateArray())
-                {
-                    rules.Add(new Rule(
-                        match: el.GetProperty("match").GetString()!,
-                        pattern: el.GetProperty("pattern").GetString()!,
-                        browser: el.GetProperty("browser").GetString()!,
-                        argsTemplate: el.GetProperty("argsTemplate").GetString()!
-                    ));
-                }
-            }
-
-            Rule? def = null;
-            if (root.TryGetProperty("default", out var jd))
-            {
-                def = new Rule("default", ".*", jd.GetProperty("browser").GetString()!, jd.GetProperty("argsTemplate").GetString()!);
-            }
-
-            config = new Config(rules.ToArray(), def);
+            config = ConfigLoader.LoadConfig(configPath);
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Failed to read config: {e.Message}");
+            Console.Error.WriteLine($"Failed to read config from '{configPath}': {e.Message}");
             return 4;
         }
 
-        // Choose rule
-        Rule? matched = null;
-        foreach (var r in config.rules)
-        {
-            try
-            {
-                if (r.match.Equals("domain", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (string.Equals(uri.Host, r.pattern, StringComparison.OrdinalIgnoreCase) ||
-                        uri.Host.EndsWith("." + r.pattern, StringComparison.OrdinalIgnoreCase))
-                    {
-                        matched = r;
-                        break;
-                    }
-                }
-                else if (r.match.Equals("regex", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (Regex.IsMatch(uri.ToString(), r.pattern, RegexOptions.IgnoreCase))
-                    {
-                        matched = r;
-                        break;
-                    }
-                }
-                else if (r.match.Equals("contains", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (uri.ToString().IndexOf(r.pattern, StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        matched = r;
-                        break;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // ignore faulty patterns
-            }
-        }
-
-        var ruleToUse = matched ?? config.@default;
+        // Find matching rule
+        var ruleToUse = RuleMatcher.FindMatchingRule(config, uri!);
         if (ruleToUse == null)
         {
             Console.Error.WriteLine("No rule and no default configured.");
             return 5;
         }
 
-        // Prepare args: escape URL (already absolute and safe to pass as quoted string)
-        string escapedUrl = uri.ToString();
-        string argsToPass = ruleToUse.argsTemplate.Replace("{url}", escapedUrl);
-
-        // Launch target browser directly to avoid re-invoking router
+        // Resolve profile (if any) and launch browser
         try
         {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = ruleToUse.browser,
-                Arguments = argsToPass,
-                UseShellExecute = false
-            };
-            Process.Start(startInfo);
+            var effectiveRule = ProfileResolver.ResolveEffectiveRule(config, ruleToUse);
+            BrowserLauncher.Launch(effectiveRule, uri!);
             return 0;
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Failed to start browser: {ex.Message}");
             return 6;
+        }
+    }
+
+    private static void LogArgumentsToFile(string[] args)
+    {
+        // Log args to %AppData%\\LinkRouter\\args.log
+        try
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var dir = Path.Combine(appData, "LinkRouter");
+            Directory.CreateDirectory(dir);
+            var logPath = Path.Combine(dir, "args.log");
+            var line = $"{DateTime.Now:O} | {string.Join(" ", args)}";
+            File.AppendAllText(logPath, line + Environment.NewLine);
+        }
+        catch
+        {
+            // ignore logging errors
         }
     }
 }
