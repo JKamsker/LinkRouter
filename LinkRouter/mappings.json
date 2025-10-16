@@ -1,0 +1,20 @@
+﻿{
+  "default": {
+    "browser": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+    "argsTemplate": "-new-window \"{url}\""
+  },
+  "rules": [
+    {
+      "match": "domain",
+      "pattern": "google.at",
+      "browser": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "argsTemplate": "-new-window \"{url}\""
+    },
+    {
+      "match": "domain",
+      "pattern": "youtube.com",
+      "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "argsTemplate": "-new-window \"{url}\""
+    }
+  ]
+}
