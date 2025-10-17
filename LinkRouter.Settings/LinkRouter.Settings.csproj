@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -16,8 +16,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.241001000" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-    <!-- Provide Appx/PRI build tasks when building without full Visual Studio install -->
-<!--    <PackageReference Include="Microsoft.Build.AppxPackage" Version="17.*" PrivateAssets="all" />-->
   </ItemGroup>
 
   <ItemGroup>
