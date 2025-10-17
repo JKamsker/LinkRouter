@@ -1,0 +1,19 @@
+* text eol=lf
+
+# Binary assets should never be normalized
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.bmp binary
+*.pdf binary
+*.zip binary
+*.7z binary
+*.rar binary
+*.dll binary
+*.exe binary
+*.pdb binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
