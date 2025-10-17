@@ -26,8 +26,16 @@
             <AppBarButton Icon="Add" Label="Add" Command="{x:Bind ViewModel.AddRuleCommand}" />
             <AppBarButton Icon="Delete" Label="Delete" Command="{x:Bind ViewModel.DeleteRuleCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}" />
             <AppBarButton Icon="Copy" Label="Duplicate" Command="{x:Bind ViewModel.DuplicateRuleCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}" />
-            <AppBarButton Icon="Up" Label="Move up" Command="{x:Bind ViewModel.MoveUpCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}" />
-            <AppBarButton Icon="Down" Label="Move down" Command="{x:Bind ViewModel.MoveDownCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}" />
+            <AppBarButton Label="Move up" Command="{x:Bind ViewModel.MoveUpCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE74A;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Move down" Command="{x:Bind ViewModel.MoveDownCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE74B;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
         </muxc:CommandBar>
 
         <ListView Grid.Row="1"
@@ -66,7 +74,7 @@
                     <StackPanel Spacing="8">
                         <TextBox PlaceholderText="https://example.com" Text="{x:Bind ViewModel.TestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Content="Test rule" Command="{x:Bind ViewModel.TestRuleCommand}" />
-                        <TextBlock Text="{x:Bind ViewModel.TestError}" Foreground="{ThemeResource ErrorTextBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="{x:Bind ViewModel.TestError}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
                         <TextBlock Text="{x:Bind ViewModel.TestResult}" TextWrapping="Wrap" FontFamily="Consolas" />
                     </StackPanel>
                 </controls:SettingsCard>

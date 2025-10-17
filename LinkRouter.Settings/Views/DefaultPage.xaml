@@ -30,7 +30,7 @@
             <controls:SettingsCard Header="Preview">
                 <StackPanel Spacing="8">
                     <TextBlock Text="{x:Bind ViewModel.Preview}" TextWrapping="Wrap" FontFamily="Consolas" />
-                    <TextBlock Text="{x:Bind ViewModel.Error}" Foreground="{ThemeResource ErrorTextBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="{x:Bind ViewModel.Error}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
                 </StackPanel>
             </controls:SettingsCard>
         </StackPanel>

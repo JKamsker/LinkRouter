@@ -56,7 +56,7 @@
 
                 <controls:SettingsCard Header="Detected browsers">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="{x:Bind ViewModel.DetectionError}" Foreground="{ThemeResource ErrorTextBrush}" Visibility="{x:Bind ViewModel.DetectionErrorVisibility, Mode=OneWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.DetectionError}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Visibility="{x:Bind ViewModel.DetectionErrorVisibility, Mode=OneWay}" />
                         <ItemsControl ItemsSource="{Binding Browsers}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>

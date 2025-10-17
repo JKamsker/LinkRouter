@@ -20,6 +20,8 @@
             <NavigationViewItem Content="Advanced" Icon="AllApps" Tag="Advanced" />
             <NavigationViewItem Content="About" Icon="Help" Tag="About" />
         </NavigationView.MenuItems>
-        <Frame x:Name="ContentFrame" />
+        <NavigationView.Content>
+            <Frame x:Name="ContentFrame" IsNavigationStackEnabled="False" />
+        </NavigationView.Content>
     </NavigationView>
 </Window>

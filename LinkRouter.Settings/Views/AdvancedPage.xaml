@@ -25,6 +25,6 @@
             </StackPanel>
         </controls:SettingsCard>
 
-        <TextBlock Text="{x:Bind ViewModel.Error}" Foreground="{ThemeResource ErrorTextBrush}" TextWrapping="Wrap" />
+        <TextBlock Text="{x:Bind ViewModel.Error}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
     </StackPanel>
 </Page>

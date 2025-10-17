@@ -46,20 +46,29 @@ public sealed partial class MainWindow : Window
 
     private void OnNavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        var tag = args.SelectedItemContainer?.Tag?.ToString();
-        if (tag is null)
+        if (args.SelectedItemContainer is NavigationViewItem item && item.Tag is string tag)
         {
-            return;
+            System.Diagnostics.Debug.WriteLine($"Navigation to: {tag}");
+            Navigate(tag);
         }
-
-        Navigate(tag);
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"Navigation failed - SelectedItem: {args.SelectedItem}, SelectedItemContainer: {args.SelectedItemContainer}");
+        }
     }
 
     private void Navigate(string tag)
     {
+        System.Diagnostics.Debug.WriteLine($"Navigate called with tag: {tag}");
         if (_pageMap.TryGetValue(tag, out var pageType))
         {
-            ContentFrame.Navigate(pageType);
+            System.Diagnostics.Debug.WriteLine($"Found pageType: {pageType.Name}");
+            var result = ContentFrame.Navigate(pageType);
+            System.Diagnostics.Debug.WriteLine($"Navigate result: {result}, CurrentSourcePageType: {ContentFrame.CurrentSourcePageType?.Name}");
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"Tag '{tag}' not found in _pageMap");
         }
     }
 
