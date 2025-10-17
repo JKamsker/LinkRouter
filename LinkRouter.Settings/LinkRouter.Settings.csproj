@@ -10,6 +10,9 @@
     <EnableMsixTooling>false</EnableMsixTooling>
     <WindowsPackageType>None</WindowsPackageType>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <!-- Bundle the Windows App SDK runtime so the app can launch without a global installation -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <DisableMrtCorePriGen>true</DisableMrtCorePriGen>
   </PropertyGroup>
 
