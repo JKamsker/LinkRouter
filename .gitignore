@@ -9,3 +9,4 @@ riderModule.iml
 .local/
 
 .dotnet/
+.vs/

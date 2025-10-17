@@ -7,10 +7,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>false</EnableMsixTooling>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+    <WindowsAppSDKRuntimeIdentifiers>win-x64</WindowsAppSDKRuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240916000" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.241001000" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
   </ItemGroup>
 

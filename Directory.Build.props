@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+    <BaseIntermediateOutputPath>/tmp/linkrouter2/obj/</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <OutputPath>/tmp/linkrouter2/bin/</OutputPath>
+    <UseAppHost>false</UseAppHost>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+</Project>
