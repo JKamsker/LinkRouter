@@ -12,7 +12,8 @@
                     IsSettingsVisible="False"
                     SelectionChanged="OnNavigationSelectionChanged">
         <NavigationView.MenuItems>
-            <NavigationViewItem Content="General" Icon="Home" Tag="General" />
+            <NavigationViewItem Content="Overview" Icon="Home" Tag="Overview" />
+            <NavigationViewItem Content="Configuration" Icon="Document" Tag="General" />
             <NavigationViewItem Content="Rules" Icon="List" Tag="Rules" />
             <NavigationViewItem Content="Browsers &amp; Profiles" Icon="People" Tag="Profiles" />
             <NavigationViewItem Content="Default" Icon="Favorite" Tag="Default" />

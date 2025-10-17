@@ -1,0 +1,93 @@
+<Page
+    x:Class="LinkRouter.Settings.Views.OverviewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:viewModels="using:LinkRouter.Settings.ViewModels"
+    mc:Ignorable="d">
+    <Page.DataContext>
+        <viewModels:OverviewViewModel />
+    </Page.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Margin="16" Spacing="16">
+            <Grid ColumnSpacing="16" RowSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Default destination" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.DefaultDestination, Mode=OneWay}" FontSize="18" TextWrapping="Wrap" />
+                        <TextBlock Text="Used when no rule matches a URL." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Registration" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <muxc:InfoBadge Value="!" Visibility="{x:Bind ViewModel.IsRegistered ? Visibility.Collapsed : Visibility.Visible, Mode=OneWay}" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.RegistrationStatus, Mode=OneWay}" TextWrapping="Wrap" />
+                        <ProgressRing Width="32" Height="32" IsActive="{x:Bind ViewModel.IsOperationRunning, Mode=OneWay}" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Last test" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.SimulationSummary, Mode=OneWay}" TextWrapping="Wrap" />
+                        <TextBlock Text="{x:Bind ViewModel.SimulationDetails, Mode=OneWay}" FontFamily="Consolas" TextWrapping="Wrap" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.HasSimulationError, Mode=OneWay}" Severity="Error" Message="{x:Bind ViewModel.SimulationError, Mode=OneWay}" />
+                        <TextBlock Text="Run a quick simulation below to see routing results." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text="Configuration" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <muxc:InfoBadge Value="!" Visibility="{x:Bind ViewModel.HasUnsavedChanges ? Visibility.Visible : Visibility.Collapsed, Mode=OneWay}" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.ConfigPath, Mode=OneWay}" TextWrapping="Wrap" />
+                        <TextBlock Text="Last modified:" />
+                        <TextBlock Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}" />
+                        <TextBlock Text="Backups available:" />
+                        <TextBlock Text="{x:Bind ViewModel.BackupCount, Mode=OneWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.LatestBackupSummary, Mode=OneWay}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Quick actions" Style="{StaticResource SettingsCardHeaderTextStyle}" />
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Simulate a URL" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBox PlaceholderText="https://example.com" Text="{x:Bind ViewModel.TestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Content="Simulate" Command="{x:Bind ViewModel.SimulateCommand}" />
+                        </StackPanel>
+                        <InfoBar IsOpen="{x:Bind ViewModel.HasOperationMessage, Mode=OneWay}" Severity="Success" Message="{x:Bind ViewModel.OperationMessage, Mode=OneWay}" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.HasOperationError, Mode=OneWay}" Severity="Error" Message="{x:Bind ViewModel.OperationError, Mode=OneWay}" />
+                        <muxc:WrapPanel Orientation="Horizontal" HorizontalSpacing="8" VerticalSpacing="8">
+                            <Button Content="Register LinkRouter" Command="{x:Bind ViewModel.RegisterCommand}" />
+                            <Button Content="Unregister" Command="{x:Bind ViewModel.UnregisterCommand}" />
+                            <Button Content="Open config folder" Command="{x:Bind ViewModel.OpenConfigFolderCommand}" />
+                            <Button Content="Restore latest backup" Command="{x:Bind ViewModel.RestoreLatestBackupCommand}" />
+                        </muxc:WrapPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

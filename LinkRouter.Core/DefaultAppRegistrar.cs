@@ -10,6 +10,25 @@ public static class DefaultAppRegistrar
     private const string AppName = "LinkRouter";
     private const string ProgId = "LinkRouterURL"; // Our per-user ProgID
 
+    public static bool IsRegistered()
+    {
+        using var progIdKey = Registry.CurrentUser.OpenSubKey($"Software\\Classes\\{ProgId}");
+        if (progIdKey is null)
+        {
+            return false;
+        }
+
+        using var appRoot = Registry.CurrentUser.OpenSubKey($"Software\\Clients\\StartMenuInternet\\{AppName}");
+        if (appRoot is null)
+        {
+            return false;
+        }
+
+        using var regApps = Registry.CurrentUser.OpenSubKey("Software\\RegisteredApplications");
+        var registrationPath = regApps?.GetValue(AppName) as string;
+        return !string.IsNullOrEmpty(registrationPath);
+    }
+
     public static void RegisterPerUser()
     {
         string exePath = GetExecutablePath();
