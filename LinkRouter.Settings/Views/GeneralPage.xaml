@@ -7,7 +7,6 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:viewModels="using:LinkRouter.Settings.ViewModels"
     xmlns:services="using:LinkRouter.Settings.Services"
-    x:DataType="viewModels:GeneralViewModel"
     mc:Ignorable="d">
     <Page.DataContext>
         <viewModels:GeneralViewModel />
@@ -15,53 +14,62 @@
 
     <ScrollViewer>
         <StackPanel Spacing="16" Margin="16">
-            <muxc:SettingsCard Header="Configuration">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Config file" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                    <TextBlock TextWrapping="Wrap" Text="{x:Bind ConfigPath, Mode=OneWay}"/>
-                    <TextBlock Text="Last modified:"/>
-                    <TextBlock Text="{x:Bind LastModified, Mode=OneWay, StringFormat='{}{0:G}'}" />
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Open folder" Command="{x:Bind OpenConfigFolderCommand}" />
-                        <Button Content="Copy path" Command="{x:Bind CopyConfigPathCommand}" />
-                        <Button Content="Save" Command="{x:Bind SaveCommand}" IsEnabled="{x:Bind HasUnsavedChanges}" />
-                        <ProgressRing Width="24" Height="24" IsActive="{x:Bind IsSaving}" />
+            <StackPanel Spacing="8">
+                <TextBlock Text="Configuration" Style="{StaticResource SettingsCardHeaderTextStyle}" />
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Config file" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock TextWrapping="Wrap" Text="{x:Bind ViewModel.ConfigPath, Mode=OneWay}"/>
+                        <TextBlock Text="Last modified:"/>
+                        <TextBlock Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Open folder" Command="{x:Bind ViewModel.OpenConfigFolderCommand}" />
+                            <Button Content="Copy path" Command="{x:Bind ViewModel.CopyConfigPathCommand}" />
+                            <Button Content="Save" Command="{x:Bind ViewModel.SaveCommand}" IsEnabled="{x:Bind ViewModel.HasUnsavedChanges}" />
+                            <ProgressRing Width="24" Height="24" IsActive="{x:Bind ViewModel.IsSaving}" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.StatusMessage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="Backups" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <ItemsControl ItemsSource="{Binding Backups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding FileName}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding TimestampDisplay}" Margin="16,0,0,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
-                    <TextBlock Text="{x:Bind StatusMessage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBlock Text="Backups" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                    <ItemsControl ItemsSource="{x:Bind Backups}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="services:ConfigBackup">
-                                <Grid Margin="0,4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{x:Bind FileName}" />
-                                    <TextBlock Grid.Column="1" Text="{x:Bind TimestampUtc, StringFormat='{}{0:G}'}" Margin="16,0,0,0" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </muxc:SettingsCard>
+                </Border>
+            </StackPanel>
 
-            <muxc:SettingsCard Header="Registration">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Content="Register" Command="{x:Bind RegisterCommand}" />
-                    <Button Content="Unregister" Command="{x:Bind UnregisterCommand}" />
-                </StackPanel>
-            </muxc:SettingsCard>
+            <StackPanel Spacing="8">
+                <TextBlock Text="Registration" Style="{StaticResource SettingsCardHeaderTextStyle}" />
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Register" Command="{x:Bind ViewModel.RegisterCommand}" />
+                        <Button Content="Unregister" Command="{x:Bind ViewModel.UnregisterCommand}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
 
-            <muxc:SettingsCard Header="Test URL">
-                <StackPanel Spacing="8">
-                    <TextBox PlaceholderText="https://example.com" Text="{x:Bind TestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <Button Content="Simulate" Command="{x:Bind SimulateCommand}" />
-                    <InfoBar IsOpen="{x:Bind ErrorMessage != null, Mode=OneWay}" Severity="Error" Message="{x:Bind ErrorMessage, Mode=OneWay}" />
-                    <TextBlock Text="{x:Bind SimulationSummary}" TextWrapping="Wrap" />
-                    <TextBlock Text="{x:Bind SimulationDetails}" TextWrapping="Wrap" FontFamily="Consolas" />
-                </StackPanel>
-            </muxc:SettingsCard>
+            <StackPanel Spacing="8">
+                <TextBlock Text="Test URL" Style="{StaticResource SettingsCardHeaderTextStyle}" />
+                <Border Style="{StaticResource SettingsCardBorderStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBox PlaceholderText="https://example.com" Text="{x:Bind ViewModel.TestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Content="Simulate" Command="{x:Bind ViewModel.SimulateCommand}" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.SimulationSummary}" TextWrapping="Wrap" />
+                        <TextBlock Text="{x:Bind ViewModel.SimulationDetails}" TextWrapping="Wrap" FontFamily="Consolas" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>

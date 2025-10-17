@@ -3,4 +3,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Thickness x:Key="SettingsCardMargin">0,8,0,0</Thickness>
     <Thickness x:Key="SectionSpacing">0,16,0,0</Thickness>
+    <Style x:Key="SettingsCardBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style x:Key="SettingsCardHeaderTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
 </ResourceDictionary>

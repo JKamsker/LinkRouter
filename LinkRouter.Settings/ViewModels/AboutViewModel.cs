@@ -10,6 +10,7 @@ public partial class AboutViewModel : ObservableObject
     public string AppName => "LinkRouter Settings";
     public string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
     public string RepositoryUrl => "https://github.com/jonas/LinkRouter";
+    public string VersionLabel => $"Version {Version}";
 
     [RelayCommand]
     private void OpenRepository()

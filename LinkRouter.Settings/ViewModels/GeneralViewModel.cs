@@ -46,6 +46,8 @@ public partial class GeneralViewModel : ObservableObject
 
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
     public bool HasUnsavedChanges => _state.HasUnsavedChanges;
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+    public string LastModifiedDisplay => LastModified?.ToLocalTime().ToString("G") ?? string.Empty;
 
     public GeneralViewModel()
     {
@@ -218,5 +220,15 @@ public partial class GeneralViewModel : ObservableObject
         };
         package.SetText(_configService.ConfigPath);
         Clipboard.SetContent(package);
+    }
+
+    partial void OnErrorMessageChanged(string? value)
+    {
+        OnPropertyChanged(nameof(HasError));
+    }
+
+    partial void OnLastModifiedChanged(DateTime? value)
+    {
+        OnPropertyChanged(nameof(LastModifiedDisplay));
     }
 }

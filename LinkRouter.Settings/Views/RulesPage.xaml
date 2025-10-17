@@ -5,8 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:controls="using:LinkRouter.Settings.Controls"
     xmlns:viewModels="using:LinkRouter.Settings.ViewModels"
-    x:DataType="viewModels:RulesViewModel"
     mc:Ignorable="d">
     <Page.DataContext>
         <viewModels:RulesViewModel />
@@ -23,16 +23,16 @@
         </Grid.RowDefinitions>
 
         <muxc:CommandBar Grid.ColumnSpan="2">
-            <AppBarButton Icon="Add" Label="Add" Command="{x:Bind AddRuleCommand}" />
-            <AppBarButton Icon="Delete" Label="Delete" Command="{x:Bind DeleteRuleCommand}" CommandParameter="{x:Bind SelectedRule}" />
-            <AppBarButton Icon="Copy" Label="Duplicate" Command="{x:Bind DuplicateRuleCommand}" CommandParameter="{x:Bind SelectedRule}" />
-            <AppBarButton Icon="Up" Label="Move up" Command="{x:Bind MoveUpCommand}" CommandParameter="{x:Bind SelectedRule}" />
-            <AppBarButton Icon="Down" Label="Move down" Command="{x:Bind MoveDownCommand}" CommandParameter="{x:Bind SelectedRule}" />
+            <AppBarButton Icon="Add" Label="Add" Command="{x:Bind ViewModel.AddRuleCommand}" />
+            <AppBarButton Icon="Delete" Label="Delete" Command="{x:Bind ViewModel.DeleteRuleCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}" />
+            <AppBarButton Icon="Copy" Label="Duplicate" Command="{x:Bind ViewModel.DuplicateRuleCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}" />
+            <AppBarButton Icon="Up" Label="Move up" Command="{x:Bind ViewModel.MoveUpCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}" />
+            <AppBarButton Icon="Down" Label="Move down" Command="{x:Bind ViewModel.MoveDownCommand}" CommandParameter="{x:Bind ViewModel.SelectedRule}" />
         </muxc:CommandBar>
 
         <ListView Grid.Row="1"
-                  ItemsSource="{x:Bind Rules}"
-                  SelectedItem="{x:Bind SelectedRule, Mode=TwoWay}"
+                  ItemsSource="{x:Bind ViewModel.Rules}"
+                  SelectedItem="{x:Bind ViewModel.SelectedRule, Mode=TwoWay}"
                   SelectionMode="Single">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:RuleEditorViewModel">
@@ -46,11 +46,11 @@
 
         <ScrollViewer Grid.Column="1" Grid.Row="1" Margin="16,0,0,0">
             <StackPanel Spacing="12">
-                <muxc:SettingsCard Header="Rule details">
-                    <StackPanel Spacing="8" DataContext="{x:Bind SelectedRule, Mode=OneWay}">
+                <controls:SettingsCard Header="Rule details">
+                    <StackPanel Spacing="8" DataContext="{x:Bind ViewModel.SelectedRule, Mode=OneWay}">
                         <CheckBox Content="Enabled" IsChecked="{Binding Enabled, Mode=TwoWay}" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <ComboBox Width="160" ItemsSource="{x:Bind MatchTypes}" SelectedItem="{Binding Match, Mode=TwoWay}" />
+                            <ComboBox Width="160" ItemsSource="{x:Bind ViewModel.MatchTypes}" SelectedItem="{Binding Match, Mode=TwoWay}" />
                             <TextBox Width="320" PlaceholderText="Pattern" Text="{Binding Pattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <TextBox PlaceholderText="Browser path" Text="{Binding Browser, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -60,16 +60,16 @@
                         <TextBox PlaceholderText="Working directory" Text="{Binding WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox PlaceholderText="Use profile" Text="{Binding UseProfile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                </muxc:SettingsCard>
+                </controls:SettingsCard>
 
-                <muxc:SettingsCard Header="Test">
+                <controls:SettingsCard Header="Test">
                     <StackPanel Spacing="8">
-                        <TextBox PlaceholderText="https://example.com" Text="{x:Bind TestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Content="Test rule" Command="{x:Bind TestRuleCommand}" />
-                        <TextBlock Text="{x:Bind TestError}" Foreground="{ThemeResource ErrorTextBrush}" TextWrapping="Wrap" />
-                        <TextBlock Text="{x:Bind TestResult}" TextWrapping="Wrap" FontFamily="Consolas" />
+                        <TextBox PlaceholderText="https://example.com" Text="{x:Bind ViewModel.TestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Content="Test rule" Command="{x:Bind ViewModel.TestRuleCommand}" />
+                        <TextBlock Text="{x:Bind ViewModel.TestError}" Foreground="{ThemeResource ErrorTextBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="{x:Bind ViewModel.TestResult}" TextWrapping="Wrap" FontFamily="Consolas" />
                     </StackPanel>
-                </muxc:SettingsCard>
+                </controls:SettingsCard>
             </StackPanel>
         </ScrollViewer>
     </Grid>

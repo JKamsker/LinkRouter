@@ -193,7 +193,27 @@ public sealed class ConfigService
 
 public sealed record ConfigDocument(Config Config, string Path, DateTime? LastModified, IReadOnlyList<ConfigBackup> Backups);
 
-public sealed record ConfigBackup(string Path, DateTime TimestampUtc, long SizeBytes)
+public sealed record ConfigBackup
 {
+    public ConfigBackup()
+    {
+        Path = string.Empty;
+        TimestampUtc = DateTime.MinValue;
+        SizeBytes = 0;
+    }
+
+    public ConfigBackup(string path, DateTime timestampUtc, long sizeBytes)
+    {
+        Path = path;
+        TimestampUtc = timestampUtc;
+        SizeBytes = sizeBytes;
+    }
+
+    public string Path { get; set; }
+    public DateTime TimestampUtc { get; set; }
+    public long SizeBytes { get; set; }
+
     public string FileName => System.IO.Path.GetFileName(Path);
+    public string TimestampDisplay => TimestampUtc.ToLocalTime().ToString("G");
 }
+

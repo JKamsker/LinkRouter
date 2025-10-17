@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;

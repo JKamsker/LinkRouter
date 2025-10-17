@@ -6,16 +6,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:viewModels="using:LinkRouter.Settings.ViewModels"
-    x:DataType="viewModels:AboutViewModel"
     mc:Ignorable="d">
     <Page.DataContext>
         <viewModels:AboutViewModel />
     </Page.DataContext>
 
     <StackPanel Spacing="12" Margin="16">
-        <TextBlock Text="{x:Bind AppName}" Style="{StaticResource TitleTextBlockStyle}" />
-        <TextBlock Text="{x:Bind Version, StringFormat='Version {0}'}" />
-        <Button Content="Open repository" Command="{x:Bind OpenRepositoryCommand}" />
+        <TextBlock Text="{x:Bind ViewModel.AppName}" Style="{StaticResource TitleTextBlockStyle}" />
+        <TextBlock Text="{x:Bind ViewModel.VersionLabel}" />
+        <Button Content="Open repository" Command="{x:Bind ViewModel.OpenRepositoryCommand}" />
         <TextBlock Text="Source code under MIT license. No telemetry." />
     </StackPanel>
 </Page>

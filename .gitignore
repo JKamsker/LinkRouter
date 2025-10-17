@@ -5,8 +5,9 @@ riderModule.iml
 /_ReSharper.Caches/
 .cache/
 .idea/
-
 .local/
-
 .dotnet/
 .vs/
+
+*.binlog
+*.log

@@ -193,10 +193,47 @@ public enum BrowserFamily
     Firefox
 }
 
-public sealed record BrowserInfo(string Name, string Path, BrowserFamily Family);
-
-public sealed record FirefoxProfileInfo(string Name, string RelativePath, bool IsRelative)
+public sealed record BrowserInfo
 {
+    public BrowserInfo()
+    {
+        Name = string.Empty;
+        Path = string.Empty;
+        Family = BrowserFamily.Unknown;
+    }
+
+    public BrowserInfo(string name, string path, BrowserFamily family)
+    {
+        Name = name;
+        Path = path;
+        Family = family;
+    }
+
+    public string Name { get; set; }
+    public string Path { get; set; }
+    public BrowserFamily Family { get; set; }
+}
+
+public sealed record FirefoxProfileInfo
+{
+    public FirefoxProfileInfo()
+    {
+        Name = string.Empty;
+        RelativePath = string.Empty;
+        IsRelative = false;
+    }
+
+    public FirefoxProfileInfo(string name, string relativePath, bool isRelative)
+    {
+        Name = name;
+        RelativePath = relativePath;
+        IsRelative = isRelative;
+    }
+
+    public string Name { get; set; }
+    public string RelativePath { get; set; }
+    public bool IsRelative { get; set; }
+
     public string GetAbsolutePath()
     {
         if (IsRelative)

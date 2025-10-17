@@ -29,7 +29,7 @@ public partial class App : Application
         _window.Activate();
     }
 
-    private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         // TODO: Add centralized logging if desired
         e.Handled = true;
