@@ -42,6 +42,16 @@ public sealed class ConfigService
 
     public string SerializeToJson(Config config) => SerializeConfig(config);
 
+    public async Task<ConfigDocument> RestoreBackupAsync(ConfigBackup backup, CancellationToken cancellationToken = default)
+    {
+        if (backup is null)
+        {
+            throw new ArgumentNullException(nameof(backup));
+        }
+
+        return await Task.Run(() => RestoreBackupInternal(backup.Path), cancellationToken).ConfigureAwait(false);
+    }
+
     private ConfigDocument LoadInternal()
     {
         Directory.CreateDirectory(_rootFolder);
@@ -87,6 +97,18 @@ public sealed class ConfigService
         }
 
         File.Move(tempPath, _configPath, true);
+    }
+
+    private ConfigDocument RestoreBackupInternal(string backupPath)
+    {
+        if (!File.Exists(backupPath))
+        {
+            throw new FileNotFoundException($"Backup file not found: {backupPath}", backupPath);
+        }
+
+        var restoredConfig = ConfigLoader.LoadConfig(backupPath);
+        SaveInternal(restoredConfig);
+        return LoadInternal();
     }
 
     private string SerializeConfig(Config config)

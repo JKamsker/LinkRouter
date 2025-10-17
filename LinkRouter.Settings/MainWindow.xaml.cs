@@ -13,6 +13,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly Dictionary<string, Type> _pageMap = new()
     {
+        ["Overview"] = typeof(Views.OverviewPage),
         ["General"] = typeof(Views.GeneralPage),
         ["Rules"] = typeof(Views.RulesPage),
         ["Profiles"] = typeof(Views.ProfilesPage),

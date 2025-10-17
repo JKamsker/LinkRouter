@@ -158,21 +158,14 @@ public partial class ImportExportViewModel : ObservableObject
 
         try
         {
-            if (!File.Exists(backup.Path))
-            {
-                Error = "Backup file not found.";
-                return;
-            }
-
-            var json = await File.ReadAllTextAsync(backup.Path);
-            var tempPath = Path.Combine(Path.GetTempPath(), $"LinkRouter_restore_{Guid.NewGuid():N}.json");
-            await File.WriteAllTextAsync(tempPath, json);
-
-            var restored = ConfigLoader.LoadConfig(tempPath);
-            await _configService.SaveAsync(restored);
-            var document = await _configService.LoadAsync();
+            var document = await _configService.RestoreBackupAsync(backup);
             _state.Load(document);
             DiffSummary = $"Restored backup {backup.FileName}.";
+            Error = null;
+        }
+        catch (FileNotFoundException)
+        {
+            Error = "Backup file not found.";
         }
         catch (Exception ex)
         {

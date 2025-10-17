@@ -13,63 +13,49 @@
     </Page.DataContext>
 
     <ScrollViewer>
-        <StackPanel Spacing="16" Margin="16">
-            <StackPanel Spacing="8">
-                <TextBlock Text="Configuration" Style="{StaticResource SettingsCardHeaderTextStyle}" />
-                <Border Style="{StaticResource SettingsCardBorderStyle}">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Config file" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        <TextBlock TextWrapping="Wrap" Text="{x:Bind ViewModel.ConfigPath, Mode=OneWay}"/>
-                        <TextBlock Text="Last modified:"/>
-                        <TextBlock Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Content="Open folder" Command="{x:Bind ViewModel.OpenConfigFolderCommand}" />
-                            <Button Content="Copy path" Command="{x:Bind ViewModel.CopyConfigPathCommand}" />
-                            <Button Content="Save" Command="{x:Bind ViewModel.SaveCommand}" IsEnabled="{x:Bind ViewModel.HasUnsavedChanges}" />
-                            <ProgressRing Width="24" Height="24" IsActive="{x:Bind ViewModel.IsSaving}" />
-                        </StackPanel>
-                        <TextBlock Text="{x:Bind ViewModel.StatusMessage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Backups" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        <ItemsControl ItemsSource="{Binding Backups}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding FileName}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding TimestampDisplay}" Margin="16,0,0,0" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-
-            <StackPanel Spacing="8">
-                <TextBlock Text="Registration" Style="{StaticResource SettingsCardHeaderTextStyle}" />
-                <Border Style="{StaticResource SettingsCardBorderStyle}">
+        <StackPanel Spacing="24" Margin="16">
+            <controls:SettingsCard Header="Configuration file">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="{x:Bind ViewModel.ConfigPath, Mode=OneWay}" TextWrapping="Wrap" />
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Register" Command="{x:Bind ViewModel.RegisterCommand}" />
-                        <Button Content="Unregister" Command="{x:Bind ViewModel.UnregisterCommand}" />
+                        <TextBlock Text="Last modified:" />
+                        <TextBlock Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}" />
                     </StackPanel>
-                </Border>
-            </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Save" Command="{x:Bind ViewModel.SaveCommand}" IsEnabled="{x:Bind ViewModel.HasUnsavedChanges, Mode=OneWay}" />
+                        <ProgressRing Width="24" Height="24" IsActive="{x:Bind ViewModel.IsSaving, Mode=OneWay}" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.HasUnsavedChanges, Mode=OneWay}" Severity="Warning" Message="Unsaved changes" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Open folder" Command="{x:Bind ViewModel.OpenConfigFolderCommand}" />
+                        <Button Content="Copy path" Command="{x:Bind ViewModel.CopyConfigPathCommand}" />
+                    </StackPanel>
+                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </controls:SettingsCard>
 
-            <StackPanel Spacing="8">
-                <TextBlock Text="Test URL" Style="{StaticResource SettingsCardHeaderTextStyle}" />
-                <Border Style="{StaticResource SettingsCardBorderStyle}">
-                    <StackPanel Spacing="8">
-                        <TextBox PlaceholderText="https://example.com" Text="{x:Bind ViewModel.TestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Content="Simulate" Command="{x:Bind ViewModel.SimulateCommand}" />
-                        <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
-                        <TextBlock Text="{x:Bind ViewModel.SimulationSummary}" TextWrapping="Wrap" />
-                        <TextBlock Text="{x:Bind ViewModel.SimulationDetails}" TextWrapping="Wrap" FontFamily="Consolas" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
+            <controls:SettingsCard Header="Backups">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Recent automatic backups appear here after you save changes." TextWrapping="Wrap" />
+                    <ListView ItemsSource="{Binding Backups}" MaxHeight="240">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnSpacing="16" Padding="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding FileName}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding TimestampDisplay}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding SizeBytes, Converter={StaticResource ByteSizeToStringConverter}}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="16,0,0,0" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </controls:SettingsCard>
         </StackPanel>
     </ScrollViewer>
 </Page>

@@ -1,0 +1,100 @@
+<Page
+    x:Class="LinkRouter.Settings.Views.OverviewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:LinkRouter.Settings.Controls"
+    xmlns:viewModels="using:LinkRouter.Settings.ViewModels"
+    mc:Ignorable="d">
+    <Page.DataContext>
+        <viewModels:OverviewViewModel />
+    </Page.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Spacing="24" Margin="16">
+            <StackPanel>
+                <TextBlock Text="Dashboard" Style="{StaticResource TitleTextBlockStyle}" />
+                <TextBlock Text="Review LinkRouter's current status and jump into common tasks." Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <controls:SettingsCard Grid.Row="0" Grid.Column="0" Margin="0,0,16,16" Header="Configuration file">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{x:Bind ViewModel.ConfigPath, Mode=OneWay}" TextWrapping="Wrap" />
+                        <TextBlock>
+                            <Run Text="Last modified: " />
+                            <Run Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="Backups stored: " />
+                            <Run Text="{x:Bind ViewModel.BackupCount, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="Latest backup: " />
+                            <Run Text="{x:Bind ViewModel.LatestBackupDisplay, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Text="{x:Bind ViewModel.LatestBackupSizeDisplay, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Save changes" Command="{x:Bind ViewModel.SaveCommand}" IsEnabled="{x:Bind ViewModel.HasUnsavedChanges, Mode=OneWay}" />
+                            <ProgressRing Width="24" Height="24" IsActive="{x:Bind ViewModel.IsSaving, Mode=OneWay}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Open folder" Command="{x:Bind ViewModel.OpenConfigFolderCommand}" />
+                            <Button Content="Copy path" Command="{x:Bind ViewModel.CopyConfigPathCommand}" />
+                        </StackPanel>
+                        <InfoBar IsOpen="{x:Bind ViewModel.HasUnsavedChanges, Mode=OneWay}" Severity="Warning" Message="Unsaved changes" />
+                    </StackPanel>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard Grid.Row="0" Grid.Column="1" Margin="0,0,0,16" Header="Registration">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Register LinkRouter as your default browser handler for HTTP/HTTPS links." TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Register" Command="{x:Bind ViewModel.RegisterCommand}" IsEnabled="{x:Bind !ViewModel.IsOperationRunning, Mode=OneWay}" />
+                            <Button Content="Unregister" Command="{x:Bind ViewModel.UnregisterCommand}" IsEnabled="{x:Bind !ViewModel.IsOperationRunning, Mode=OneWay}" />
+                        </StackPanel>
+                        <ProgressRing Width="24" Height="24" HorizontalAlignment="Left" IsActive="{x:Bind ViewModel.IsOperationRunning, Mode=OneWay}" />
+                    </StackPanel>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard Grid.Row="1" Grid.Column="0" Margin="0,0,16,16" Header="Quick actions">
+                    <StackPanel Spacing="8">
+                        <Button Content="Restore latest backup" Command="{x:Bind ViewModel.RestoreLatestBackupCommand}" IsEnabled="{x:Bind ViewModel.HasLatestBackup, Mode=OneWay}" />
+                        <TextBlock Text="Use this if a recent change broke routing. You can undo by saving again afterward." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard Grid.Row="1" Grid.Column="1" Margin="0,0,0,16" Header="Change status">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap" />
+                        <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                    </StackPanel>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard Grid.Row="2" Grid.ColumnSpan="2" Header="Simulate a link">
+                    <StackPanel Spacing="12">
+                        <TextBox Header="URL" PlaceholderText="https://example.com" Text="{x:Bind ViewModel.TestUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Simulate" Command="{x:Bind ViewModel.SimulateCommand}" />
+                            <Button Content="Clear" Command="{x:Bind ViewModel.ClearSimulationCommand}" />
+                        </StackPanel>
+                        <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.SimulationSummary, Mode=OneWay}" TextWrapping="Wrap" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.SimulationDetails, Mode=OneWay}" TextWrapping="Wrap" FontFamily="Consolas" />
+                    </StackPanel>
+                </controls:SettingsCard>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
