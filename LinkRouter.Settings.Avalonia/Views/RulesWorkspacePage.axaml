@@ -13,7 +13,7 @@
                     <Button Content="Move Up" Command="{Binding MoveUpCommand}" CommandParameter="{Binding SelectedRule}" />
                     <Button Content="Move Down" Command="{Binding MoveDownCommand}" CommandParameter="{Binding SelectedRule}" />
                 </StackPanel>
-                <ListBox Grid.Row="1" Items="{Binding Rules}" SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
+                <ListBox Grid.Row="1" ItemsSource="{Binding Rules}" SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding DisplayName}" />
@@ -27,16 +27,51 @@
             <ScrollViewer>
                 <StackPanel Spacing="12">
                     <ToggleSwitch Content="Enabled" IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}" />
-                    <ComboBox Header="Match" Items="{Binding MatchTypes}" SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}" />
-                    <TextBox Header="Pattern" Text="{Binding SelectedRule.Pattern, Mode=TwoWay}" />
-                    <TextBox Header="Browser" Text="{Binding SelectedRule.Browser, Mode=TwoWay}" />
-                    <TextBox Header="Profile" Text="{Binding SelectedRule.Profile, Mode=TwoWay}" />
-                    <TextBox Header="Args Template" Text="{Binding SelectedRule.ArgsTemplate, Mode=TwoWay}" />
-                    <TextBox Header="User Data Dir" Text="{Binding SelectedRule.UserDataDir, Mode=TwoWay}" />
-                    <TextBox Header="Working Directory" Text="{Binding SelectedRule.WorkingDirectory, Mode=TwoWay}" />
-                    <TextBox Header="Use Profile" Text="{Binding SelectedRule.UseProfile, Mode=TwoWay}" />
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Match" />
+                        <ComboBox ItemsSource="{Binding MatchTypes}" SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Pattern" />
+                        <TextBox Text="{Binding SelectedRule.Pattern, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Browser" />
+                        <TextBox Text="{Binding SelectedRule.Browser, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Profile" />
+                        <TextBox Text="{Binding SelectedRule.Profile, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Args Template" />
+                        <TextBox Text="{Binding SelectedRule.ArgsTemplate, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="User Data Dir" />
+                        <TextBox Text="{Binding SelectedRule.UserDataDir, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Working Directory" />
+                        <TextBox Text="{Binding SelectedRule.WorkingDirectory, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Use Profile" />
+                        <TextBox Text="{Binding SelectedRule.UseProfile, Mode=TwoWay}" />
+                    </StackPanel>
                     <Separator />
-                    <TextBox Header="Test URL" Text="{Binding TestUrl, Mode=TwoWay}" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Test URL" />
+                        <TextBox Text="{Binding TestUrl, Mode=TwoWay}" />
+                    </StackPanel>
                     <Button Content="Test Rule" Command="{Binding TestRuleCommand}" />
                     <TextBlock Text="{Binding TestResult}" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding TestError}" TextWrapping="Wrap" Foreground="Red" />

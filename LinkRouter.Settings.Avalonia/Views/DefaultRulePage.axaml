@@ -8,14 +8,38 @@
             <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                 <StackPanel Spacing="12">
                     <ToggleSwitch Content="Enable default rule" IsChecked="{Binding DefaultRule.Enabled, Mode=TwoWay}" />
-                    <TextBox Header="Browser" Text="{Binding DefaultRule.Browser, Mode=TwoWay}" />
-                    <TextBox Header="Profile" Text="{Binding DefaultRule.Profile, Mode=TwoWay}" />
-                    <TextBox Header="Args Template" Text="{Binding DefaultRule.ArgsTemplate, Mode=TwoWay}" />
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Browser" />
+                        <TextBox Text="{Binding DefaultRule.Browser, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Profile" />
+                        <TextBox Text="{Binding DefaultRule.Profile, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Args Template" />
+                        <TextBox Text="{Binding DefaultRule.ArgsTemplate, Mode=TwoWay}" />
+                    </StackPanel>
                     <Expander Header="Advanced options">
-                        <StackPanel Spacing="8" Margin="0,8,0,0">
-                            <TextBox Header="User Data Dir" Text="{Binding DefaultRule.UserDataDir, Mode=TwoWay}" />
-                            <TextBox Header="Working Directory" Text="{Binding DefaultRule.WorkingDirectory, Mode=TwoWay}" />
-                            <TextBox Header="Use Profile" Text="{Binding DefaultRule.UseProfile, Mode=TwoWay}" />
+                        <StackPanel Spacing="12" Margin="0,8,0,0">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="User Data Dir" />
+                                <TextBox Text="{Binding DefaultRule.UserDataDir, Mode=TwoWay}" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Working Directory" />
+                                <TextBox Text="{Binding DefaultRule.WorkingDirectory, Mode=TwoWay}" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Use Profile" />
+                                <TextBox Text="{Binding DefaultRule.UseProfile, Mode=TwoWay}" />
+                            </StackPanel>
+
                             <Button Content="Clear Profile Override" Command="{Binding ClearProfileCommand}" />
                         </StackPanel>
                     </Expander>

@@ -8,7 +8,7 @@
         Title="LinkRouter Settings">
     <fa:NavigationView x:Name="NavView"
                        PaneDisplayMode="Left"
-                       IsBackButtonVisible="Collapsed"
+                       IsBackButtonVisible="False"
                        IsSettingsVisible="False"
                        SelectionChanged="OnSelectionChanged">
         <fa:NavigationView.MenuItems>
