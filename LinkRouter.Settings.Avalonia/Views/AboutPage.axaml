@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LinkRouter.Settings.Core.ViewModels;assembly=LinkRouter.Settings.Core"
+             x:Class="LinkRouter.Settings.Avalonia.Views.AboutPage"
+             x:DataType="vm:AboutViewModel">
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="12">
+            <TextBlock Text="About" FontSize="24"/>
+            <TextBlock Text="Version" FontWeight="Bold"/>
+            <TextBlock Text="{Binding Version}"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

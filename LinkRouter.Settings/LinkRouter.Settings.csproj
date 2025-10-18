@@ -18,11 +18,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.241001000" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LinkRouter.Core\LinkRouter.Core.csproj" />
+    <ProjectReference Include="..\LinkRouter.Settings.Core\LinkRouter.Settings.Core.csproj" />
   </ItemGroup>
 
 

@@ -3,7 +3,7 @@ using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public partial class AboutViewModel : ObservableObject
 {

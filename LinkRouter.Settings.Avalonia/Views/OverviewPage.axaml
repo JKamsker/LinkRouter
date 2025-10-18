@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LinkRouter.Settings.Core.ViewModels;assembly=LinkRouter.Settings.Core"
+             x:Class="LinkRouter.Settings.Avalonia.Views.OverviewPage"
+             x:DataType="vm:GeneralViewModel">
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="12">
+            <TextBlock Text="Overview" FontSize="24"/>
+            <TextBlock Text="Config path:" FontWeight="Bold"/>
+            <TextBlock Text="{Binding ConfigPath}"/>
+            <TextBlock Text="Last modified:" FontWeight="Bold"/>
+            <TextBlock Text="{Binding LastModifiedDisplay}"/>
+            <TextBlock Text="Status:" FontWeight="Bold"/>
+            <TextBlock Text="{Binding StatusMessage}"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

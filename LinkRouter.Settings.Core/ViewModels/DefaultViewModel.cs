@@ -3,13 +3,14 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
-using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Core.Services;
+using LinkRouter.Settings.Core.Infrastructure;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public partial class DefaultViewModel : ObservableObject
 {
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
+    private readonly ConfigurationState _state = SettingsServiceLocator.ConfigurationState;
 
     [ObservableProperty]
     private string? _preview;

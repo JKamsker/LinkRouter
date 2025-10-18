@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LinkRouter.Settings.Core.ViewModels;assembly=LinkRouter.Settings.Core"
+             x:Class="LinkRouter.Settings.Avalonia.Views.RulesPage"
+             x:DataType="vm:RulesViewModel">
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="12">
+            <TextBlock Text="Rules" FontSize="24"/>
+            <ItemsControl ItemsSource="{Binding Rules}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RuleEditorViewModel">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Pattern}"/>
+                            <TextBlock Text="{Binding Browser}" FontSize="12"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -5,9 +5,9 @@ using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LinkRouter;
-using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Core.Services;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public sealed class ConfigurationState : ObservableObject
 {

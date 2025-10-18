@@ -7,9 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:controls="using:LinkRouter.Settings.Controls"
-    xmlns:viewModels="using:LinkRouter.Settings.ViewModels"
-    xmlns:services="using:LinkRouter.Settings.Services"
-    mc:Ignorable="d">
+    xmlns:viewModels="using:LinkRouter.Settings.Core.ViewModels"
+        mc:Ignorable="d">
     <Page.DataContext>
         <viewModels:ImportExportViewModel />
     </Page.DataContext>

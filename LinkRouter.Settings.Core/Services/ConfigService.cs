@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LinkRouter;
 
-namespace LinkRouter.Settings.Services;
+namespace LinkRouter.Settings.Core.Services;
 
 public sealed class ConfigService
 {

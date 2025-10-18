@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LinkRouter.Settings.Core.ViewModels;assembly=LinkRouter.Settings.Core"
+             x:Class="LinkRouter.Settings.Avalonia.Views.DefaultPage"
+             x:DataType="vm:DefaultViewModel">
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="12">
+            <TextBlock Text="Default Rule" FontSize="24"/>
+            <TextBlock Text="Selected browser:"/>
+            <TextBlock Text="{Binding DefaultRule.Browser}"/>
+            <TextBlock Text="Command preview:"/>
+            <TextBlock Text="{Binding Preview}" FontFamily="Consolas"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

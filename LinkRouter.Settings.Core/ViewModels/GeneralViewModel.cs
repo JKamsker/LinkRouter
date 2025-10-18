@@ -1,21 +1,20 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
-using LinkRouter.Settings.Services;
-using Windows.ApplicationModel.DataTransfer;
+using LinkRouter.Settings.Core.Infrastructure;
+using LinkRouter.Settings.Core.Services;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public partial class GeneralViewModel : ObservableObject
 {
-    private readonly ConfigService _configService = AppServices.ConfigService;
-    private readonly RuleTestService _ruleTestService = AppServices.RuleTestService;
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
+    private readonly ConfigService _configService = SettingsServiceLocator.ConfigService;
+    private readonly RuleTestService _ruleTestService = SettingsServiceLocator.RuleTestService;
+    private readonly ConfigurationState _state = SettingsServiceLocator.ConfigurationState;
 
     [ObservableProperty]
     private string _configPath = string.Empty;
@@ -197,12 +196,7 @@ public partial class GeneralViewModel : ObservableObject
             var folder = Path.GetDirectoryName(_configService.ConfigPath);
             if (!string.IsNullOrEmpty(folder))
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "explorer.exe",
-                    Arguments = folder,
-                    UseShellExecute = true
-                });
+                SettingsServiceLocator.Launcher.OpenFolder(folder);
             }
         }
         catch (Exception ex)
@@ -214,12 +208,7 @@ public partial class GeneralViewModel : ObservableObject
     [RelayCommand]
     private void CopyConfigPath()
     {
-        var package = new DataPackage
-        {
-            RequestedOperation = DataPackageOperation.Copy
-        };
-        package.SetText(_configService.ConfigPath);
-        Clipboard.SetContent(package);
+        SettingsServiceLocator.Clipboard.SetText(_configService.ConfigPath);
     }
 
     partial void OnErrorMessageChanged(string? value)

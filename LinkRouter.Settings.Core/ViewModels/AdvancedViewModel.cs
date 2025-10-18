@@ -1,15 +1,15 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Core.Services;
+using LinkRouter.Settings.Core.Infrastructure;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public partial class AdvancedViewModel : ObservableObject
 {
-    private readonly ConfigService _configService = AppServices.ConfigService;
+    private readonly ConfigService _configService = SettingsServiceLocator.ConfigService;
     private readonly string _logFilePath;
     private readonly string _loggingTogglePath;
 
@@ -35,12 +35,7 @@ public partial class AdvancedViewModel : ObservableObject
             var folder = Path.GetDirectoryName(_configService.ConfigPath);
             if (!string.IsNullOrEmpty(folder))
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "explorer.exe",
-                    Arguments = folder,
-                    UseShellExecute = true
-                });
+                SettingsServiceLocator.Launcher.OpenFolder(folder);
             }
         }
         catch (Exception ex)
@@ -56,12 +51,7 @@ public partial class AdvancedViewModel : ObservableObject
         {
             if (File.Exists(_logFilePath))
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "notepad.exe",
-                    Arguments = _logFilePath,
-                    UseShellExecute = true
-                });
+                SettingsServiceLocator.Launcher.OpenFile(_logFilePath);
             }
             else
             {
@@ -101,11 +91,7 @@ public partial class AdvancedViewModel : ObservableObject
     {
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "ms-settings:defaultapps",
-                UseShellExecute = true
-            });
+            SettingsServiceLocator.Launcher.OpenUri("ms-settings:defaultapps");
         }
         catch (Exception ex)
         {

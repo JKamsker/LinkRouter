@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Core.Services;
+using LinkRouter.Settings.Core.Infrastructure;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public partial class RulesViewModel : ObservableObject
 {
     private static readonly IReadOnlyList<string> s_matchTypes = new[] { "domain", "regex", "contains" };
 
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
-    private readonly RuleTestService _tester = AppServices.RuleTestService;
+    private readonly ConfigurationState _state = SettingsServiceLocator.ConfigurationState;
+    private readonly RuleTestService _tester = SettingsServiceLocator.RuleTestService;
 
     [ObservableProperty]
     private RuleEditorViewModel? _selectedRule;

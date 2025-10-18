@@ -1,5 +1,5 @@
-using LinkRouter.Settings.Services;
-using LinkRouter.Settings.ViewModels;
+using LinkRouter.Settings.Core.Services;
+using LinkRouter.Settings.Core.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 

@@ -4,15 +4,15 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
-using LinkRouter.Settings.Services;
-using Microsoft.UI.Xaml;
+using LinkRouter.Settings.Core.Services;
+using LinkRouter.Settings.Core.Infrastructure;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public partial class ProfilesViewModel : ObservableObject
 {
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
-    private readonly BrowserDetectionService _detector = AppServices.BrowserDetectionService;
+    private readonly ConfigurationState _state = SettingsServiceLocator.ConfigurationState;
+    private readonly BrowserDetectionService _detector = SettingsServiceLocator.BrowserDetectionService;
 
     [ObservableProperty]
     private ProfileEditorViewModel? _selectedProfile;
@@ -25,8 +25,7 @@ public partial class ProfilesViewModel : ObservableObject
     public ObservableCollection<string> ChromiumProfileDirectories { get; } = new();
     public ObservableCollection<FirefoxProfileInfo> FirefoxProfiles { get; } = new();
 
-    public Visibility DetectionErrorVisibility => string.IsNullOrWhiteSpace(DetectionError) ? Visibility.Collapsed : Visibility.Visible;
-    public bool HasDetectionError => DetectionErrorVisibility == Visibility.Visible;
+    public bool HasDetectionError => !string.IsNullOrWhiteSpace(DetectionError);
 
     public ProfilesViewModel()
     {
@@ -63,11 +62,7 @@ public partial class ProfilesViewModel : ObservableObject
         }
     }
 
-    partial void OnDetectionErrorChanged(string? value)
-    {
-        OnPropertyChanged(nameof(DetectionErrorVisibility));
-        OnPropertyChanged(nameof(HasDetectionError));
-    }
+    partial void OnDetectionErrorChanged(string? value) => OnPropertyChanged(nameof(HasDetectionError));
 
     [RelayCommand]
     private void AddProfile()

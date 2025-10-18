@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fa="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        mc:Ignorable="d"
+        d:DesignWidth="1024"
+        d:DesignHeight="768"
+        x:Class="LinkRouter.Settings.Avalonia.MainWindow"
+        Title="LinkRouter Settings">
+    <fa:NavigationView x:Name="NavigationView"
+                       IsPaneToggleButtonVisible="True"
+                       PaneDisplayMode="Auto"
+                       SelectionChanged="OnSelectionChanged">
+        <fa:NavigationView.MenuItems>
+            <fa:NavigationViewItem Content="Overview" Tag="Overview" />
+            <fa:NavigationViewItem Content="Rules" Tag="Rules" />
+            <fa:NavigationViewItem Content="Profiles" Tag="Profiles" />
+            <fa:NavigationViewItem Content="Default" Tag="Default" />
+            <fa:NavigationViewItem Content="Import / Export" Tag="ImportExport" />
+            <fa:NavigationViewItem Content="Advanced" Tag="Advanced" />
+            <fa:NavigationViewItem Content="About" Tag="About" />
+        </fa:NavigationView.MenuItems>
+
+        <ContentControl x:Name="ContentHost" Margin="0" />
+    </fa:NavigationView>
+</Window>

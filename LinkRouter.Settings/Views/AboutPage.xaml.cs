@@ -1,4 +1,4 @@
-using LinkRouter.Settings.ViewModels;
+using LinkRouter.Settings.Core.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 
 namespace LinkRouter.Settings.Views;

@@ -1,4 +1,6 @@
-using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Core.Infrastructure;
+using LinkRouter.Settings.Core.Services;
+using LinkRouter.Settings.Platform;
 using Microsoft.UI.Xaml;
 
 namespace LinkRouter.Settings;
@@ -11,14 +13,21 @@ public partial class App : Application
     {
         InitializeComponent();
         UnhandledException += OnUnhandledException;
+        SettingsServiceLocator.ConfigService = new ConfigService();
+        SettingsServiceLocator.RuleTestService = new RuleTestService();
+        SettingsServiceLocator.BrowserDetectionService = new BrowserDetectionService();
+        SettingsServiceLocator.ConfigurationState = new ConfigurationState();
+        SettingsServiceLocator.Clipboard = new WinUIClipboardService();
+        SettingsServiceLocator.Launcher = new WinUILauncherService();
+        SettingsServiceLocator.FilePicker = new WinUIFilePickerService();
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         try
         {
-            var document = AppServices.ConfigService.LoadAsync().GetAwaiter().GetResult();
-            AppServices.ConfigurationState.Load(document);
+            var document = SettingsServiceLocator.ConfigService.LoadAsync().GetAwaiter().GetResult();
+            SettingsServiceLocator.ConfigurationState.Load(document);
         }
         catch
         {
@@ -26,6 +35,10 @@ public partial class App : Application
         }
 
         _window = new MainWindow();
+        SettingsServiceLocator.MessageDialog = new WinUIMessageDialogService(() => new Microsoft.UI.Xaml.Controls.ContentDialog
+        {
+            XamlRoot = _window.Content.XamlRoot
+        });
         _window.Activate();
     }
 

@@ -2,7 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using LinkRouter;
 
-namespace LinkRouter.Settings.Services;
+namespace LinkRouter.Settings.Core.Services;
 
 public sealed class RuleTestService
 {

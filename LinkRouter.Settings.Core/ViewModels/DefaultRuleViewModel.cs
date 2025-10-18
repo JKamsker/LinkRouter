@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using LinkRouter;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public sealed class DefaultRuleViewModel : ObservableObject
 {

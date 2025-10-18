@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
-using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Core.Services;
+using LinkRouter.Settings.Core.Infrastructure;
 
-namespace LinkRouter.Settings.ViewModels;
+namespace LinkRouter.Settings.Core.ViewModels;
 
 public partial class ImportExportViewModel : ObservableObject
 {
-    private readonly ConfigService _configService = AppServices.ConfigService;
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
+    private readonly ConfigService _configService = SettingsServiceLocator.ConfigService;
+    private readonly ConfigurationState _state = SettingsServiceLocator.ConfigurationState;
 
     [ObservableProperty]
     private string _importPath = string.Empty;
