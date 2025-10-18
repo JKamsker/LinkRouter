@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter.Settings.Services;
@@ -29,6 +30,17 @@ public partial class RulesViewModel : ObservableObject
     public ObservableCollection<RuleEditorViewModel> Rules => _state.Rules;
 
     public IReadOnlyList<string> MatchTypes => s_matchTypes;
+
+    public IReadOnlyList<string> ProfileOptions => _state.Profiles
+        .Select(p => p.Name)
+        .Where(name => !string.IsNullOrWhiteSpace(name))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+    public RulesViewModel()
+    {
+        _state.StateChanged += OnStateChanged;
+    }
 
     [RelayCommand]
     private void AddRule()
@@ -135,5 +147,10 @@ public partial class RulesViewModel : ObservableObject
         {
             TestError = ex.Message;
         }
+    }
+
+    private void OnStateChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(ProfileOptions));
     }
 }

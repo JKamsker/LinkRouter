@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:converters="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
              x:Class="LinkRouter.Settings.Avalonia.Views.RulesWorkspacePage">
     <Grid ColumnDefinitions="2*,3*" RowDefinitions="Auto,*" Margin="16" RowSpacing="12" ColumnSpacing="12">
         <TextBlock Text="Rules" FontSize="20" FontWeight="SemiBold" Grid.ColumnSpan="2" />
@@ -26,47 +27,65 @@
         <Border Grid.Row="1" Grid.Column="1" Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
             <ScrollViewer>
                 <StackPanel Spacing="12">
-                    <ToggleSwitch Content="Enabled" IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}" />
+                    <TextBlock Text="Select a rule to view details."
+                               HorizontalAlignment="Center"
+                               IsVisible="{Binding SelectedRule, Converter={x:Static converters:ObjectConverters.IsNull}}" />
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Match" />
-                        <ComboBox ItemsSource="{Binding MatchTypes}" SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}" />
-                    </StackPanel>
+                    <ContentControl Content="{Binding SelectedRule}"
+                                    IsVisible="{Binding SelectedRule, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Spacing="12">
+                                    <ToggleSwitch Content="Enabled" IsChecked="{Binding Enabled, Mode=TwoWay}" />
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Pattern" />
-                        <TextBox Text="{Binding SelectedRule.Pattern, Mode=TwoWay}" />
-                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Match" />
+                                        <TextBlock Text="{Binding Match}" />
+                                    </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Browser" />
-                        <TextBox Text="{Binding SelectedRule.Browser, Mode=TwoWay}" />
-                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Pattern" />
+                                        <TextBlock Text="{Binding Pattern}" TextWrapping="Wrap" />
+                                    </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Profile" />
-                        <TextBox Text="{Binding SelectedRule.Profile, Mode=TwoWay}" />
-                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Browser" />
+                                        <TextBlock Text="{Binding Browser}" TextWrapping="Wrap" />
+                                    </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Args Template" />
-                        <TextBox Text="{Binding SelectedRule.ArgsTemplate, Mode=TwoWay}" />
-                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Profile" />
+                                        <TextBlock Text="{Binding Profile}" TextWrapping="Wrap" />
+                                    </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="User Data Dir" />
-                        <TextBox Text="{Binding SelectedRule.UserDataDir, Mode=TwoWay}" />
-                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Args Template" />
+                                        <TextBlock Text="{Binding ArgsTemplate}" TextWrapping="Wrap" />
+                                    </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Working Directory" />
-                        <TextBox Text="{Binding SelectedRule.WorkingDirectory, Mode=TwoWay}" />
-                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="User Data Dir" />
+                                        <TextBlock Text="{Binding UserDataDir}" TextWrapping="Wrap" />
+                                    </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Use Profile" />
-                        <TextBox Text="{Binding SelectedRule.UseProfile, Mode=TwoWay}" />
-                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Working Directory" />
+                                        <TextBlock Text="{Binding WorkingDirectory}" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Use Profile" />
+                                        <TextBlock Text="{Binding UseProfile}" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <Button Content="Edit rule..."
+                                            HorizontalAlignment="Left"
+                                            Click="OnEditRuleClick" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+
                     <Separator />
                     <StackPanel Spacing="4">
                         <TextBlock Text="Test URL" />
