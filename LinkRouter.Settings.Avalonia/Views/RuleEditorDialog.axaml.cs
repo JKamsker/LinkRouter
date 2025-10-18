@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.ViewModels;
 
 namespace LinkRouter.Settings.Avalonia.Views;
 
-public partial class RuleEditorDialog : ContentDialog
+public partial class RuleEditorDialog : Window
 {
     public RuleEditorDialog()
     {
@@ -28,5 +27,10 @@ public partial class RuleEditorDialog : ContentDialog
         }
 
         UseProfileCombo.SelectedItem = null;
+    }
+
+    private void OnDoneClick(object? sender, RoutedEventArgs e)
+    {
+        Close();
     }
 }

@@ -31,53 +31,35 @@
                         <TextBlock Text="{Binding SelectedRule.DisplayName, FallbackValue=Select a rule to view details., TargetNullValue=Select a rule to view details.}" TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <ContentControl Content="{Binding SelectedRule}">
-                        <ContentControl.ContentTemplate>
-                            <DataTemplate DataType="{x:Type vm:RuleEditorViewModel}">
-                                <StackPanel Spacing="12">
-                                    <ToggleSwitch Content="Enabled" IsChecked="{Binding Enabled, Mode=TwoWay}" />
+                    <ToggleSwitch Content="Enabled"
+                                  IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}"
+                                  IsEnabled="{Binding HasSelectedRule}" />
 
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Match" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding Match}" />
-                                        <TextBlock Text="{Binding Pattern}" TextWrapping="Wrap" />
-                                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Match Type" />
+                        <ComboBox ItemsSource="{Binding MatchTypes}"
+                                  SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}"
+                                  IsEnabled="{Binding HasSelectedRule}" />
+                    </StackPanel>
 
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Browser" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding Browser}" TextWrapping="Wrap" />
-                                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Use Profile" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox ItemsSource="{Binding ProfileOptions}"
+                                      SelectedItem="{Binding SelectedRule.UseProfile, Mode=TwoWay}"
+                                      Width="200"
+                                      PlaceholderText="Select a configured profile"
+                                      IsEnabled="{Binding HasSelectedRule}" />
+                            <Button Content="Clear"
+                                    Command="{Binding ClearUseProfileCommand}"
+                                    IsEnabled="{Binding HasSelectedRule}" />
+                        </StackPanel>
+                    </StackPanel>
 
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Profile" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding Profile}" TextWrapping="Wrap" />
-                                    </StackPanel>
-
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Args Template" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding ArgsTemplate}" TextWrapping="Wrap" />
-                                    </StackPanel>
-
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="User Data Dir" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding UserDataDir}" TextWrapping="Wrap" />
-                                    </StackPanel>
-
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Working Directory" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding WorkingDirectory}" TextWrapping="Wrap" />
-                                    </StackPanel>
-
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Use Profile" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding UseProfile}" TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ContentControl.ContentTemplate>
-                    </ContentControl>
-
-                    <Button Content="Edit rule…" Click="OnEditRuleClick" IsEnabled="{Binding HasSelectedRule}" />
+                    <Button Content="More…"
+                            Click="OnEditRuleClick"
+                            HorizontalAlignment="Left"
+                            IsEnabled="{Binding HasSelectedRule}" />
 
                     <Separator />
 

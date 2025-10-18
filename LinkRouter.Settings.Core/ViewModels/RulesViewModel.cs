@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter.Settings.Services;
@@ -148,6 +149,19 @@ public partial class RulesViewModel : ObservableObject
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanClearUseProfile))]
+    private void ClearUseProfile()
+    {
+        if (SelectedRule is null)
+        {
+            return;
+        }
+
+        SelectedRule.UseProfile = null;
+    }
+
+    private bool CanClearUseProfile() => SelectedRule?.UseProfile is not null;
+
     private void RefreshProfileOptions()
     {
         _profileOptions.Clear();
@@ -170,8 +184,30 @@ public partial class RulesViewModel : ObservableObject
         OnPropertyChanged(nameof(HasSelectedRule));
     }
 
+    partial void OnSelectedRuleChanging(RuleEditorViewModel? value)
+    {
+        if (SelectedRule is not null)
+        {
+            SelectedRule.PropertyChanged -= OnSelectedRulePropertyChanged;
+        }
+    }
+
     partial void OnSelectedRuleChanged(RuleEditorViewModel? value)
     {
+        if (value is not null)
+        {
+            value.PropertyChanged += OnSelectedRulePropertyChanged;
+        }
+
         OnPropertyChanged(nameof(HasSelectedRule));
+        ClearUseProfileCommand.NotifyCanExecuteChanged();
+    }
+
+    private void OnSelectedRulePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(RuleEditorViewModel.UseProfile))
+        {
+            ClearUseProfileCommand.NotifyCanExecuteChanged();
+        }
     }
 }

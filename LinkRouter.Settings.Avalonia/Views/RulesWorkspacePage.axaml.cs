@@ -29,7 +29,7 @@ public partial class RulesWorkspacePage : UserControl
 
         if (TopLevel.GetTopLevel(this) is Window window)
         {
-            await dialog.ShowAsync(window);
+            await dialog.ShowDialog(window);
         }
     }
 }
