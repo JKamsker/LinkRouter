@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-    <BaseIntermediateOutputPath>/tmp/linkrouter2/obj/</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>/tmp/linkrouter2/obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
-    <OutputPath>/tmp/linkrouter2/bin/</OutputPath>
+    <OutputPath>/tmp/linkrouter2/bin/$(MSBuildProjectName)/</OutputPath>
     <UseAppHost>false</UseAppHost>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
