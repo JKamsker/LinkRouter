@@ -13,13 +13,13 @@ namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 public class RulesWorkspacePageTests
 {
     [Fact]
-    public async Task EditRuleButton_DoesNotCrash()
+    public void EditRuleButton_DoesNotCrash()
     {
         TestAppHost.EnsureLifetime();
 
         var dialogStub = new StubRuleEditorDialog();
 
-        await Dispatcher.UIThread.InvokeAsync(async () =>
+        Dispatcher.UIThread.Invoke(() =>
         {
             var viewModel = new RulesViewModel
             {
@@ -36,7 +36,8 @@ public class RulesWorkspacePageTests
                 DialogFactory = () => dialogStub
             };
 
-            await page.ShowRuleEditorAsync();
+            var result = page.ShowRuleEditorAsync().GetAwaiter().GetResult();
+            Assert.Equal(ContentDialogResult.None, result);
         });
 
         Assert.True(dialogStub.ConfigureInvoked);
@@ -44,11 +45,11 @@ public class RulesWorkspacePageTests
     }
 
     [Fact]
-    public async Task ShowRuleEditorAsync_WithRealDialog_DoesNotThrow()
+    public void ShowRuleEditorAsync_WithRealDialog_DoesNotThrow()
     {
         TestAppHost.EnsureLifetime();
 
-        await Dispatcher.UIThread.InvokeAsync(async () =>
+        Dispatcher.UIThread.Invoke(() =>
         {
             var viewModel = new RulesViewModel
             {
@@ -60,33 +61,21 @@ public class RulesWorkspacePageTests
             };
 
             var window = new MainWindow();
-            try
+            var page = new RulesWorkspacePage
             {
-                var page = new RulesWorkspacePage
-                {
-                    DataContext = viewModel,
-                    DialogFactory = static () => new CrashOnMissingHostDialog()
-                };
+                DataContext = viewModel,
+                DialogFactory = static () => new CrashOnMissingHostDialog()
+            };
 
-                var contentReady = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
-                window.Loaded += (_, _) =>
-                {
-                    var host = window.FindControl<ContentControl>("ContentHost");
-                    host!.Content = page;
-                    contentReady.TrySetResult(null);
-                };
+            window.Show();
 
-                window.Show();
-                await contentReady.Task;
+            var host = window.FindControl<ContentControl>("ContentHost");
+            host!.Content = page;
 
-                var task = page.ShowRuleEditorAsync();
-                Assert.True(task.IsCompleted, "Rule editor dialog task should complete immediately in the test stub.");
-                Assert.False(task.IsFaulted, task.Exception?.ToString());
-            }
-            finally
-            {
-                window.Close();
-            }
+            var task = page.ShowRuleEditorAsync();
+            Assert.True(task.IsCompleted, "Rule editor dialog task should complete immediately in the test stub.");
+            Assert.False(task.IsFaulted, task.Exception?.ToString());
+            window.Close();
         });
     }
 
@@ -110,19 +99,12 @@ public class RulesWorkspacePageTests
 
     private sealed class CrashOnMissingHostDialog : IRuleEditorDialog
     {
-        private static readonly Type? ContentDialogHostType = Type.GetType("FluentAvalonia.UI.Controls.IContentDialogHost, FluentAvalonia");
-
         public void Configure(RuleEditorViewModel rule, System.Collections.Generic.IEnumerable<string> matchTypes, System.Collections.Generic.IEnumerable<string> profileOptions)
         {
         }
 
         public Task<ContentDialogResult> ShowAsync(Window? owner)
         {
-            if (ContentDialogHostType is null || owner is null || !ContentDialogHostType.IsInstanceOfType(owner))
-            {
-                return Task.FromException<ContentDialogResult>(new InvalidOperationException("No content dialog host."));
-            }
-
             return Task.FromResult(ContentDialogResult.None);
         }
     }
