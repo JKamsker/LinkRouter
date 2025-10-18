@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -36,8 +37,7 @@ public class RulesWorkspacePageTests
                 DialogFactory = () => dialogStub
             };
 
-            var result = page.ShowRuleEditorAsync().GetAwaiter().GetResult();
-            Assert.Equal(ContentDialogResult.None, result);
+            page.ShowRuleEditorAsync().GetAwaiter().GetResult();
         });
 
         Assert.True(dialogStub.ConfigureInvoked);
@@ -45,38 +45,40 @@ public class RulesWorkspacePageTests
     }
 
     [Fact]
-    public void ShowRuleEditorAsync_WithRealDialog_DoesNotThrow()
+    public async Task ShowRuleEditorAsync_WithContentDialogHost_DoesNotCrash()
     {
-        TestAppHost.EnsureLifetime();
+        var lifetime = TestAppHost.EnsureLifetime();
 
-        Dispatcher.UIThread.Invoke(() =>
+        AutoCloseRuleEditorDialog? dialog = null;
+
+        var dialogTask = await Dispatcher.UIThread.InvokeAsync<Task>(() =>
         {
-            var viewModel = new RulesViewModel
+            var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
+            var rulesItem = window.NavView.MenuItems
+                .OfType<NavigationViewItem>()
+                .First(item => string.Equals(item.Tag as string, "rules", StringComparison.Ordinal));
+
+            window.NavView.SelectedItem = rulesItem;
+
+            var page = Assert.IsType<RulesWorkspacePage>(window.ContentHost.Content);
+            var viewModel = Assert.IsType<RulesViewModel>(page.DataContext);
+            viewModel.SelectedRule = new RuleEditorViewModel
             {
-                SelectedRule = new RuleEditorViewModel
-                {
-                    Match = "domain",
-                    Pattern = "example.com"
-                }
+                Match = "domain",
+                Pattern = "example.com"
             };
 
-            var window = new MainWindow();
-            var page = new RulesWorkspacePage
-            {
-                DataContext = viewModel,
-                DialogFactory = static () => new CrashOnMissingHostDialog()
-            };
+            dialog = new AutoCloseRuleEditorDialog();
+            page.DialogFactory = () => dialog;
 
-            window.Show();
-
-            var host = window.FindControl<ContentControl>("ContentHost");
-            host!.Content = page;
-
-            var task = page.ShowRuleEditorAsync();
-            Assert.True(task.IsCompleted, "Rule editor dialog task should complete immediately in the test stub.");
-            Assert.False(task.IsFaulted, task.Exception?.ToString());
-            window.Close();
+            return page.ShowRuleEditorAsync();
         });
+
+        await dialogTask;
+
+        Assert.NotNull(dialog);
+        Assert.True(dialog!.ShowInvoked);
+        Assert.NotNull(dialog.CapturedOwner);
     }
 
     private sealed class StubRuleEditorDialog : IRuleEditorDialog
@@ -90,22 +92,30 @@ public class RulesWorkspacePageTests
             ConfigureInvoked = true;
         }
 
-        public Task<ContentDialogResult> ShowAsync(Window? owner)
+        public Task ShowAsync(Window? owner)
         {
             ShowInvoked = true;
-            return Task.FromResult(ContentDialogResult.None);
+            return Task.CompletedTask;
         }
     }
 
-    private sealed class CrashOnMissingHostDialog : IRuleEditorDialog
+    private sealed class AutoCloseRuleEditorDialog : RuleEditorDialog
     {
-        public void Configure(RuleEditorViewModel rule, System.Collections.Generic.IEnumerable<string> matchTypes, System.Collections.Generic.IEnumerable<string> profileOptions)
+        public bool ShowInvoked { get; private set; }
+
+        public Window? CapturedOwner { get; private set; }
+
+        public new Task ShowAsync(Window? owner)
         {
+            ShowInvoked = true;
+            CapturedOwner = owner;
+            return base.ShowAsync(owner);
         }
 
-        public Task<ContentDialogResult> ShowAsync(Window? owner)
+        protected override void OnOpened(EventArgs e)
         {
-            return Task.FromResult(ContentDialogResult.None);
+            base.OnOpened(e);
+            Dispatcher.UIThread.Post(() => Close());
         }
     }
 }

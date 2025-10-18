@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.ViewModels;
 
 namespace LinkRouter.Settings.Avalonia.Views;
@@ -21,17 +20,17 @@ public partial class RulesWorkspacePage : UserControl
         await ShowRuleEditorAsync();
     }
 
-    internal Task<ContentDialogResult> ShowRuleEditorAsync()
+    internal Task ShowRuleEditorAsync()
     {
         if (DataContext is not RulesViewModel viewModel)
         {
-            return Task.FromResult(ContentDialogResult.None);
+            return Task.CompletedTask;
         }
 
         var rule = viewModel.SelectedRule;
         if (rule is null)
         {
-            return Task.FromResult(ContentDialogResult.None);
+            return Task.CompletedTask;
         }
 
         var dialog = DialogFactory();

@@ -1,8 +1,7 @@
 using System;
-using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
-using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.Avalonia;
 using LinkRouter.Settings.Avalonia.Views;
 using Xunit;
@@ -12,43 +11,33 @@ namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 public class RuleEditorDialogTests
 {
     [Fact]
-    public void RuleEditorDialog_IsContentDialog()
+    public void RuleEditorDialog_IsWindow()
     {
         TestAppHost.EnsureLifetime();
 
-        ContentDialog? contentDialog = null;
+        Window? dialogWindow = null;
         Dispatcher.UIThread.Invoke(() =>
         {
-            contentDialog = new RuleEditorDialog();
+            dialogWindow = new RuleEditorDialog();
         });
 
-        Assert.NotNull(contentDialog);
-        Assert.IsAssignableFrom<ContentDialog>(contentDialog);
+        Assert.NotNull(dialogWindow);
+        Assert.IsAssignableFrom<Window>(dialogWindow);
     }
 
     [Fact]
-    public void MainWindow_MissingContentDialogHost()
+    public async Task RuleEditorDialog_ShowAsync_CompletesWhenClosed()
     {
         TestAppHost.EnsureLifetime();
 
-        var hostType = Type.GetType("FluentAvalonia.UI.Controls.DialogHost, FluentAvalonia");
-        object? host = null;
-
-        Dispatcher.UIThread.Invoke(() =>
+        var dialogTask = await Dispatcher.UIThread.InvokeAsync<Task>(() =>
         {
-            var window = new MainWindow();
-            if (hostType is null)
-            {
-                return;
-            }
-
-            window.Show();
-
-            host = window.GetVisualDescendants().FirstOrDefault(hostType.IsInstanceOfType);
-
-            window.Close();
+            var dialog = new RuleEditorDialog();
+            var showTask = dialog.ShowAsync(null);
+            Dispatcher.UIThread.Post(dialog.Close);
+            return showTask;
         });
 
-        Assert.NotNull(host);
+        await dialogTask;
     }
 }
