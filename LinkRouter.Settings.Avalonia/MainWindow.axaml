@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fa="using:FluentAvalonia.UI.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="LinkRouter.Settings.Avalonia.MainWindow"
+        Title="LinkRouter Settings"
+        Width="1200"
+        Height="800">
+    <fa:NavigationView x:Name="Shell" PaneDisplayMode="Top" SelectionChanged="OnNavigationSelectionChanged" IsSettingsVisible="False">
+        <fa:NavigationView.MenuItems>
+            <fa:NavigationViewItem Content="Overview" Tag="overview">
+                <fa:NavigationViewItem.IconSource>
+                    <fa:SymbolIconSource Symbol="Home" />
+                </fa:NavigationViewItem.IconSource>
+            </fa:NavigationViewItem>
+            <fa:NavigationViewItem Content="Rules" Tag="rules">
+                <fa:NavigationViewItem.IconSource>
+                    <fa:SymbolIconSource Symbol="Filter" />
+                </fa:NavigationViewItem.IconSource>
+            </fa:NavigationViewItem>
+            <fa:NavigationViewItem Content="Browsers &amp; Profiles" Tag="profiles">
+                <fa:NavigationViewItem.IconSource>
+                    <fa:SymbolIconSource Symbol="People" />
+                </fa:NavigationViewItem.IconSource>
+            </fa:NavigationViewItem>
+            <fa:NavigationViewItem Content="Default rule" Tag="default">
+                <fa:NavigationViewItem.IconSource>
+                    <fa:SymbolIconSource Symbol="Settings" />
+                </fa:NavigationViewItem.IconSource>
+            </fa:NavigationViewItem>
+            <fa:NavigationViewItem Content="Import &amp; Export" Tag="import">
+                <fa:NavigationViewItem.IconSource>
+                    <fa:SymbolIconSource Symbol="ArrowDownload" />
+                </fa:NavigationViewItem.IconSource>
+            </fa:NavigationViewItem>
+            <fa:NavigationViewItem Content="Advanced" Tag="advanced">
+                <fa:NavigationViewItem.IconSource>
+                    <fa:SymbolIconSource Symbol="Wrench" />
+                </fa:NavigationViewItem.IconSource>
+            </fa:NavigationViewItem>
+        </fa:NavigationView.MenuItems>
+        <ContentControl x:Name="ContentHost" />
+    </fa:NavigationView>
+</Window>

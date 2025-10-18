@@ -1,3 +1,4 @@
+using LinkRouter.Settings.Platform;
 using LinkRouter.Settings.Services;
 using Microsoft.UI.Xaml;
 
@@ -11,6 +12,7 @@ public partial class App : Application
     {
         InitializeComponent();
         UnhandledException += OnUnhandledException;
+        AppServices.ClipboardService = new WinUIClipboardService();
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
@@ -26,6 +28,7 @@ public partial class App : Application
         }
 
         _window = new MainWindow();
+        AppServices.FilePickerService = new WinUIFilePickerService(_window);
         _window.Activate();
     }
 

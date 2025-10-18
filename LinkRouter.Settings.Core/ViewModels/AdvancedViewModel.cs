@@ -37,8 +37,7 @@ public partial class AdvancedViewModel : ObservableObject
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "explorer.exe",
-                    Arguments = folder,
+                    FileName = folder,
                     UseShellExecute = true
                 });
             }
@@ -58,8 +57,7 @@ public partial class AdvancedViewModel : ObservableObject
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "notepad.exe",
-                    Arguments = _logFilePath,
+                    FileName = _logFilePath,
                     UseShellExecute = true
                 });
             }
@@ -101,11 +99,18 @@ public partial class AdvancedViewModel : ObservableObject
     {
         try
         {
-            Process.Start(new ProcessStartInfo
+            if (OperatingSystem.IsWindows())
             {
-                FileName = "ms-settings:defaultapps",
-                UseShellExecute = true
-            });
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "ms-settings:defaultapps",
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                Error = "Default apps settings are only available on Windows.";
+            }
         }
         catch (Exception ex)
         {

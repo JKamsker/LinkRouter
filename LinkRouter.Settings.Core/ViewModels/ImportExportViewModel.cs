@@ -37,6 +37,26 @@ public partial class ImportExportViewModel : ObservableObject
         _state.StateChanged += (_, _) => RefreshBackups();
     }
 
+    [RelayCommand]
+    private async Task BrowseImportAsync()
+    {
+        var path = await AppServices.FilePickerService.PickOpenFileAsync("Select configuration", "JSON files|*.json").ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            ImportPath = path;
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseExportAsync()
+    {
+        var path = await AppServices.FilePickerService.PickSaveFileAsync("Export configuration", "LinkRouter.json", "JSON files|*.json").ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            ExportPath = path;
+        }
+    }
+
     private void RefreshBackups()
     {
         Backups.Clear();

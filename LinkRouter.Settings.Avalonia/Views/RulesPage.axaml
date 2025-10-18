@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
+             x:Class="LinkRouter.Settings.Avalonia.Views.RulesPage">
+    <Grid Margin="24" ColumnSpacing="16" RowSpacing="16" ColumnDefinitions="2*,3*" RowDefinitions="Auto,*">
+        <StackPanel Grid.Column="0" Grid.RowSpan="2" Spacing="12">
+            <fa:CommandBar>
+                <fa:CommandBar.PrimaryCommands>
+                    <fa:AppBarButton Label="Add" Command="{Binding AddRuleCommand}">
+                        <fa:AppBarButton.IconSource>
+                            <fa:SymbolIconSource Symbol="Add" />
+                        </fa:AppBarButton.IconSource>
+                    </fa:AppBarButton>
+                    <fa:AppBarButton Label="Duplicate" Command="{Binding DuplicateRuleCommand}" CommandParameter="{Binding SelectedRule}">
+                        <fa:AppBarButton.IconSource>
+                            <fa:SymbolIconSource Symbol="Copy" />
+                        </fa:AppBarButton.IconSource>
+                    </fa:AppBarButton>
+                    <fa:AppBarButton Label="Remove" Command="{Binding DeleteRuleCommand}" CommandParameter="{Binding SelectedRule}">
+                        <fa:AppBarButton.IconSource>
+                            <fa:SymbolIconSource Symbol="Delete" />
+                        </fa:AppBarButton.IconSource>
+                    </fa:AppBarButton>
+                </fa:CommandBar.PrimaryCommands>
+                <fa:CommandBar.SecondaryCommands>
+                    <fa:AppBarButton Label="Move up" Command="{Binding MoveUpCommand}" CommandParameter="{Binding SelectedRule}">
+                        <fa:AppBarButton.IconSource>
+                            <fa:SymbolIconSource Symbol="ArrowUp" />
+                        </fa:AppBarButton.IconSource>
+                    </fa:AppBarButton>
+                    <fa:AppBarButton Label="Move down" Command="{Binding MoveDownCommand}" CommandParameter="{Binding SelectedRule}">
+                        <fa:AppBarButton.IconSource>
+                            <fa:SymbolIconSource Symbol="ArrowDown" />
+                        </fa:AppBarButton.IconSource>
+                    </fa:AppBarButton>
+                </fa:CommandBar.SecondaryCommands>
+            </fa:CommandBar>
+            <DataGrid Items="{Binding Rules}" SelectedItem="{Binding SelectedRule, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="None" HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Enabled}" Width="80" />
+                    <DataGridTextColumn Header="Match" Binding="{Binding Match}" Width="120" />
+                    <DataGridTextColumn Header="Pattern" Binding="{Binding Pattern}" Width="*" />
+                    <DataGridTextColumn Header="Browser" Binding="{Binding Browser}" Width="160" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+
+        <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Classes="Card" Padding="16">
+            <ScrollViewer>
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Rule editor" FontSize="20" FontWeight="SemiBold" />
+                    <ToggleSwitch Header="Enabled" IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}" IsEnabled="{Binding SelectedRule, Converter={StaticResource NullToBooleanConverter}}" />
+                    <ComboBox Header="Match type" Items="{Binding MatchTypes}" SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}" />
+                    <TextBox Header="Pattern" Text="{Binding SelectedRule.Pattern, Mode=TwoWay}" />
+                    <TextBox Header="Browser path" Text="{Binding SelectedRule.Browser, Mode=TwoWay}" Watermark="C:\\Program Files\\Browser\\browser.exe" />
+                    <TextBox Header="Profile" Text="{Binding SelectedRule.Profile, Mode=TwoWay}" />
+
+                    <fa:Expander Header="Advanced options">
+                        <StackPanel Spacing="8">
+                            <TextBox Header="Arguments template" Text="{Binding SelectedRule.ArgsTemplate, Mode=TwoWay}" AcceptsReturn="True" MinHeight="60" />
+                            <TextBox Header="Working directory" Text="{Binding SelectedRule.WorkingDirectory, Mode=TwoWay}" />
+                            <TextBox Header="User data directory" Text="{Binding SelectedRule.UserDataDir, Mode=TwoWay}" />
+                            <TextBox Header="Use profile override" Text="{Binding SelectedRule.UseProfile, Mode=TwoWay}" />
+                        </StackPanel>
+                    </fa:Expander>
+
+                    <Border Classes="Card" Padding="12">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Test rule" FontWeight="SemiBold" />
+                            <TextBox Text="{Binding TestUrl, Mode=TwoWay}" Watermark="https://example.com" />
+                            <Button Content="Run test" Command="{Binding TestRuleCommand}" />
+                            <fa:InfoBar IsOpen="{Binding TestError, Converter={StaticResource StringToBooleanConverter}}" Severity="Error" IsClosable="False" Message="{Binding TestError}" />
+                            <TextBlock Text="{Binding TestResult}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

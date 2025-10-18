@@ -1,0 +1,20 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:conv="using:LinkRouter.Settings.Avalonia.Converters"
+             x:Class="LinkRouter.Settings.Avalonia.App">
+    <Application.Styles>
+        <sty:FluentAvaloniaTheme />
+        <Style Selector="Border.card">
+            <Setter Property="Border.Background" Value="{DynamicResource LayerFillColorDefaultBrush}" />
+            <Setter Property="Border.CornerRadius" Value="8" />
+            <Setter Property="Border.BorderBrush" Value="{DynamicResource LayerStrokeColorDefaultBrush}" />
+            <Setter Property="Border.BorderThickness" Value="1" />
+        </Style>
+    </Application.Styles>
+    <Application.Resources>
+        <conv:BooleanNegationConverter x:Key="InverseBooleanConverter" />
+        <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+        <conv:StringToBooleanConverter x:Key="StringToBooleanConverter" />
+    </Application.Resources>
+</Application>

@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
+             x:Class="LinkRouter.Settings.Avalonia.Views.AdvancedPage">
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="24">
+            <fa:InfoBar IsOpen="{Binding Error, Converter={StaticResource StringToBooleanConverter}}" Severity="Error" Message="{Binding Error}" IsClosable="False" />
+            <Border Classes="Card" Padding="16">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Utilities" FontSize="20" FontWeight="SemiBold" />
+                    <ToggleSwitch Header="Enable launch logging" IsChecked="{Binding IsLoggingEnabled, Mode=TwoWay}" />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Content="Open config folder" Command="{Binding OpenConfigFolderCommand}" />
+                        <Button Content="Open log file" Command="{Binding OpenLogFileCommand}" />
+                        <Button Content="Default apps" Command="{Binding OpenDefaultAppsCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

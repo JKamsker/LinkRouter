@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
+             x:Class="LinkRouter.Settings.Avalonia.Views.OverviewPage">
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="24">
+            <fa:InfoBar IsOpen="{Binding HasError}" Severity="Error" IsClosable="False" Title="Configuration error" Message="{Binding ErrorMessage}" />
+            <fa:InfoBar IsOpen="{Binding HasUnsavedChanges}" Severity="Informational" IsClosable="False" Title="Unsaved changes" Message="{Binding StatusMessage}" />
+
+            <Grid ColumnDefinitions="* *" RowDefinitions="Auto" ColumnSpacing="16" RowSpacing="16">
+                <Border Classes="Card" Column="0" Padding="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Configuration" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="Config file" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding ConfigPath}" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Copy" Command="{Binding CopyConfigPathCommand}" />
+                            <Button Content="Open Folder" Command="{Binding OpenConfigFolderCommand}" />
+                        </StackPanel>
+                        <TextBlock Text="Last modified" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding LastModifiedDisplay}" />
+                        <TextBlock Text="Backups" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding BackupCount}" />
+                        <Button Content="Save configuration" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaving, Converter={StaticResource InverseBooleanConverter}}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="Card" Column="1" Padding="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Registration" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="Register LinkRouter as the default handler to route links through your rules." TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Register" Command="{Binding RegisterCommand}" />
+                            <Button Content="Unregister" Command="{Binding UnregisterCommand}" />
+                        </StackPanel>
+                        <ItemsControl Items="{Binding Backups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="Backup" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding FileName}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Classes="Card" Padding="16">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Simulate URL" FontSize="18" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding TestUrl, Mode=TwoWay}" Watermark="https://example.com" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Run simulation" Command="{Binding SimulateCommand}" />
+                        <TextBlock Text="{Binding SimulationSummary}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding SimulationDetails}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

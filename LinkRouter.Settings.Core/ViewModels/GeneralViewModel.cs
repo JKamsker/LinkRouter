@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
 using LinkRouter.Settings.Services;
-using Windows.ApplicationModel.DataTransfer;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -214,12 +213,12 @@ public partial class GeneralViewModel : ObservableObject
     [RelayCommand]
     private void CopyConfigPath()
     {
-        var package = new DataPackage
+        if (string.IsNullOrEmpty(_configService.ConfigPath))
         {
-            RequestedOperation = DataPackageOperation.Copy
-        };
-        package.SetText(_configService.ConfigPath);
-        Clipboard.SetContent(package);
+            return;
+        }
+
+        AppServices.ClipboardService.SetText(_configService.ConfigPath);
     }
 
     partial void OnErrorMessageChanged(string? value)

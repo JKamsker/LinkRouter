@@ -1,5 +1,8 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
@@ -18,11 +21,14 @@ public partial class DefaultViewModel : ObservableObject
     private string? _error;
 
     public DefaultRuleViewModel DefaultRule => _state.DefaultRule;
+    public ObservableCollection<string> ProfileNames { get; } = new();
 
     public DefaultViewModel()
     {
         DefaultRule.PropertyChanged += OnDefaultRuleChanged;
         _state.StateChanged += OnStateChanged;
+        _state.Profiles.CollectionChanged += OnProfilesChanged;
+        SyncProfiles();
         UpdatePreview();
     }
 
@@ -34,6 +40,20 @@ public partial class DefaultViewModel : ObservableObject
     private void OnStateChanged(object? sender, EventArgs e)
     {
         UpdatePreview();
+    }
+
+    private void OnProfilesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        SyncProfiles();
+    }
+
+    private void SyncProfiles()
+    {
+        ProfileNames.Clear();
+        foreach (var name in _state.Profiles.Select(p => p.Name).Where(n => !string.IsNullOrWhiteSpace(n)))
+        {
+            ProfileNames.Add(name);
+        }
     }
 
     private void UpdatePreview()
