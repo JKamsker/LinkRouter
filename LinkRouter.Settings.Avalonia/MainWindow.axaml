@@ -1,11 +1,12 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:fa="using:FluentAvalonia.UI.Controls"
-        mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
-        x:Class="LinkRouter.Settings.Avalonia.MainWindow"
-        Title="LinkRouter Settings">
+<fw:AppWindow xmlns="https://github.com/avaloniaui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:fa="using:FluentAvalonia.UI.Controls"
+              xmlns:fw="using:FluentAvalonia.UI.Windowing"
+              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
+              x:Class="LinkRouter.Settings.Avalonia.MainWindow"
+              Title="LinkRouter Settings">
     <fa:NavigationView x:Name="NavView"
                        PaneDisplayMode="Left"
                        IsBackButtonVisible="False"
@@ -23,4 +24,4 @@
 
         <ContentControl x:Name="ContentHost" Margin="0" />
     </fa:NavigationView>
-</Window>
+</fw:AppWindow>
