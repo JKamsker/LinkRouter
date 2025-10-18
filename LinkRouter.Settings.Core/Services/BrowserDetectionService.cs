@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Win32;
 
-namespace LinkRouter.Settings.Services;
+namespace LinkRouter.Settings.Core.Services;
 
 public sealed class BrowserDetectionService
 {

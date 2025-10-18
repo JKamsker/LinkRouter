@@ -1,14 +1,13 @@
 using LinkRouter.Settings.Core.Services;
-using LinkRouter.Settings.ViewModels;
 
-namespace LinkRouter.Settings.Services;
+namespace LinkRouter.Settings.Avalonia.Services;
 
 public static class AppServices
 {
-    private static readonly SettingsCoreContext CoreContext = new();
+    public static SettingsCoreContext CoreContext { get; } = new();
 
     public static ConfigService ConfigService => CoreContext.ConfigService;
     public static RuleTestService RuleTestService => CoreContext.RuleTestService;
     public static BrowserDetectionService BrowserDetectionService => CoreContext.BrowserDetectionService;
-    public static ConfigurationState ConfigurationState { get; } = new();
 }
+

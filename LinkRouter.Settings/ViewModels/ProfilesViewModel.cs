@@ -4,6 +4,7 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
+using LinkRouter.Settings.Core.Services;
 using LinkRouter.Settings.Services;
 using Microsoft.UI.Xaml;
 
