@@ -1,15 +1,16 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
 public partial class AdvancedViewModel : ObservableObject
 {
     private readonly ConfigService _configService = AppServices.ConfigService;
+    private readonly IShellService _shellService = AppServices.ShellService;
     private readonly string _logFilePath;
     private readonly string _loggingTogglePath;
 
@@ -18,6 +19,8 @@ public partial class AdvancedViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _error;
+
+    public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     public AdvancedViewModel()
     {
@@ -35,12 +38,7 @@ public partial class AdvancedViewModel : ObservableObject
             var folder = Path.GetDirectoryName(_configService.ConfigPath);
             if (!string.IsNullOrEmpty(folder))
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "explorer.exe",
-                    Arguments = folder,
-                    UseShellExecute = true
-                });
+                _shellService.OpenFolder(folder);
             }
         }
         catch (Exception ex)
@@ -56,12 +54,7 @@ public partial class AdvancedViewModel : ObservableObject
         {
             if (File.Exists(_logFilePath))
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "notepad.exe",
-                    Arguments = _logFilePath,
-                    UseShellExecute = true
-                });
+                _shellService.OpenFile(_logFilePath);
             }
             else
             {
@@ -101,15 +94,13 @@ public partial class AdvancedViewModel : ObservableObject
     {
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "ms-settings:defaultapps",
-                UseShellExecute = true
-            });
+            _shellService.OpenUri("ms-settings:defaultapps");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
         }
     }
+
+    partial void OnErrorChanged(string? value) => OnPropertyChanged(nameof(HasError));
 }

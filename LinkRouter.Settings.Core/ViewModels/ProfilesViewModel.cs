@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
 using LinkRouter.Settings.Services;
-using Microsoft.UI.Xaml;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -25,8 +24,7 @@ public partial class ProfilesViewModel : ObservableObject
     public ObservableCollection<string> ChromiumProfileDirectories { get; } = new();
     public ObservableCollection<FirefoxProfileInfo> FirefoxProfiles { get; } = new();
 
-    public Visibility DetectionErrorVisibility => string.IsNullOrWhiteSpace(DetectionError) ? Visibility.Collapsed : Visibility.Visible;
-    public bool HasDetectionError => DetectionErrorVisibility == Visibility.Visible;
+    public bool HasDetectionError => !string.IsNullOrWhiteSpace(DetectionError);
 
     public ProfilesViewModel()
     {
@@ -63,11 +61,7 @@ public partial class ProfilesViewModel : ObservableObject
         }
     }
 
-    partial void OnDetectionErrorChanged(string? value)
-    {
-        OnPropertyChanged(nameof(DetectionErrorVisibility));
-        OnPropertyChanged(nameof(HasDetectionError));
-    }
+    partial void OnDetectionErrorChanged(string? value) => OnPropertyChanged(nameof(HasDetectionError));
 
     [RelayCommand]
     private void AddProfile()

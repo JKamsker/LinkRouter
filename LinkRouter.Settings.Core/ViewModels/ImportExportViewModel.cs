@@ -29,7 +29,11 @@ public partial class ImportExportViewModel : ObservableObject
     [ObservableProperty]
     private string _exportPath = string.Empty;
 
+    [ObservableProperty]
+    private ConfigBackup? _selectedBackup;
+
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
+    public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     public ImportExportViewModel()
     {
@@ -48,6 +52,8 @@ public partial class ImportExportViewModel : ObservableObject
             }
         }
     }
+
+    partial void OnErrorChanged(string? value) => OnPropertyChanged(nameof(HasError));
 
     [RelayCommand]
     private async Task AnalyzeImportAsync()

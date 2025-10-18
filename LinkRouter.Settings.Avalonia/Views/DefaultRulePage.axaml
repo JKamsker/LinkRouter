@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             x:Class="LinkRouter.Settings.Avalonia.Views.DefaultRulePage">
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="16">
+            <TextBlock Text="Default Rule" FontSize="20" FontWeight="SemiBold" />
+            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="12">
+                    <ToggleSwitch Content="Enable default rule" IsChecked="{Binding DefaultRule.Enabled, Mode=TwoWay}" />
+                    <TextBox Header="Browser" Text="{Binding DefaultRule.Browser, Mode=TwoWay}" />
+                    <TextBox Header="Profile" Text="{Binding DefaultRule.Profile, Mode=TwoWay}" />
+                    <TextBox Header="Args Template" Text="{Binding DefaultRule.ArgsTemplate, Mode=TwoWay}" />
+                    <Expander Header="Advanced options">
+                        <StackPanel Spacing="8" Margin="0,8,0,0">
+                            <TextBox Header="User Data Dir" Text="{Binding DefaultRule.UserDataDir, Mode=TwoWay}" />
+                            <TextBox Header="Working Directory" Text="{Binding DefaultRule.WorkingDirectory, Mode=TwoWay}" />
+                            <TextBox Header="Use Profile" Text="{Binding DefaultRule.UseProfile, Mode=TwoWay}" />
+                            <Button Content="Clear Profile Override" Command="{Binding ClearProfileCommand}" />
+                        </StackPanel>
+                    </Expander>
+                    <Border Padding="12" Background="#33000000" CornerRadius="4" IsVisible="{Binding HasError}">
+                        <TextBlock Text="{Binding Error}" Foreground="Red" />
+                    </Border>
+                    <Border Padding="12" CornerRadius="4" Background="#220000FF">
+                        <TextBlock Text="{Binding Preview}" TextWrapping="Wrap" />
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

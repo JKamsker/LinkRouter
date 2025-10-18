@@ -1,3 +1,4 @@
+using LinkRouter.Settings.Platform;
 using LinkRouter.Settings.Services;
 using Microsoft.UI.Xaml;
 
@@ -9,6 +10,10 @@ public partial class App : Application
 
     public App()
     {
+        AppServices.ClipboardService = new WinUIClipboardService();
+        AppServices.ShellService = new WinUIShellService();
+        AppServices.FilePickerService = new WinUIFilePickerService();
+        AppServices.MessageDialogService = new WinUIMessageDialogService();
         InitializeComponent();
         UnhandledException += OnUnhandledException;
     }

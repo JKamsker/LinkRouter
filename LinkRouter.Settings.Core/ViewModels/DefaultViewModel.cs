@@ -18,6 +18,7 @@ public partial class DefaultViewModel : ObservableObject
     private string? _error;
 
     public DefaultRuleViewModel DefaultRule => _state.DefaultRule;
+    public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     public DefaultViewModel()
     {
@@ -35,6 +36,8 @@ public partial class DefaultViewModel : ObservableObject
     {
         UpdatePreview();
     }
+
+    partial void OnErrorChanged(string? value) => OnPropertyChanged(nameof(HasError));
 
     private void UpdatePreview()
     {

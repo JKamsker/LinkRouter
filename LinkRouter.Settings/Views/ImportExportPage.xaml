@@ -49,7 +49,7 @@
                 </ItemsControl>
             </controls:SettingsCard>
 
-            <TextBlock Text="{x:Bind ViewModel.Error}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
+            <TextBlock Text="{x:Bind ViewModel.Error}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" x:Load="{x:Bind ViewModel.HasError, Mode=OneWay}" />
         </StackPanel>
     </ScrollViewer>
 </Page>

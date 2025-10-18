@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             x:Class="LinkRouter.Settings.Avalonia.Views.RulesWorkspacePage">
+    <Grid ColumnDefinitions="2*,3*" RowDefinitions="Auto,*" Margin="16" RowSpacing="12" ColumnSpacing="12">
+        <TextBlock Text="Rules" FontSize="20" FontWeight="SemiBold" Grid.ColumnSpan="2" />
+        <Border Grid.Row="1" Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+            <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Add" Command="{Binding AddRuleCommand}" />
+                    <Button Content="Duplicate" Command="{Binding DuplicateRuleCommand}" CommandParameter="{Binding SelectedRule}" />
+                    <Button Content="Delete" Command="{Binding DeleteRuleCommand}" CommandParameter="{Binding SelectedRule}" />
+                    <Button Content="Move Up" Command="{Binding MoveUpCommand}" CommandParameter="{Binding SelectedRule}" />
+                    <Button Content="Move Down" Command="{Binding MoveDownCommand}" CommandParameter="{Binding SelectedRule}" />
+                </StackPanel>
+                <ListBox Grid.Row="1" Items="{Binding Rules}" SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Grid.Column="1" Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+            <ScrollViewer>
+                <StackPanel Spacing="12">
+                    <ToggleSwitch Content="Enabled" IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}" />
+                    <ComboBox Header="Match" Items="{Binding MatchTypes}" SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}" />
+                    <TextBox Header="Pattern" Text="{Binding SelectedRule.Pattern, Mode=TwoWay}" />
+                    <TextBox Header="Browser" Text="{Binding SelectedRule.Browser, Mode=TwoWay}" />
+                    <TextBox Header="Profile" Text="{Binding SelectedRule.Profile, Mode=TwoWay}" />
+                    <TextBox Header="Args Template" Text="{Binding SelectedRule.ArgsTemplate, Mode=TwoWay}" />
+                    <TextBox Header="User Data Dir" Text="{Binding SelectedRule.UserDataDir, Mode=TwoWay}" />
+                    <TextBox Header="Working Directory" Text="{Binding SelectedRule.WorkingDirectory, Mode=TwoWay}" />
+                    <TextBox Header="Use Profile" Text="{Binding SelectedRule.UseProfile, Mode=TwoWay}" />
+                    <Separator />
+                    <TextBox Header="Test URL" Text="{Binding TestUrl, Mode=TwoWay}" />
+                    <Button Content="Test Rule" Command="{Binding TestRuleCommand}" />
+                    <TextBlock Text="{Binding TestResult}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding TestError}" TextWrapping="Wrap" Foreground="Red" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

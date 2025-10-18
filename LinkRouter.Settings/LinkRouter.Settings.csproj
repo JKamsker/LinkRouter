@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LinkRouter.Settings.Core\LinkRouter.Settings.Core.csproj" />
     <ProjectReference Include="..\LinkRouter.Core\LinkRouter.Core.csproj" />
   </ItemGroup>
 

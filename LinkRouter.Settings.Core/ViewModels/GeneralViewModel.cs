@@ -1,13 +1,11 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
 using LinkRouter.Settings.Services;
-using Windows.ApplicationModel.DataTransfer;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -197,12 +195,7 @@ public partial class GeneralViewModel : ObservableObject
             var folder = Path.GetDirectoryName(_configService.ConfigPath);
             if (!string.IsNullOrEmpty(folder))
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "explorer.exe",
-                    Arguments = folder,
-                    UseShellExecute = true
-                });
+                AppServices.ShellService.OpenFolder(folder);
             }
         }
         catch (Exception ex)
@@ -214,12 +207,14 @@ public partial class GeneralViewModel : ObservableObject
     [RelayCommand]
     private void CopyConfigPath()
     {
-        var package = new DataPackage
+        try
         {
-            RequestedOperation = DataPackageOperation.Copy
-        };
-        package.SetText(_configService.ConfigPath);
-        Clipboard.SetContent(package);
+            AppServices.ClipboardService.SetText(_configService.ConfigPath);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
     partial void OnErrorMessageChanged(string? value)
