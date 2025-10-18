@@ -1,0 +1,57 @@
+<fa:ContentDialog xmlns="https://github.com/avaloniaui"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:fa="using:FluentAvalonia.UI.Controls"
+                  x:Class="LinkRouter.Settings.Avalonia.Views.RuleEditorDialog"
+                  Title="Edit Rule"
+                  PrimaryButtonText="Done"
+                  CloseButtonText="Cancel">
+    <ScrollViewer>
+        <StackPanel Spacing="12" Margin="0,8,0,0">
+            <ToggleSwitch Content="Enabled" IsChecked="{Binding Enabled, Mode=TwoWay}" />
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Match" />
+                <ComboBox x:Name="MatchTypeCombo"
+                          SelectedItem="{Binding Match, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Pattern" />
+                <TextBox Text="{Binding Pattern, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Browser" />
+                <TextBox Text="{Binding Browser, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Profile" />
+                <TextBox Text="{Binding Profile, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Args Template" />
+                <TextBox Text="{Binding ArgsTemplate, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="User Data Dir" />
+                <TextBox Text="{Binding UserDataDir, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Working Directory" />
+                <TextBox Text="{Binding WorkingDirectory, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Use Profile" />
+                <ComboBox x:Name="UseProfileCombo"
+                          PlaceholderText="Select a configured profile"
+                          SelectedItem="{Binding UseProfile, Mode=TwoWay}" />
+                <Button Content="Clear" HorizontalAlignment="Left" Click="OnClearUseProfileClick" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</fa:ContentDialog>

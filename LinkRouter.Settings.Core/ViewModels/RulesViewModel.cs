@@ -13,6 +13,7 @@ public partial class RulesViewModel : ObservableObject
 
     private readonly ConfigurationState _state = AppServices.ConfigurationState;
     private readonly RuleTestService _tester = AppServices.RuleTestService;
+    private readonly List<string> _profileOptions = new();
 
     [ObservableProperty]
     private RuleEditorViewModel? _selectedRule;
@@ -26,9 +27,19 @@ public partial class RulesViewModel : ObservableObject
     [ObservableProperty]
     private string? _testError;
 
+    public RulesViewModel()
+    {
+        _state.StateChanged += OnStateChanged;
+        RefreshProfileOptions();
+    }
+
     public ObservableCollection<RuleEditorViewModel> Rules => _state.Rules;
 
     public IReadOnlyList<string> MatchTypes => s_matchTypes;
+
+    public IReadOnlyList<string> ProfileOptions => _profileOptions;
+
+    public bool HasSelectedRule => SelectedRule is not null;
 
     [RelayCommand]
     private void AddRule()
@@ -135,5 +146,32 @@ public partial class RulesViewModel : ObservableObject
         {
             TestError = ex.Message;
         }
+    }
+
+    private void RefreshProfileOptions()
+    {
+        _profileOptions.Clear();
+
+        foreach (var profile in _state.Profiles)
+        {
+            if (!string.IsNullOrWhiteSpace(profile.Name))
+            {
+                _profileOptions.Add(profile.Name);
+            }
+        }
+
+        _profileOptions.Sort(StringComparer.OrdinalIgnoreCase);
+        OnPropertyChanged(nameof(ProfileOptions));
+    }
+
+    private void OnStateChanged(object? sender, EventArgs e)
+    {
+        RefreshProfileOptions();
+        OnPropertyChanged(nameof(HasSelectedRule));
+    }
+
+    partial void OnSelectedRuleChanged(RuleEditorViewModel? value)
+    {
+        OnPropertyChanged(nameof(HasSelectedRule));
     }
 }
