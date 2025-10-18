@@ -36,10 +36,17 @@
                                   IsEnabled="{Binding HasSelectedRule}" />
 
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Match Type" />
-                        <ComboBox ItemsSource="{Binding MatchTypes}"
-                                  SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}"
-                                  IsEnabled="{Binding HasSelectedRule}" />
+                        <TextBlock Text="Match" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox ItemsSource="{Binding MatchTypes}"
+                                      SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}"
+                                      Width="140"
+                                      IsEnabled="{Binding HasSelectedRule}" />
+                            <TextBox Text="{Binding SelectedRule.Pattern, Mode=TwoWay}"
+                                     Width="220"
+                                     Watermark="Pattern"
+                                     IsEnabled="{Binding HasSelectedRule}" />
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel Spacing="4">
@@ -56,7 +63,8 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <Button Content="More…"
+                    <Button x:Name="EditRuleButton"
+                            Content="More…"
                             Click="OnEditRuleClick"
                             HorizontalAlignment="Left"
                             IsEnabled="{Binding HasSelectedRule}" />

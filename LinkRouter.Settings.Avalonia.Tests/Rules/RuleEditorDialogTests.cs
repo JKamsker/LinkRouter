@@ -1,5 +1,5 @@
-using Avalonia.Controls;
 using Avalonia.Threading;
+using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.Avalonia.Views;
 using Xunit;
 
@@ -8,17 +8,17 @@ namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 public class RuleEditorDialogTests
 {
     [Fact]
-    public void RuleEditorDialog_UsesWindowHost()
+    public void RuleEditorDialog_IsContentDialog()
     {
         TestAppHost.EnsureLifetime();
 
-        Window? dialogWindow = null;
+        ContentDialog? contentDialog = null;
         Dispatcher.UIThread.Invoke(() =>
         {
-            dialogWindow = new RuleEditorDialog();
+            contentDialog = new RuleEditorDialog();
         });
 
-        Assert.NotNull(dialogWindow);
-        Assert.IsAssignableFrom<Window>(dialogWindow);
+        Assert.NotNull(contentDialog);
+        Assert.IsAssignableFrom<ContentDialog>(contentDialog);
     }
 }

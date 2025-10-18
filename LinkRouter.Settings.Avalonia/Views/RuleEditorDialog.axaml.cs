@@ -1,11 +1,13 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.ViewModels;
 
 namespace LinkRouter.Settings.Avalonia.Views;
 
-public partial class RuleEditorDialog : Window
+public partial class RuleEditorDialog : ContentDialog, IRuleEditorDialog
 {
     public RuleEditorDialog()
     {
@@ -19,6 +21,13 @@ public partial class RuleEditorDialog : Window
         UseProfileCombo.ItemsSource = profileOptions;
     }
 
+    public new Task<ContentDialogResult> ShowAsync(Window? owner)
+    {
+        return owner is null
+            ? base.ShowAsync()
+            : base.ShowAsync(owner);
+    }
+
     private void OnClearUseProfileClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is RuleEditorViewModel rule)
@@ -27,10 +36,5 @@ public partial class RuleEditorDialog : Window
         }
 
         UseProfileCombo.SelectedItem = null;
-    }
-
-    private void OnDoneClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
     }
 }
