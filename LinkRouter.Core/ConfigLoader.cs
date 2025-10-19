@@ -11,8 +11,12 @@ public static class ConfigLoader
     {
         var json = File.ReadAllText(configPath);
         using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
+        return LoadConfig(doc.RootElement);
+    }
 
+    public static Config LoadConfig(JsonElement root)
+    {
+        
         // Load profiles map (optional)
         Dictionary<string, Profile>? profiles = null;
         if (root.TryGetProperty("profiles", out var jpRoot) && jpRoot.ValueKind == JsonValueKind.Object)

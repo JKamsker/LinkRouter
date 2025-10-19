@@ -74,7 +74,7 @@ public partial class GeneralViewModel : ObservableObject
         Backups.Clear();
         if (_state.Document is ConfigDocument document)
         {
-            LastModified = document.LastModified;
+            LastModified = document.SettingsLastModified;
             BackupCount = document.Backups.Count;
             foreach (var backup in document.Backups)
             {
@@ -143,8 +143,8 @@ public partial class GeneralViewModel : ObservableObject
 
         try
         {
-            var config = _state.BuildConfig();
-            await _configService.SaveAsync(config);
+            var snapshot = _state.BuildSettingsSnapshot();
+            await _configService.SaveAsync(snapshot);
             var document = await _configService.LoadAsync();
             _state.Load(document);
             StatusMessage = "Saved.";

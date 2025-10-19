@@ -1,7 +1,13 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:conv="clr-namespace:LinkRouter.Settings.Avalonia.Converters"
              x:Class="LinkRouter.Settings.Avalonia.Views.ProfilesPage">
+    <UserControl.Resources>
+        <conv:StringHasValueConverter x:Key="StringHasValueConverter" />
+        <conv:BooleanNotConverter x:Key="BooleanNotConverter" />
+        <SolidColorBrush x:Key="SecondaryTextBrush" Color="#606060" />
+    </UserControl.Resources>
     <Grid ColumnDefinitions="2*,3*" RowDefinitions="Auto,*" Margin="16" RowSpacing="12" ColumnSpacing="12">
         <TextBlock Text="Browsers &amp; Profiles" FontSize="20" FontWeight="SemiBold" Grid.ColumnSpan="2" />
         <Border Grid.Row="1" Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
@@ -13,7 +19,10 @@
                 <ListBox Grid.Row="1" ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name}" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{Binding Name}" />
+                                <TextBlock Text="(Default)" IsVisible="{Binding IsDefault}" Foreground="{StaticResource SecondaryTextBrush}" />
+                            </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -28,74 +37,72 @@
                         <TextBox Text="{Binding SelectedProfile.Name, Mode=TwoWay}" />
                     </StackPanel>
 
-                    <StackPanel Spacing="4">
+                    <CheckBox Content="Default" IsChecked="{Binding SelectedProfileIsDefault, Mode=TwoWay}" IsEnabled="{Binding SelectedProfile.Name, Converter={StaticResource StringHasValueConverter}}" />
+
+                    <StackPanel Spacing="12" IsVisible="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Browser" />
+                            <ComboBox ItemsSource="{Binding Browsers}"
+                                      SelectedItem="{Binding SelectedBrowser, Mode=TwoWay}"
+                                      IsEnabled="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" />
+                                            <TextBlock Text="{Binding Path}" FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Profile" />
+                            <ComboBox ItemsSource="{Binding DetectedProfiles}"
+                                      SelectedItem="{Binding SelectedDetectedProfile, Mode=TwoWay}"
+                                      IsEnabled="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DisplayName}" />
+                                            <TextBlock Text="{Binding UserDataDir}" FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" IsVisible="{Binding UserDataDir, Converter={StaticResource StringHasValueConverter}}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <CheckBox Content="New window" IsChecked="{Binding SelectedProfileNewWindow, Mode=TwoWay}" IsEnabled="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}" />
+                    </StackPanel>
+
+                    <Button Content="Advanced mode" Command="{Binding EnterAdvancedModeCommand}" IsEnabled="{Binding CanEnterAdvanced}" />
+
+                    <StackPanel Spacing="4" IsVisible="{Binding SelectedProfile.IsAdvanced, FallbackValue=False, TargetNullValue=False}">
                         <TextBlock Text="Browser" />
                         <TextBox Text="{Binding SelectedProfile.Browser, Mode=TwoWay}" />
                     </StackPanel>
 
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="4" IsVisible="{Binding SelectedProfile.IsAdvanced, FallbackValue=False, TargetNullValue=False}">
                         <TextBlock Text="Args Template" />
                         <TextBox Text="{Binding SelectedProfile.ArgsTemplate, Mode=TwoWay}" />
                     </StackPanel>
 
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="4" IsVisible="{Binding SelectedProfile.IsAdvanced, FallbackValue=False, TargetNullValue=False}">
                         <TextBlock Text="Profile" />
                         <TextBox Text="{Binding SelectedProfile.Profile, Mode=TwoWay}" />
                     </StackPanel>
 
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="4" IsVisible="{Binding SelectedProfile.IsAdvanced, FallbackValue=False, TargetNullValue=False}">
                         <TextBlock Text="User Data Dir" />
                         <TextBox Text="{Binding SelectedProfile.UserDataDir, Mode=TwoWay}" />
                     </StackPanel>
 
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="4" IsVisible="{Binding SelectedProfile.IsAdvanced}">
                         <TextBlock Text="Working Directory" />
                         <TextBox Text="{Binding SelectedProfile.WorkingDirectory, Mode=TwoWay}" />
                     </StackPanel>
+
                     <Button Content="Test Launch" Command="{Binding TestLaunchCommand}" CommandParameter="{Binding SelectedProfile}" />
-
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Detected Browsers" FontWeight="SemiBold" />
-                        <ItemsControl ItemsSource="{Binding Browsers}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="{Binding Name}" />
-                                        <TextBlock Text="{Binding Path}" />
-                                        <Button Content="Use" Command="{Binding DataContext.UseDetectedBrowserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Chromium Profiles" FontWeight="SemiBold" />
-                        <ItemsControl ItemsSource="{Binding ChromiumProfileDirectories}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="{Binding}" />
-                                        <Button Content="Use" Command="{Binding DataContext.UseChromiumProfileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Firefox Profiles" FontWeight="SemiBold" />
-                        <ItemsControl ItemsSource="{Binding FirefoxProfiles}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="{Binding Name}" />
-                                        <Button Content="Use" Command="{Binding DataContext.UseFirefoxProfileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
 
                     <Border Padding="12" Background="#33FF0000" CornerRadius="4" IsVisible="{Binding HasDetectionError}">
                         <TextBlock Text="{Binding DetectionError}" TextWrapping="Wrap" Foreground="Red" />

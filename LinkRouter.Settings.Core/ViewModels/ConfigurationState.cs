@@ -13,10 +13,11 @@ public sealed class ConfigurationState : ObservableObject
 {
     private bool _isDirty;
     private ConfigDocument? _document;
+    private ProfileEditorViewModel? _defaultProfile;
+    private bool _isDefaultEnabled;
 
     public ObservableCollection<RuleEditorViewModel> Rules { get; } = new();
     public ObservableCollection<ProfileEditorViewModel> Profiles { get; } = new();
-    public DefaultRuleViewModel DefaultRule { get; } = new();
 
     public ConfigDocument? Document
     {
@@ -28,6 +29,32 @@ public sealed class ConfigurationState : ObservableObject
     {
         get => _isDirty;
         private set => SetProperty(ref _isDirty, value);
+    }
+
+    public ProfileEditorViewModel? DefaultProfile
+    {
+        get => _defaultProfile;
+        private set
+        {
+            if (!ReferenceEquals(_defaultProfile, value))
+            {
+                _defaultProfile = value;
+                OnPropertyChanged(nameof(DefaultProfile));
+            }
+        }
+    }
+
+    public bool IsDefaultEnabled
+    {
+        get => _isDefaultEnabled;
+        private set
+        {
+            if (_isDefaultEnabled != value)
+            {
+                _isDefaultEnabled = value;
+                OnPropertyChanged(nameof(IsDefaultEnabled));
+            }
+        }
     }
 
     public event EventHandler? StateChanged;
@@ -47,19 +74,55 @@ public sealed class ConfigurationState : ObservableObject
             Rules.Add(vm);
         }
 
+        var profileStates = document.ProfileStates;
+
         if (document.Config.profiles is not null)
         {
             foreach (var kvp in document.Config.profiles)
             {
                 var vm = new ProfileEditorViewModel(kvp.Key, kvp.Value);
+                vm.InitializeAdvanced(ShouldStartAdvanced(kvp.Key, kvp.Value, profileStates));
+                vm.SetDefaultFlag(false);
                 vm.PropertyChanged += OnChildPropertyChanged;
                 Profiles.Add(vm);
             }
         }
 
-        DefaultRule.PropertyChanged -= OnChildPropertyChanged;
-        DefaultRule.Load(document.Config.@default);
-        DefaultRule.PropertyChanged += OnChildPropertyChanged;
+        if (document.Config.@default is { } defaultRule)
+        {
+            IsDefaultEnabled = defaultRule.Enabled;
+            if (!string.IsNullOrWhiteSpace(defaultRule.useProfile))
+            {
+                var match = FindProfileByName(defaultRule.useProfile);
+                if (match is null && HasDefaultRulePayload(defaultRule))
+                {
+                    match = CreateProfileFromDefault(defaultRule);
+                }
+
+                DefaultProfile = match;
+            }
+            else if (HasDefaultRulePayload(defaultRule))
+            {
+                var profile = CreateProfileFromDefault(defaultRule);
+                DefaultProfile = profile;
+            }
+            else
+            {
+                DefaultProfile = null;
+            }
+        }
+        else
+        {
+            DefaultProfile = null;
+            IsDefaultEnabled = false;
+        }
+
+        if (DefaultProfile is null)
+        {
+            IsDefaultEnabled = false;
+        }
+
+        UpdateDefaultFlags();
 
         Document = document;
         HasUnsavedChanges = false;
@@ -69,7 +132,20 @@ public sealed class ConfigurationState : ObservableObject
     public Config BuildConfig()
     {
         var rules = Rules.Select(rule => rule.ToRule()).ToArray();
-        var defaultRule = DefaultRule.ToRuleOrNull();
+        Rule? defaultRule = null;
+        if (DefaultProfile is not null && !string.IsNullOrWhiteSpace(DefaultProfile.Name))
+        {
+            defaultRule = new Rule(
+                match: "default",
+                pattern: ".*",
+                browser: null,
+                argsTemplate: null,
+                profile: null,
+                userDataDir: null,
+                workingDirectory: null,
+                useProfile: DefaultProfile.Name,
+                Enabled: IsDefaultEnabled);
+        }
         Dictionary<string, Profile>? profiles = null;
         if (Profiles.Count > 0)
         {
@@ -79,6 +155,19 @@ public sealed class ConfigurationState : ObservableObject
         }
 
         return new Config(rules, defaultRule, profiles);
+    }
+
+    public SettingsSnapshot BuildSettingsSnapshot()
+    {
+        var config = BuildConfig();
+        var profileStates = Profiles
+            .Where(p => !string.IsNullOrWhiteSpace(p.Name))
+            .ToDictionary(
+                p => p.Name,
+                p => new ProfileUiState(p.IsAdvanced),
+                StringComparer.OrdinalIgnoreCase);
+
+        return new SettingsSnapshot(config, profileStates);
     }
 
     public void MarkSaved()
@@ -130,11 +219,64 @@ public sealed class ConfigurationState : ObservableObject
     {
         profile.PropertyChanged -= OnChildPropertyChanged;
         Profiles.Remove(profile);
+        if (ReferenceEquals(DefaultProfile, profile))
+        {
+            DefaultProfile = null;
+            IsDefaultEnabled = false;
+            UpdateDefaultFlags();
+        }
+        MarkDirty();
+    }
+
+    public void SetDefault(ProfileEditorViewModel? profile)
+    {
+        if (profile is null)
+        {
+            ClearDefault();
+            return;
+        }
+
+        bool changed = false;
+
+        if (!ReferenceEquals(DefaultProfile, profile))
+        {
+            DefaultProfile = profile;
+            changed = true;
+        }
+
+        if (!IsDefaultEnabled)
+        {
+            IsDefaultEnabled = true;
+            changed = true;
+        }
+
+        if (changed)
+        {
+            UpdateDefaultFlags();
+            MarkDirty();
+        }
+    }
+
+    public void ClearDefault()
+    {
+        if (DefaultProfile is null && !IsDefaultEnabled)
+        {
+            return;
+        }
+
+        DefaultProfile = null;
+        IsDefaultEnabled = false;
+        UpdateDefaultFlags();
         MarkDirty();
     }
 
     private void OnChildPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (sender is ProfileEditorViewModel && e.PropertyName == nameof(ProfileEditorViewModel.IsDefault))
+        {
+            return;
+        }
+
         HasUnsavedChanges = true;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -144,6 +286,82 @@ public sealed class ConfigurationState : ObservableObject
         foreach (var item in items)
         {
             item.PropertyChanged -= OnChildPropertyChanged;
+        }
+    }
+
+    private bool ShouldStartAdvanced(string profileName, Profile profile, IReadOnlyDictionary<string, ProfileUiState> profileStates)
+    {
+        if (profileStates.TryGetValue(profileName, out var state))
+        {
+            return state.IsAdvanced;
+        }
+
+        var template = profile.argsTemplate;
+        if (string.IsNullOrWhiteSpace(template))
+        {
+            return true;
+        }
+
+        template = template.Trim();
+        return template is not "\"{url}\"" and not "-new-window \"{url}\"" and not "--new-window \"{url}\"";
+    }
+
+    private ProfileEditorViewModel? FindProfileByName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return null;
+        }
+
+        return Profiles.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private bool HasDefaultRulePayload(Rule rule)
+    {
+        return !string.IsNullOrWhiteSpace(rule.browser)
+            || !string.IsNullOrWhiteSpace(rule.argsTemplate)
+            || !string.IsNullOrWhiteSpace(rule.profile)
+            || !string.IsNullOrWhiteSpace(rule.userDataDir)
+            || !string.IsNullOrWhiteSpace(rule.workingDirectory);
+    }
+
+    private ProfileEditorViewModel CreateProfileFromDefault(Rule rule)
+    {
+        var name = GenerateUniqueProfileName("Default");
+        var profile = new Profile(rule.browser, rule.argsTemplate, rule.profile, rule.userDataDir, rule.workingDirectory);
+        var vm = new ProfileEditorViewModel(name, profile);
+        vm.InitializeAdvanced(true);
+        vm.SetDefaultFlag(false);
+        vm.PropertyChanged += OnChildPropertyChanged;
+        Profiles.Add(vm);
+        return vm;
+    }
+
+    private string GenerateUniqueProfileName(string baseName)
+    {
+        var existing = new HashSet<string>(Profiles.Select(p => p.Name), StringComparer.OrdinalIgnoreCase);
+        if (!existing.Contains(baseName))
+        {
+            return baseName;
+        }
+
+        for (int i = 2; i < 1000; i++)
+        {
+            var candidate = $"{baseName}{i}";
+            if (!existing.Contains(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return baseName + Guid.NewGuid().ToString("N");
+    }
+
+    private void UpdateDefaultFlags()
+    {
+        foreach (var profile in Profiles)
+        {
+            profile.SetDefaultFlag(IsDefaultEnabled && ReferenceEquals(profile, DefaultProfile));
         }
     }
 }

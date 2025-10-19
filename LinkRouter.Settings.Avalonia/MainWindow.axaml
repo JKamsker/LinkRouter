@@ -16,7 +16,6 @@
                 <fa:NavigationViewItem Content="Overview" Tag="overview" />
                 <fa:NavigationViewItem Content="Rules" Tag="rules" />
                 <fa:NavigationViewItem Content="Browsers &amp; Profiles" Tag="profiles" />
-                <fa:NavigationViewItem Content="Default Rule" Tag="default" />
                 <fa:NavigationViewItem Content="Import / Export" Tag="import" />
                 <fa:NavigationViewItem Content="Advanced" Tag="advanced" />
                 <fa:NavigationViewItem Content="About" Tag="about" />
