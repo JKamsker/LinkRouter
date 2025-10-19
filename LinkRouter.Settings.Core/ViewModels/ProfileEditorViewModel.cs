@@ -12,6 +12,8 @@ public sealed class ProfileEditorViewModel : ObservableObject
     private string? _profile;
     private string? _userDataDir;
     private string? _workingDirectory;
+    private bool _isAdvanced;
+    private bool _isDefault;
 
     public ProfileEditorViewModel()
     {
@@ -64,6 +66,38 @@ public sealed class ProfileEditorViewModel : ObservableObject
         set => SetProperty(ref _workingDirectory, value);
     }
 
+    public bool IsAdvanced
+    {
+        get => _isAdvanced;
+        set
+        {
+            if (!value && _isAdvanced)
+            {
+                return;
+            }
+
+            SetProperty(ref _isAdvanced, value);
+        }
+    }
+
+    public bool IsDefault
+    {
+        get => _isDefault;
+        set => SetProperty(ref _isDefault, value);
+    }
+
+    public void InitializeAdvanced(bool isAdvanced)
+    {
+        _isAdvanced = isAdvanced;
+        OnPropertyChanged(nameof(IsAdvanced));
+    }
+
+    public void SetDefaultFlag(bool isDefault)
+    {
+        _isDefault = isDefault;
+        OnPropertyChanged(nameof(IsDefault));
+    }
+
     public Profile ToProfile()
     {
         return new Profile(Browser, ArgsTemplate, Profile, UserDataDir, WorkingDirectory);
@@ -78,7 +112,9 @@ public sealed class ProfileEditorViewModel : ObservableObject
             _argsTemplate = _argsTemplate,
             _profile = _profile,
             _userDataDir = _userDataDir,
-            _workingDirectory = _workingDirectory
+            _workingDirectory = _workingDirectory,
+            _isAdvanced = _isAdvanced,
+            _isDefault = _isDefault
         };
     }
 }

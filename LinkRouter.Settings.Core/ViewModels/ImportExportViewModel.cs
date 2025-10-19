@@ -113,7 +113,8 @@ public partial class ImportExportViewModel : ObservableObject
                 newConfig = incoming;
             }
 
-            await _configService.SaveAsync(newConfig);
+            var snapshot = new SettingsSnapshot(newConfig, new Dictionary<string, ProfileUiState>(StringComparer.OrdinalIgnoreCase));
+            await _configService.SaveAsync(snapshot);
             var document = await _configService.LoadAsync();
             _state.Load(document);
             DiffSummary = "Import completed.";
@@ -175,7 +176,8 @@ public partial class ImportExportViewModel : ObservableObject
             await File.WriteAllTextAsync(tempPath, json);
 
             var restored = ConfigLoader.LoadConfig(tempPath);
-            await _configService.SaveAsync(restored);
+            var snapshot = new SettingsSnapshot(restored, new Dictionary<string, ProfileUiState>(StringComparer.OrdinalIgnoreCase));
+            await _configService.SaveAsync(snapshot);
             var document = await _configService.LoadAsync();
             _state.Load(document);
             DiffSummary = $"Restored backup {backup.FileName}.";

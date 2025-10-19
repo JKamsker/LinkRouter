@@ -56,28 +56,125 @@ public sealed class BrowserDetectionService
         return results;
     }
 
-    public IReadOnlyList<string> GetChromiumProfileDirectories()
+    public IReadOnlyList<BrowserProfileOption> GetBrowserProfileOptions(BrowserInfo browser)
     {
-        var locations = new List<string>();
-        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var chromeRoot = Path.Combine(localAppData, "Google", "Chrome", "User Data");
-        if (Directory.Exists(chromeRoot))
+        try
         {
-            locations.Add(chromeRoot);
-            locations.AddRange(Directory.GetDirectories(chromeRoot));
+            return browser.Family switch
+            {
+                BrowserFamily.Chromium => GetChromiumProfileOptions(browser),
+                BrowserFamily.Firefox => GetFirefoxProfileOptions(),
+                _ => Array.Empty<BrowserProfileOption>()
+            };
         }
-
-        var edgeRoot = Path.Combine(localAppData, "Microsoft", "Edge", "User Data");
-        if (Directory.Exists(edgeRoot))
+        catch
         {
-            locations.Add(edgeRoot);
-            locations.AddRange(Directory.GetDirectories(edgeRoot));
+            return Array.Empty<BrowserProfileOption>();
         }
-
-        return locations.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
-    public IReadOnlyList<FirefoxProfileInfo> GetFirefoxProfiles()
+    private static string? ReadExecutablePath(IEnumerable<string> registryKeys)
+    {
+        // Search HKCU then HKLM
+        foreach (var root in new[] { Registry.CurrentUser, Registry.LocalMachine })
+        {
+            foreach (var keyPath in registryKeys)
+            {
+                using var key = root.OpenSubKey(keyPath);
+                var value = key?.GetValue(null) as string;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    return value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private IReadOnlyList<BrowserProfileOption> GetChromiumProfileOptions(BrowserInfo browser)
+    {
+        var options = new List<BrowserProfileOption>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var root in EnumerateChromiumRoots(browser))
+        {
+            if (!Directory.Exists(root))
+            {
+                continue;
+            }
+
+            foreach (var directory in Directory.GetDirectories(root))
+            {
+                var name = Path.GetFileName(directory);
+                if (string.IsNullOrEmpty(name))
+                {
+                    continue;
+                }
+
+                if (string.Equals(name, "System Profile", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var key = $"{name}|{root}";
+                if (seen.Add(key))
+                {
+                    options.Add(new BrowserProfileOption(name, name, root));
+                }
+            }
+        }
+
+        return options;
+    }
+
+    private static IEnumerable<string> EnumerateChromiumRoots(BrowserInfo browser)
+    {
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrWhiteSpace(localAppData))
+        {
+            yield break;
+        }
+
+        var executable = Path.GetFileName(browser.Path) ?? string.Empty;
+        executable = executable.ToLowerInvariant();
+
+        if (browser.Name.Contains("Chrome", StringComparison.OrdinalIgnoreCase) || executable.Contains("chrome"))
+        {
+            yield return Path.Combine(localAppData, "Google", "Chrome", "User Data");
+        }
+
+        if (browser.Name.Contains("Edge", StringComparison.OrdinalIgnoreCase) || executable.Contains("msedge"))
+        {
+            yield return Path.Combine(localAppData, "Microsoft", "Edge", "User Data");
+        }
+
+        if (browser.Name.Contains("Brave", StringComparison.OrdinalIgnoreCase) || executable.Contains("brave"))
+        {
+            yield return Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data");
+        }
+    }
+
+    private IReadOnlyList<BrowserProfileOption> GetFirefoxProfileOptions()
+    {
+        var profiles = new List<BrowserProfileOption>();
+        foreach (var profile in EnumerateFirefoxProfiles())
+        {
+            if (string.IsNullOrWhiteSpace(profile.Name) && string.IsNullOrWhiteSpace(profile.RelativePath))
+            {
+                continue;
+            }
+
+            profiles.Add(new BrowserProfileOption(
+                string.IsNullOrWhiteSpace(profile.Name) ? profile.RelativePath : profile.Name,
+                profile.Name,
+                null));
+        }
+
+        return profiles;
+    }
+
+    private IReadOnlyList<FirefoxProfileInfo> EnumerateFirefoxProfiles()
     {
         var profiles = new List<FirefoxProfileInfo>();
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -134,25 +231,6 @@ public sealed class BrowserDetectionService
         }
 
         return profiles;
-    }
-
-    private static string? ReadExecutablePath(IEnumerable<string> registryKeys)
-    {
-        // Search HKCU then HKLM
-        foreach (var root in new[] { Registry.CurrentUser, Registry.LocalMachine })
-        {
-            foreach (var keyPath in registryKeys)
-            {
-                using var key = root.OpenSubKey(keyPath);
-                var value = key?.GetValue(null) as string;
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    return value;
-                }
-            }
-        }
-
-        return null;
     }
 
     private static string? ReadFirefoxPath(IEnumerable<string> registryKeys)
@@ -245,3 +323,5 @@ public sealed record FirefoxProfileInfo
         return RelativePath;
     }
 }
+
+public sealed record BrowserProfileOption(string DisplayName, string? ProfileArgument, string? UserDataDir);

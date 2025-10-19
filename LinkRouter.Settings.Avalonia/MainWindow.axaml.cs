@@ -21,7 +21,6 @@ public partial class MainWindow : Window
             ["overview"] = CreatePage(new OverviewPage(), new GeneralViewModel()),
             ["rules"] = CreatePage(new RulesWorkspacePage(), new RulesViewModel()),
             ["profiles"] = CreatePage(new ProfilesPage(), new ProfilesViewModel()),
-            ["default"] = CreatePage(new DefaultRulePage(), new DefaultViewModel()),
             ["import"] = CreatePage(new ImportExportPage(), new ImportExportViewModel()),
             ["advanced"] = CreatePage(new AdvancedPage(), new AdvancedViewModel()),
             ["about"] = CreatePage(new AboutPage(), new AboutViewModel())

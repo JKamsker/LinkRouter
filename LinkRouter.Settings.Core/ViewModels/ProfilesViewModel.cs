@@ -1,6 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
@@ -17,18 +19,56 @@ public partial class ProfilesViewModel : ObservableObject
     private ProfileEditorViewModel? _selectedProfile;
 
     [ObservableProperty]
+    private BrowserInfo? _selectedBrowser;
+
+    [ObservableProperty]
+    private BrowserProfileOption? _selectedDetectedProfile;
+
+    [ObservableProperty]
+    private bool _selectedProfileNewWindow;
+
+    [ObservableProperty]
     private string? _detectionError;
 
     public ObservableCollection<ProfileEditorViewModel> Profiles => _state.Profiles;
     public ObservableCollection<BrowserInfo> Browsers { get; } = new();
-    public ObservableCollection<string> ChromiumProfileDirectories { get; } = new();
-    public ObservableCollection<FirefoxProfileInfo> FirefoxProfiles { get; } = new();
+    public ObservableCollection<BrowserProfileOption> DetectedProfiles { get; } = new();
 
     public bool HasDetectionError => !string.IsNullOrWhiteSpace(DetectionError);
+
+    public bool SelectedProfileIsDefault
+    {
+        get => SelectedProfile is not null
+            && _state.IsDefaultEnabled
+            && ReferenceEquals(SelectedProfile, _state.DefaultProfile);
+        set
+        {
+            if (SelectedProfile is null)
+            {
+                return;
+            }
+
+            if (value)
+            {
+                _state.SetDefault(SelectedProfile);
+            }
+            else if (ReferenceEquals(_state.DefaultProfile, SelectedProfile))
+            {
+                _state.ClearDefault();
+            }
+
+            OnPropertyChanged(nameof(SelectedProfileIsDefault));
+        }
+    }
+
+    public bool CanEnterAdvanced => SelectedProfile is not null && !SelectedProfile.IsAdvanced;
+
+    private bool _suppressSelectionUpdates;
 
     public ProfilesViewModel()
     {
         RefreshDetections();
+        _state.PropertyChanged += OnStatePropertyChanged;
     }
 
     private void RefreshDetections()
@@ -41,19 +81,8 @@ public partial class ProfilesViewModel : ObservableObject
                 Browsers.Add(browser);
             }
 
-            ChromiumProfileDirectories.Clear();
-            foreach (var path in _detector.GetChromiumProfileDirectories())
-            {
-                ChromiumProfileDirectories.Add(path);
-            }
-
-            FirefoxProfiles.Clear();
-            foreach (var profile in _detector.GetFirefoxProfiles())
-            {
-                FirefoxProfiles.Add(profile);
-            }
-
             DetectionError = null;
+            SyncSelectionsWithProfile();
         }
         catch (Exception ex)
         {
@@ -62,6 +91,69 @@ public partial class ProfilesViewModel : ObservableObject
     }
 
     partial void OnDetectionErrorChanged(string? value) => OnPropertyChanged(nameof(HasDetectionError));
+
+    partial void OnSelectedProfileChanged(ProfileEditorViewModel? value)
+    {
+        SyncSelectionsWithProfile();
+    }
+
+    partial void OnSelectedBrowserChanged(BrowserInfo? value)
+    {
+        if (_suppressSelectionUpdates || SelectedProfile is null)
+        {
+            return;
+        }
+
+        if (value is null)
+        {
+            SelectedProfile.Browser = null;
+            SelectedProfile.WorkingDirectory = null;
+            DetectedProfiles.Clear();
+            SelectedDetectedProfile = null;
+            return;
+        }
+
+        SelectedProfile.Browser = value.Path;
+        if (!SelectedProfile.IsAdvanced)
+        {
+            SelectedProfile.ArgsTemplate = BuildArgsTemplate(value, SelectedProfileNewWindow);
+            SelectedProfile.WorkingDirectory = GetBrowserWorkingDirectory(value);
+            SelectedProfile.Profile = null;
+            SelectedProfile.UserDataDir = null;
+        }
+
+        UpdateDetectedProfiles(value);
+        SelectedDetectedProfile = null;
+    }
+
+    partial void OnSelectedDetectedProfileChanged(BrowserProfileOption? value)
+    {
+        if (_suppressSelectionUpdates || SelectedProfile is null || SelectedProfile.IsAdvanced)
+        {
+            return;
+        }
+
+        if (value is null)
+        {
+            SelectedProfile.Profile = null;
+            SelectedProfile.UserDataDir = null;
+        }
+        else
+        {
+            SelectedProfile.Profile = value.ProfileArgument;
+            SelectedProfile.UserDataDir = value.UserDataDir;
+        }
+    }
+
+    partial void OnSelectedProfileNewWindowChanged(bool value)
+    {
+        if (_suppressSelectionUpdates || SelectedProfile is null || SelectedProfile.IsAdvanced)
+        {
+            return;
+        }
+
+        SelectedProfile.ArgsTemplate = BuildArgsTemplate(SelectedBrowser, value);
+    }
 
     [RelayCommand]
     private void AddProfile()
@@ -90,37 +182,18 @@ public partial class ProfilesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void UseDetectedBrowser(BrowserInfo? browser)
+    private void EnterAdvancedMode()
     {
-        if (browser is null || SelectedProfile is null)
+        if (SelectedProfile is null)
         {
             return;
         }
 
-        SelectedProfile.Browser = browser.Path;
-    }
-
-    [RelayCommand]
-    private void UseChromiumProfile(string? path)
-    {
-        if (SelectedProfile is null || string.IsNullOrWhiteSpace(path))
+        if (!SelectedProfile.IsAdvanced)
         {
-            return;
+            SelectedProfile.IsAdvanced = true;
+            OnPropertyChanged(nameof(CanEnterAdvanced));
         }
-
-        SelectedProfile.UserDataDir = path;
-    }
-
-    [RelayCommand]
-    private void UseFirefoxProfile(FirefoxProfileInfo? profile)
-    {
-        if (SelectedProfile is null || profile is null)
-        {
-            return;
-        }
-
-        SelectedProfile.Profile = profile.Name;
-        SelectedProfile.UserDataDir = null;
     }
 
     [RelayCommand]
@@ -133,6 +206,7 @@ public partial class ProfilesViewModel : ObservableObject
 
         try
         {
+            DetectionError = null;
             var config = _state.BuildConfig();
             var rule = new Rule(
                 match: "default",
@@ -159,6 +233,122 @@ public partial class ProfilesViewModel : ObservableObject
         catch (Exception ex)
         {
             DetectionError = ex.Message;
+        }
+    }
+
+    private void SyncSelectionsWithProfile()
+    {
+        _suppressSelectionUpdates = true;
+        try
+        {
+            if (SelectedProfile is null)
+            {
+                SelectedBrowser = null;
+                DetectedProfiles.Clear();
+                SelectedDetectedProfile = null;
+                SelectedProfileNewWindow = false;
+            }
+            else
+            {
+                SelectedBrowser = FindBrowserByPath(SelectedProfile.Browser);
+                UpdateDetectedProfiles(SelectedBrowser);
+                SelectedDetectedProfile = MatchProfileOption(SelectedProfile);
+                SelectedProfileNewWindow = DetermineNewWindow(SelectedProfile);
+            }
+        }
+        finally
+        {
+            _suppressSelectionUpdates = false;
+        }
+
+        OnPropertyChanged(nameof(SelectedProfileIsDefault));
+        OnPropertyChanged(nameof(CanEnterAdvanced));
+    }
+
+    private BrowserInfo? FindBrowserByPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        return Browsers.FirstOrDefault(b => string.Equals(b.Path, path, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void UpdateDetectedProfiles(BrowserInfo? browser)
+    {
+        DetectedProfiles.Clear();
+        if (browser is null)
+        {
+            return;
+        }
+
+        foreach (var option in _detector.GetBrowserProfileOptions(browser))
+        {
+            DetectedProfiles.Add(option);
+        }
+    }
+
+    private BrowserProfileOption? MatchProfileOption(ProfileEditorViewModel profile)
+    {
+        if (DetectedProfiles.Count == 0)
+        {
+            return null;
+        }
+
+        foreach (var option in DetectedProfiles)
+        {
+            if (string.Equals(option.ProfileArgument, profile.Profile, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(option.UserDataDir, profile.UserDataDir, StringComparison.OrdinalIgnoreCase))
+            {
+                return option;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool DetermineNewWindow(ProfileEditorViewModel profile)
+    {
+        if (string.IsNullOrWhiteSpace(profile.ArgsTemplate))
+        {
+            return false;
+        }
+
+        return profile.ArgsTemplate.Contains("--new-window", StringComparison.OrdinalIgnoreCase)
+            || profile.ArgsTemplate.Contains("-new-window", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string BuildArgsTemplate(BrowserInfo? browser, bool newWindow)
+    {
+        var family = browser?.Family ?? BrowserFamily.Unknown;
+        return family switch
+        {
+            BrowserFamily.Firefox => newWindow ? "-new-window \"{url}\"" : "\"{url}\"",
+            BrowserFamily.Chromium => newWindow ? "--new-window \"{url}\"" : "\"{url}\"",
+            _ => newWindow ? "--new-window \"{url}\"" : "\"{url}\""
+        };
+    }
+
+    private static string? GetBrowserWorkingDirectory(BrowserInfo browser)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(browser.Path);
+            return string.IsNullOrWhiteSpace(directory) ? null : directory;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private void OnStatePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ConfigurationState.DefaultProfile)
+            || e.PropertyName == nameof(ConfigurationState.IsDefaultEnabled))
+        {
+            OnPropertyChanged(nameof(SelectedProfileIsDefault));
         }
     }
 }
