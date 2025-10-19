@@ -1,10 +1,15 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
              x:Class="LinkRouter.Settings.Avalonia.Views.AboutPage">
-    <StackPanel Margin="16" Spacing="12">
-        <TextBlock Text="{Binding AppName}" FontSize="24" FontWeight="SemiBold" />
-        <TextBlock Text="{Binding VersionLabel}" />
-        <Button Content="Open Repository" Command="{Binding OpenRepositoryCommand}" Width="160" />
-    </StackPanel>
+    <ScrollViewer Padding="{StaticResource PageMargin}">
+        <Border Style="{StaticResource SettingsCardStyle}">
+            <StackPanel Spacing="12">
+                <TextBlock Text="{Binding AppName}"
+                           Style="{StaticResource SectionHeaderTextStyle}" />
+                <TextBlock Text="{Binding VersionLabel}" />
+                <Button Content="Open Repository"
+                        Command="{Binding OpenRepositoryCommand}" />
+            </StackPanel>
+        </Border>
+    </ScrollViewer>
 </UserControl>

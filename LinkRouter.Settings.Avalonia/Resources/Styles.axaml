@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Thickness x:Key="PageMargin">24</Thickness>
+
+    <Style x:Key="SectionHeaderTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+
+    <Style x:Key="SectionSubheaderTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="SettingsCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource LayerFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LayerStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="24" />
+    </Style>
+
+    <Style x:Key="SettingsSectionStack" TargetType="StackPanel">
+        <Setter Property="Spacing" Value="16" />
+    </Style>
+</ResourceDictionary>

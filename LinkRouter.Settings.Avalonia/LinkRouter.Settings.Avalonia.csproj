@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledXaml>true</AvaloniaUseCompiledXaml>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,7 @@
     <PackageReference Include="Avalonia.Desktop" Version="11.3.6" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.6" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.6" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="FluentAvaloniaUI" Version="2.4.0" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Include="Avalonia.Diagnostics" Version="11.3.6">
@@ -24,4 +26,5 @@
     <ProjectReference Include="..\LinkRouter.Settings.Core\LinkRouter.Settings.Core.csproj" />
     <ProjectReference Include="..\LinkRouter.Core\LinkRouter.Core.csproj" />
   </ItemGroup>
+
 </Project>
