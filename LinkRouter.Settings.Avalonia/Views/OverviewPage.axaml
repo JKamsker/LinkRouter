@@ -1,43 +1,60 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
+             xmlns:conv="clr-namespace:LinkRouter.Settings.Avalonia.Converters"
              x:Class="LinkRouter.Settings.Avalonia.Views.OverviewPage">
+    <UserControl.Resources>
+        <conv:StringHasValueConverter x:Key="StringHasValueConverter" />
+        <conv:BooleanNotConverter x:Key="BooleanNotConverter" />
+    </UserControl.Resources>
+
     <ScrollViewer>
-        <StackPanel Spacing="16" Margin="16">
-            <TextBlock Text="Overview" FontSize="20" FontWeight="SemiBold" />
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Configuration" FontWeight="SemiBold" />
-                    <TextBlock Text="Path" FontWeight="Medium" />
-                    <TextBlock Text="{Binding ConfigPath}" TextWrapping="Wrap" />
-                    <TextBlock Text="Last Modified" FontWeight="Medium" />
-                    <TextBlock Text="{Binding LastModifiedDisplay}" />
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Save Config" Command="{Binding SaveCommand}" />
-                        <Button Content="Open Folder" Command="{Binding OpenConfigFolderCommand}" />
-                        <Button Content="Copy Path" Command="{Binding CopyConfigPathCommand}" />
-                    </StackPanel>
+        <StackPanel Margin="{StaticResource PagePadding}" Spacing="24">
+            <TextBlock Text="Overview" Style="{StaticResource PageTitleTextBlockStyle}" />
+
+            <Border Style="{StaticResource SettingsCardStyle}">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Configuration" Style="{StaticResource SectionHeaderTextBlockStyle}" />
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" RowSpacing="8" ColumnSpacing="16">
+                        <TextBlock Text="Path" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="1" Text="{Binding ConfigPath}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="1" Text="Last modified" FontWeight="SemiBold" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding LastModifiedDisplay}" />
+                    </Grid>
+
+                    <WrapPanel Spacing="12">
+                        <Button Content="Save configuration" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaving, Converter={StaticResource BooleanNotConverter}}" />
+                        <Button Content="Open folder" Command="{Binding OpenConfigFolderCommand}" />
+                        <Button Content="Copy path" Command="{Binding CopyConfigPathCommand}" />
+                    </WrapPanel>
+
+                    <fa:InfoBar IsOpen="{Binding HasError}"
+                                Severity="Error"
+                                Message="{Binding ErrorMessage}" />
+                    <fa:InfoBar IsOpen="{Binding StatusMessage, Converter={StaticResource StringHasValueConverter}}"
+                                Severity="Success"
+                                Message="{Binding StatusMessage}" />
                 </StackPanel>
             </Border>
 
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                <StackPanel Spacing="12">
-                    <TextBlock Text="Simulate URL" FontWeight="SemiBold" />
+            <Border Style="{StaticResource SettingsCardStyle}">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Simulate URL" Style="{StaticResource SectionHeaderTextBlockStyle}" />
                     <TextBox Watermark="Enter URL" Text="{Binding TestUrl, Mode=TwoWay}" />
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <WrapPanel Spacing="12">
                         <Button Content="Simulate" Command="{Binding SimulateCommand}" />
                         <Button Content="Register" Command="{Binding RegisterCommand}" />
                         <Button Content="Unregister" Command="{Binding UnregisterCommand}" />
-                    </StackPanel>
-                    <TextBlock Text="{Binding SimulationSummary}" TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding SimulationDetails}" TextWrapping="Wrap" />
+                    </WrapPanel>
+                    <fa:InfoBar IsOpen="{Binding SimulationSummary, Converter={StaticResource StringHasValueConverter}}"
+                                Severity="Success"
+                                Message="{Binding SimulationSummary}" />
+                    <fa:InfoBar IsOpen="{Binding SimulationDetails, Converter={StaticResource StringHasValueConverter}}"
+                                Severity="Informational"
+                                Message="{Binding SimulationDetails}" />
                 </StackPanel>
             </Border>
-
-            <Border Padding="12" CornerRadius="8" Background="#33000000" IsVisible="{Binding HasError}">
-                <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="Red" />
-            </Border>
-            <TextBlock Text="{Binding StatusMessage}" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

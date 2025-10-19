@@ -1,19 +1,29 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
+             xmlns:conv="clr-namespace:LinkRouter.Settings.Avalonia.Converters"
              xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
              x:Class="LinkRouter.Settings.Avalonia.Views.AdvancedPage">
+    <UserControl.Resources>
+        <conv:StringHasValueConverter x:Key="StringHasValueConverter" />
+    </UserControl.Resources>
+
     <ScrollViewer>
-        <StackPanel Spacing="16" Margin="16">
-            <TextBlock Text="Advanced" FontSize="20" FontWeight="SemiBold" />
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                <StackPanel Spacing="12">
+        <StackPanel Margin="{StaticResource PagePadding}" Spacing="24">
+            <TextBlock Text="Advanced" Style="{StaticResource PageTitleTextBlockStyle}" />
+
+            <Border Style="{StaticResource SettingsCardStyle}">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Diagnostics" Style="{StaticResource SectionHeaderTextBlockStyle}" />
                     <ToggleSwitch Content="Enable launch logging" IsChecked="{Binding IsLoggingEnabled, Mode=TwoWay}" />
-                    <Button Content="Open Config Folder" Command="{Binding OpenConfigFolderCommand}" />
-                    <Button Content="Open Log File" Command="{Binding OpenLogFileCommand}" />
-                    <Button Content="Open Default Apps" Command="{Binding OpenDefaultAppsCommand}" />
-                    <Border Padding="12" Background="#33FF0000" CornerRadius="4" IsVisible="{Binding HasError}">
-                        <TextBlock Text="{Binding Error}" Foreground="Red" />
-                    </Border>
+                    <WrapPanel Spacing="12">
+                        <Button Content="Open configuration folder" Command="{Binding OpenConfigFolderCommand}" />
+                        <Button Content="Open log file" Command="{Binding OpenLogFileCommand}" />
+                        <Button Content="Open default apps" Command="{Binding OpenDefaultAppsCommand}" />
+                    </WrapPanel>
+                    <fa:InfoBar IsOpen="{Binding HasError}"
+                                Severity="Error"
+                                Message="{Binding Error}" />
                 </StackPanel>
             </Border>
         </StackPanel>
