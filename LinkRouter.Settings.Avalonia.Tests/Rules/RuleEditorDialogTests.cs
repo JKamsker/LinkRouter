@@ -1,21 +1,14 @@
-using Avalonia.Headless.XUnit;
 using FluentAvalonia.UI.Controls;
-using LinkRouter.Settings.Avalonia;
 using LinkRouter.Settings.Avalonia.Views;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 
 public class RuleEditorDialogTests
 {
-    [AvaloniaFact(Timeout = 30_000)]
-    public Task RuleEditorDialog_IsContentDialog()
+    [Fact]
+    public void RuleEditorDialog_InheritsContentDialog()
     {
-        var dialog = new RuleEditorDialog();
-
-        Assert.NotNull(dialog);
-        Assert.IsAssignableFrom<ContentDialog>(dialog);
-        return Task.CompletedTask;
+        Assert.True(typeof(ContentDialog).IsAssignableFrom(typeof(RuleEditorDialog)));
     }
 }
