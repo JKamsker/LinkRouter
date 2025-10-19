@@ -25,9 +25,13 @@
                         <StackPanel Classes="SettingsCardContent">
                             <TextBlock Text="Rule list" Classes="SectionTitle" />
 
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="8"
-                                        IsEnabled="{Binding IsEditorOpen, Converter={StaticResource BooleanNotConverter}}">
+                            <WrapPanel HorizontalAlignment="Left"
+                                       IsEnabled="{Binding IsEditorOpen, Converter={StaticResource BooleanNotConverter}}">
+                                <WrapPanel.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Margin" Value="0,0,8,8" />
+                                    </Style>
+                                </WrapPanel.Styles>
                                 <Button Content="Add" Command="{Binding AddRuleCommand}" />
                                 <Button Content="Duplicate"
                                         Command="{Binding DuplicateRuleCommand}"
@@ -41,7 +45,7 @@
                                 <Button Content="Move Down"
                                         Command="{Binding MoveDownCommand}"
                                         CommandParameter="{Binding SelectedRule}" />
-                            </StackPanel>
+                            </WrapPanel>
 
                             <ListBox ItemsSource="{Binding Rules}"
                                      SelectedItem="{Binding SelectedRule, Mode=TwoWay}"
