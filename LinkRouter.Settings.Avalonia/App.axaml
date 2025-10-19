@@ -7,5 +7,10 @@
 
     <Application.Styles>
         <sty:FluentAvaloniaTheme />
+        <StyleInclude Source="avares://LinkRouter.Settings.Avalonia/Resources/Styles.axaml" />
     </Application.Styles>
+
+    <Application.DataTemplates>
+        <ResourceInclude Source="avares://LinkRouter.Settings.Avalonia/Resources/Views.axaml" />
+    </Application.DataTemplates>
 </Application>

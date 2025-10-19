@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="LinkRouter.Settings.Avalonia.Views.RuleEditorDialogView">
+    <ScrollViewer Padding="0">
+        <StackPanel Spacing="12">
+            <ToggleSwitch Content="Enabled"
+                          IsChecked="{Binding Rule.Enabled, Mode=TwoWay}" />
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Match" />
+                <ComboBox ItemsSource="{Binding MatchTypes}"
+                          SelectedItem="{Binding Rule.Match, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Pattern" />
+                <TextBox Text="{Binding Rule.Pattern, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Browser" />
+                <TextBox Text="{Binding Rule.Browser, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Profile" />
+                <TextBox Text="{Binding Rule.Profile, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Args Template" />
+                <TextBox Text="{Binding Rule.ArgsTemplate, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="User Data Dir" />
+                <TextBox Text="{Binding Rule.UserDataDir, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Working Directory" />
+                <TextBox Text="{Binding Rule.WorkingDirectory, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Use Profile" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <ComboBox ItemsSource="{Binding ProfileOptions}"
+                              SelectedItem="{Binding Rule.UseProfile, Mode=TwoWay}"
+                              Width="220"
+                              PlaceholderText="Select a configured profile" />
+                    <Button Content="Clear" Command="{Binding ClearProfileCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

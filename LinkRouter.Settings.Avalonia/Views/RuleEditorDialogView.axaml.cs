@@ -3,9 +3,9 @@ using Avalonia.Markup.Xaml;
 
 namespace LinkRouter.Settings.Avalonia.Views;
 
-public partial class RulesWorkspacePage : UserControl
+public partial class RuleEditorDialogView : UserControl
 {
-    public RulesWorkspacePage()
+    public RuleEditorDialogView()
     {
         InitializeComponent();
     }
