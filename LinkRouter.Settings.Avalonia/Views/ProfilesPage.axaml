@@ -40,7 +40,7 @@
 
                     <StackPanel Spacing="12" IsVisible="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Detected Browser" />
+                            <TextBlock Text="Browser" />
                             <ComboBox ItemsSource="{Binding Browsers}"
                                       SelectedItem="{Binding SelectedBrowser, Mode=TwoWay}"
                                       IsEnabled="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}">
@@ -56,7 +56,7 @@
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Detected Profile" />
+                            <TextBlock Text="Profile" />
                             <ComboBox ItemsSource="{Binding DetectedProfiles}"
                                       SelectedItem="{Binding SelectedDetectedProfile, Mode=TwoWay}"
                                       IsEnabled="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}">
