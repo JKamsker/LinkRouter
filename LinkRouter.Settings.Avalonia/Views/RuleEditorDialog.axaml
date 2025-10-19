@@ -1,70 +1,63 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="LinkRouter.Settings.Avalonia.Views.RuleEditorDialog"
-        Title="Edit Rule"
-        Width="520"
-        MinWidth="400"
-        MinHeight="480"
-        WindowStartupLocation="CenterOwner">
-    <Border Padding="16" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
-        <DockPanel LastChildFill="True" Margin="0" >
-            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
-                <Button Content="Cancel" Click="OnCancelClick" />
-                <Button Content="Done" IsDefault="True" Click="OnDoneClick" />
+<fa:ContentDialog xmlns="https://github.com/avaloniaui"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:fa="using:FluentAvalonia.UI.Controls"
+                  x:Class="LinkRouter.Settings.Avalonia.Views.RuleEditorDialog"
+                  Title="Edit Rule"
+                  PrimaryButtonText="Done"
+                  CloseButtonText="Cancel"
+                  DefaultButton="Primary">
+    <ScrollViewer Padding="12">
+        <StackPanel Spacing="12">
+            <ToggleSwitch Content="Enabled"
+                          IsChecked="{Binding Enabled, Mode=TwoWay}" />
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="Match" />
+                <ComboBox x:Name="MatchTypeCombo"
+                          SelectedItem="{Binding Match, Mode=TwoWay}" />
             </StackPanel>
 
-            <ScrollViewer>
-                <StackPanel Spacing="12">
-                    <ToggleSwitch Content="Enabled"
-                                  IsChecked="{Binding Enabled, Mode=TwoWay}" />
+            <StackPanel Spacing="4">
+                <TextBlock Text="Pattern" />
+                <TextBox Text="{Binding Pattern, Mode=TwoWay}" />
+            </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Match" />
-                        <ComboBox x:Name="MatchTypeCombo"
-                                  SelectedItem="{Binding Match, Mode=TwoWay}" />
-                    </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Browser" />
+                <TextBox Text="{Binding Browser, Mode=TwoWay}" />
+            </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Pattern" />
-                        <TextBox Text="{Binding Pattern, Mode=TwoWay}" />
-                    </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Profile" />
+                <TextBox Text="{Binding Profile, Mode=TwoWay}" />
+            </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Browser" />
-                        <TextBox Text="{Binding Browser, Mode=TwoWay}" />
-                    </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Args Template" />
+                <TextBox Text="{Binding ArgsTemplate, Mode=TwoWay}" />
+            </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Profile" />
-                        <TextBox Text="{Binding Profile, Mode=TwoWay}" />
-                    </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="User Data Dir" />
+                <TextBox Text="{Binding UserDataDir, Mode=TwoWay}" />
+            </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Args Template" />
-                        <TextBox Text="{Binding ArgsTemplate, Mode=TwoWay}" />
-                    </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Working Directory" />
+                <TextBox Text="{Binding WorkingDirectory, Mode=TwoWay}" />
+            </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="User Data Dir" />
-                        <TextBox Text="{Binding UserDataDir, Mode=TwoWay}" />
-                    </StackPanel>
-
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Working Directory" />
-                        <TextBox Text="{Binding WorkingDirectory, Mode=TwoWay}" />
-                    </StackPanel>
-
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Use Profile" />
-                        <ComboBox x:Name="UseProfileCombo"
-                                  PlaceholderText="Select a configured profile"
-                                  SelectedItem="{Binding UseProfile, Mode=TwoWay}" />
-                        <Button Content="Clear"
-                                HorizontalAlignment="Left"
-                                Click="OnClearUseProfileClick" />
-                    </StackPanel>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Use Profile" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <ComboBox x:Name="UseProfileCombo"
+                              PlaceholderText="Select a configured profile"
+                              SelectedItem="{Binding UseProfile, Mode=TwoWay}" />
+                    <Button Content="Clear"
+                            HorizontalAlignment="Left"
+                            Click="OnClearUseProfileClick" />
                 </StackPanel>
-            </ScrollViewer>
-        </DockPanel>
-    </Border>
-</Window>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</fa:ContentDialog>

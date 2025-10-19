@@ -13,8 +13,8 @@ namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 
 public class RulesWorkspacePageTests
 {
-    [Fact]
-    public void EditRuleButton_DoesNotCrash()
+    [AvaloniaFact]
+    public Task EditRuleButton_DoesNotCrash()
     {
         TestAppHost.EnsureLifetime();
 
@@ -42,18 +42,23 @@ public class RulesWorkspacePageTests
 
         Assert.True(dialogStub.ConfigureInvoked);
         Assert.True(dialogStub.ShowInvoked);
+        return Task.CompletedTask;
     }
 
-    [Fact]
+    [AvaloniaFact]
     public async Task ShowRuleEditorAsync_WithContentDialogHost_DoesNotCrash()
     {
         var lifetime = TestAppHost.EnsureLifetime();
 
         AutoCloseRuleEditorDialog? dialog = null;
+        Task? dialogTask = null;
 
-        var dialogTask = await Dispatcher.UIThread.InvokeAsync<Task>(() =>
+        Dispatcher.UIThread.Invoke(() =>
         {
             var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
+
+            window.Show();
+
             var rulesItem = window.NavView.MenuItems
                 .OfType<NavigationViewItem>()
                 .First(item => string.Equals(item.Tag as string, "rules", StringComparison.Ordinal));
@@ -71,10 +76,11 @@ public class RulesWorkspacePageTests
             dialog = new AutoCloseRuleEditorDialog();
             page.DialogFactory = () => dialog;
 
-            return page.ShowRuleEditorAsync();
+            dialogTask = page.ShowRuleEditorAsync();
+            window.Close();
         });
 
-        await dialogTask;
+        await dialogTask!;
 
         Assert.NotNull(dialog);
         Assert.True(dialog!.ShowInvoked);
@@ -99,23 +105,21 @@ public class RulesWorkspacePageTests
         }
     }
 
-    private sealed class AutoCloseRuleEditorDialog : RuleEditorDialog
+    private sealed class AutoCloseRuleEditorDialog : IRuleEditorDialog
     {
         public bool ShowInvoked { get; private set; }
 
         public Window? CapturedOwner { get; private set; }
 
-        public new Task ShowAsync(Window? owner)
+        public void Configure(RuleEditorViewModel rule, System.Collections.Generic.IEnumerable<string> matchTypes, System.Collections.Generic.IEnumerable<string> profileOptions)
+        {
+        }
+
+        public Task ShowAsync(Window? owner)
         {
             ShowInvoked = true;
             CapturedOwner = owner;
-            return base.ShowAsync(owner);
-        }
-
-        protected override void OnOpened(EventArgs e)
-        {
-            base.OnOpened(e);
-            Dispatcher.UIThread.Post(() => Close());
+            return Task.CompletedTask;
         }
     }
 }

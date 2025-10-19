@@ -1,16 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.ViewModels;
 
 namespace LinkRouter.Settings.Avalonia.Views;
 
-public partial class RuleEditorDialog : Window, IRuleEditorDialog
+public partial class RuleEditorDialog : ContentDialog, IRuleEditorDialog
 {
-    private TaskCompletionSource? _completionSource;
-
     public RuleEditorDialog()
     {
         InitializeComponent();
@@ -23,24 +21,15 @@ public partial class RuleEditorDialog : Window, IRuleEditorDialog
         UseProfileCombo.ItemsSource = profileOptions;
     }
 
-    public Task ShowAsync(Window? owner)
+    public new async Task ShowAsync(Window? owner)
     {
         if (owner is not null)
         {
-            return ShowDialog(owner);
+            await base.ShowAsync(owner);
+            return;
         }
 
-        _completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        void OnClosed(object? sender, EventArgs e)
-        {
-            Closed -= OnClosed;
-            _completionSource?.TrySetResult();
-        }
-
-        Closed += OnClosed;
-        Show();
-        return _completionSource.Task;
+        await base.ShowAsync();
     }
 
     private void OnClearUseProfileClick(object? sender, RoutedEventArgs e)
@@ -51,15 +40,5 @@ public partial class RuleEditorDialog : Window, IRuleEditorDialog
         }
 
         UseProfileCombo.SelectedItem = null;
-    }
-
-    private void OnDoneClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-
-    private void OnCancelClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
     }
 }
