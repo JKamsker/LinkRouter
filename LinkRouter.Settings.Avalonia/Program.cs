@@ -1,5 +1,6 @@
-﻿using Avalonia;
 using System;
+using Avalonia;
+using Avalonia.Media;
 
 namespace LinkRouter.Settings.Avalonia;
 
@@ -17,5 +18,6 @@ class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
+            .With(FontConfiguration.Create())
             .LogToTrace();
 }

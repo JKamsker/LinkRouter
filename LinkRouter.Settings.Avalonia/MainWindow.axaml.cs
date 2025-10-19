@@ -3,13 +3,12 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using FluentAvalonia.UI.Controls;
-using FluentAvalonia.UI.Windowing;
 using LinkRouter.Settings.Avalonia.Views;
 using LinkRouter.Settings.ViewModels;
 
 namespace LinkRouter.Settings.Avalonia;
 
-public partial class MainWindow : AppWindow
+public partial class MainWindow : Window
 {
     private readonly Dictionary<string, Control> _pages;
 

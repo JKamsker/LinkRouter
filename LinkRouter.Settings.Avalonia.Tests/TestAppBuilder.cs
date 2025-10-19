@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Skia;
+using LinkRouter.Settings.Avalonia;
 
 namespace LinkRouter.Settings.Avalonia.Tests;
 
@@ -13,5 +14,6 @@ public static class TestAppBuilder
             {
                 UseHeadlessDrawing = true
             })
-            .WithInterFont();
+            .WithInterFont()
+            .With(FontConfiguration.Create());
 }
