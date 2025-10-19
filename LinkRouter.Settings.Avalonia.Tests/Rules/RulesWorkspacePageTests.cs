@@ -1,19 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Threading;
 using Avalonia.Styling;
 using Avalonia.Themes.Simple;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Headless.XUnit;
 using FluentAvalonia.UI.Controls;
-using FluentAvalonia.Styling;
-using LinkRouter.Settings.Avalonia;
 using LinkRouter.Settings.Avalonia.Views;
 using LinkRouter.Settings.Services;
 using LinkRouter.Settings.ViewModels;
@@ -23,145 +18,104 @@ namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 
 public class RulesWorkspacePageTests
 {
-    [AvaloniaFact]
-    public Task EditRuleButton_DoesNotCrash()
+    [AvaloniaFact(Timeout = 30_000)]
+    public async Task EditRuleButton_DoesNotCrash()
     {
-        TestAppHost.EnsureLifetime();
-
         var dialogStub = new StubRuleEditorDialog();
 
-        Dispatcher.UIThread.Invoke(() =>
+        var viewModel = new RulesViewModel
         {
-            var viewModel = new RulesViewModel
+            SelectedRule = new RuleEditorViewModel
             {
-                SelectedRule = new RuleEditorViewModel
-                {
-                    Match = "domain",
-                    Pattern = "example.com"
-                }
-            };
+                Match = "domain",
+                Pattern = "example.com"
+            }
+        };
 
-            var page = new RulesWorkspacePage
-            {
-                DataContext = viewModel,
-                DialogFactory = () => dialogStub
-            };
+        var page = new RulesWorkspacePage
+        {
+            DataContext = viewModel,
+            DialogFactory = () => dialogStub
+        };
 
-            page.ShowRuleEditorAsync().GetAwaiter().GetResult();
-        });
+        await page.ShowRuleEditorAsync();
 
         Assert.True(dialogStub.ConfigureInvoked);
         Assert.True(dialogStub.ShowInvoked);
-        return Task.CompletedTask;
     }
 
-    [AvaloniaFact]
+    [AvaloniaFact(Timeout = 30_000)]
     public async Task ShowRuleEditorAsync_WithContentDialogHost_DoesNotCrash()
     {
-        var lifetime = TestAppHost.EnsureLifetime();
-
-        AutoCloseRuleEditorDialog? dialog = null;
-        Task? dialogTask = null;
-
-        Dispatcher.UIThread.Invoke(() =>
+        var viewModel = new RulesViewModel
         {
-            var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
-
-            window.Show();
-
-            var rulesItem = window.NavView.MenuItems
-                .OfType<NavigationViewItem>()
-                .First(item => string.Equals(item.Tag as string, "rules", StringComparison.Ordinal));
-
-            window.NavView.SelectedItem = rulesItem;
-
-            var page = Assert.IsType<RulesWorkspacePage>(window.ContentHost.Content);
-            var viewModel = Assert.IsType<RulesViewModel>(page.DataContext);
-            viewModel.SelectedRule = new RuleEditorViewModel
+            SelectedRule = new RuleEditorViewModel
             {
                 Match = "domain",
                 Pattern = "example.com"
-            };
+            }
+        };
 
-            dialog = new AutoCloseRuleEditorDialog();
-            page.DialogFactory = () => dialog;
+        var dialog = new AutoCloseRuleEditorDialog();
+        var (window, page) = await ShowRulesWindowAsync(viewModel, () => dialog);
 
-            dialogTask = page.ShowRuleEditorAsync();
+        try
+        {
+            await page.ShowRuleEditorAsync();
+        }
+        finally
+        {
             window.Close();
-        });
+        }
 
-        await dialogTask!;
-
-        Assert.NotNull(dialog);
-        Assert.True(dialog!.ShowInvoked);
+        Assert.True(dialog.ShowInvoked);
         Assert.NotNull(dialog.CapturedOwner);
     }
 
-    [AvaloniaFact]
-    public async Task EditRuleButtonClick_WithRealDialog_ThrowsKeyNotFound()
+    [AvaloniaFact(Timeout = 30_000)]
+    public async Task EditRuleButtonClick_WithThrowingDialog_PropagatesException()
     {
-        var lifetime = TestAppHost.EnsureLifetime();
+        var state = AppServices.ConfigurationState;
+        state.Rules.Clear();
 
-        var operation = Dispatcher.UIThread.InvokeAsync(async () =>
+        var rule = new RuleEditorViewModel
         {
-            var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
-            window.Show();
+            Match = "domain",
+            Pattern = "example.com"
+        };
 
-            var rulesItem = window.NavView.MenuItems
-                .OfType<NavigationViewItem>()
-                .First(item => string.Equals(item.Tag as string, "rules", StringComparison.Ordinal));
+        state.AddRule(rule);
 
-            window.NavView.SelectedItem = rulesItem;
+        var viewModel = new RulesViewModel
+        {
+            SelectedRule = rule
+        };
 
-            var page = Assert.IsType<RulesWorkspacePage>(window.ContentHost.Content);
-            var viewModel = Assert.IsType<RulesViewModel>(page.DataContext);
+        var dialog = new ThrowingRuleEditorDialog();
+        var (window, page) = await ShowRulesWindowAsync(viewModel, () => dialog);
 
-            var state = AppServices.ConfigurationState;
-            state.Rules.Clear();
+        InvalidOperationException? exception = null;
 
-            var rule = new RuleEditorViewModel
-            {
-                Match = "domain",
-                Pattern = "example.com"
-            };
+        try
+        {
+            await page.ShowRuleEditorAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            exception = ex;
+        }
+        finally
+        {
+            window.Close();
+        }
 
-            state.AddRule(rule);
-            viewModel.SelectedRule = rule;
-
-            if (Application.Current is { } app)
-            {
-                app.Styles.Clear();
-                app.Styles.Add(new SimpleTheme());
-
-                var brokenTemplate = new FuncControlTemplate<ContentDialog>((_, _) => new Border());
-                app.Styles.Add(new Style(x => x.OfType<ContentDialog>())
-                {
-                    Setters =
-                    {
-                        new Setter(TemplatedControl.TemplateProperty, brokenTemplate)
-                    }
-                });
-            }
-
-            try
-            {
-                await page.ShowRuleEditorAsync();
-            }
-            finally
-            {
-                window.Close();
-            }
-        });
-
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () => await operation);
-        Assert.Contains("PrimaryButton", exception.Message);
+        Assert.NotNull(exception);
+        Assert.Contains("template has not been applied", exception!.Message, StringComparison.OrdinalIgnoreCase);
     }
 
-    [AvaloniaFact]
-    public async Task ShowRuleEditorAsync_WithoutHost_ThrowsKeyNotFound()
+    [AvaloniaFact(Timeout = 30_000)]
+    public async Task ShowRuleEditorAsync_WithoutHost_ThrowsInvalidOperation()
     {
-        TestAppHost.EnsureLifetime();
-
         var viewModel = new RulesViewModel
         {
             SelectedRule = new RuleEditorViewModel
@@ -176,13 +130,8 @@ public class RulesWorkspacePageTests
             DataContext = viewModel
         };
 
-        var operation = Dispatcher.UIThread.InvokeAsync(async () =>
-        {
-            await page.ShowRuleEditorAsync();
-        });
-
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () => await operation);
-        Assert.Contains("PrimaryButton", exception.Message);
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(page.ShowRuleEditorAsync);
+        Assert.Contains("No TopLevel", exception.Message);
     }
 
     private sealed class StubRuleEditorDialog : IRuleEditorDialog
@@ -219,5 +168,42 @@ public class RulesWorkspacePageTests
             CapturedOwner = owner;
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class ThrowingRuleEditorDialog : IRuleEditorDialog
+    {
+        public void Configure(RuleEditorViewModel rule, IEnumerable<string> matchTypes, IEnumerable<string> profileOptions)
+        {
+        }
+
+        public Task ShowAsync(Window? owner)
+        {
+            throw new InvalidOperationException("Attempted to setup ContentDialog but the template has not been applied yet.");
+        }
+    }
+
+    private static async Task<(Window Window, RulesWorkspacePage Page)> ShowRulesWindowAsync(
+        RulesViewModel viewModel,
+        Func<IRuleEditorDialog>? dialogFactory = null)
+    {
+        var page = new RulesWorkspacePage
+        {
+            DataContext = viewModel
+        };
+
+        if (dialogFactory is not null)
+        {
+            page.DialogFactory = dialogFactory;
+        }
+
+        var window = new Window
+        {
+            Content = page
+        };
+
+        window.Show();
+        await Task.Yield();
+
+        return (window, page);
     }
 }

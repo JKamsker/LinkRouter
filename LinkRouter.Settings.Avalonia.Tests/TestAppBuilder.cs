@@ -1,0 +1,14 @@
+using Avalonia;
+using Avalonia.Headless;
+
+namespace LinkRouter.Settings.Avalonia.Tests;
+
+public static class TestAppBuilder
+{
+    public static AppBuilder BuildAvaloniaApp() =>
+        AppBuilder.Configure<App>()
+            .UseSkia()
+            .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
+            .WithInterFont()
+            .LogToTrace();
+}
