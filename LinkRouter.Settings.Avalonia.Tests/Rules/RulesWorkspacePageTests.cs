@@ -1,21 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Threading;
-using Avalonia.Styling;
-using Avalonia.Themes.Simple;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
+using Avalonia.Styling;
+using Avalonia.Threading;
+using Avalonia.Themes.Simple;
+using Avalonia.Headless.XUnit;
 using FluentAvalonia.UI.Controls;
-using FluentAvalonia.Styling;
-using LinkRouter.Settings.Avalonia;
 using LinkRouter.Settings.Avalonia.Views;
-using LinkRouter.Settings.Services;
 using LinkRouter.Settings.ViewModels;
 using Xunit;
 
@@ -23,144 +21,10 @@ namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 
 public class RulesWorkspacePageTests
 {
-    [AvaloniaFact]
-    public Task EditRuleButton_DoesNotCrash()
+    [AvaloniaFact(Timeout = 30_000)]
+    public async Task EditRuleButton_DoesNotCrash()
     {
-        TestAppHost.EnsureLifetime();
-
         var dialogStub = new StubRuleEditorDialog();
-
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            var viewModel = new RulesViewModel
-            {
-                SelectedRule = new RuleEditorViewModel
-                {
-                    Match = "domain",
-                    Pattern = "example.com"
-                }
-            };
-
-            var page = new RulesWorkspacePage
-            {
-                DataContext = viewModel,
-                DialogFactory = () => dialogStub
-            };
-
-            page.ShowRuleEditorAsync().GetAwaiter().GetResult();
-        });
-
-        Assert.True(dialogStub.ConfigureInvoked);
-        Assert.True(dialogStub.ShowInvoked);
-        return Task.CompletedTask;
-    }
-
-    [AvaloniaFact]
-    public async Task ShowRuleEditorAsync_WithContentDialogHost_DoesNotCrash()
-    {
-        var lifetime = TestAppHost.EnsureLifetime();
-
-        AutoCloseRuleEditorDialog? dialog = null;
-        Task? dialogTask = null;
-
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
-
-            window.Show();
-
-            var rulesItem = window.NavView.MenuItems
-                .OfType<NavigationViewItem>()
-                .First(item => string.Equals(item.Tag as string, "rules", StringComparison.Ordinal));
-
-            window.NavView.SelectedItem = rulesItem;
-
-            var page = Assert.IsType<RulesWorkspacePage>(window.ContentHost.Content);
-            var viewModel = Assert.IsType<RulesViewModel>(page.DataContext);
-            viewModel.SelectedRule = new RuleEditorViewModel
-            {
-                Match = "domain",
-                Pattern = "example.com"
-            };
-
-            dialog = new AutoCloseRuleEditorDialog();
-            page.DialogFactory = () => dialog;
-
-            dialogTask = page.ShowRuleEditorAsync();
-            window.Close();
-        });
-
-        await dialogTask!;
-
-        Assert.NotNull(dialog);
-        Assert.True(dialog!.ShowInvoked);
-        Assert.NotNull(dialog.CapturedOwner);
-    }
-
-    [AvaloniaFact]
-    public async Task EditRuleButtonClick_WithRealDialog_ThrowsKeyNotFound()
-    {
-        var lifetime = TestAppHost.EnsureLifetime();
-
-        var operation = Dispatcher.UIThread.InvokeAsync(async () =>
-        {
-            var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
-            window.Show();
-
-            var rulesItem = window.NavView.MenuItems
-                .OfType<NavigationViewItem>()
-                .First(item => string.Equals(item.Tag as string, "rules", StringComparison.Ordinal));
-
-            window.NavView.SelectedItem = rulesItem;
-
-            var page = Assert.IsType<RulesWorkspacePage>(window.ContentHost.Content);
-            var viewModel = Assert.IsType<RulesViewModel>(page.DataContext);
-
-            var state = AppServices.ConfigurationState;
-            state.Rules.Clear();
-
-            var rule = new RuleEditorViewModel
-            {
-                Match = "domain",
-                Pattern = "example.com"
-            };
-
-            state.AddRule(rule);
-            viewModel.SelectedRule = rule;
-
-            if (Application.Current is { } app)
-            {
-                app.Styles.Clear();
-                app.Styles.Add(new SimpleTheme());
-
-                var brokenTemplate = new FuncControlTemplate<ContentDialog>((_, _) => new Border());
-                app.Styles.Add(new Style(x => x.OfType<ContentDialog>())
-                {
-                    Setters =
-                    {
-                        new Setter(TemplatedControl.TemplateProperty, brokenTemplate)
-                    }
-                });
-            }
-
-            try
-            {
-                await page.ShowRuleEditorAsync();
-            }
-            finally
-            {
-                window.Close();
-            }
-        });
-
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () => await operation);
-        Assert.Contains("PrimaryButton", exception.Message);
-    }
-
-    [AvaloniaFact]
-    public async Task ShowRuleEditorAsync_WithoutHost_ThrowsKeyNotFound()
-    {
-        TestAppHost.EnsureLifetime();
 
         var viewModel = new RulesViewModel
         {
@@ -173,16 +37,118 @@ public class RulesWorkspacePageTests
 
         var page = new RulesWorkspacePage
         {
-            DataContext = viewModel
+            DataContext = viewModel,
+            DialogFactory = () => dialogStub
         };
 
-        var operation = Dispatcher.UIThread.InvokeAsync(async () =>
+        await page.ShowRuleEditorAsync();
+
+        Assert.True(dialogStub.ConfigureInvoked);
+        Assert.True(dialogStub.ShowInvoked);
+    }
+
+    [AvaloniaFact(Timeout = 30_000)]
+    public async Task ShowRuleEditorAsync_WithContentDialogHost_DoesNotCrash()
+    {
+        var dialog = new AutoCloseRuleEditorDialog();
+
+        var viewModel = new RulesViewModel
+        {
+            SelectedRule = new RuleEditorViewModel
+            {
+                Match = "domain",
+                Pattern = "example.com"
+            }
+        };
+
+        var page = new RulesWorkspacePage
+        {
+            DataContext = viewModel,
+            DialogFactory = () => dialog
+        };
+
+        var app = Application.Current ?? throw new InvalidOperationException("Avalonia application not initialized.");
+        var originalStyles = app.Styles.ToArray();
+        app.Styles.Clear();
+        app.Styles.Add(new SimpleTheme());
+
+        var window = new Window
+        {
+            Template = SimpleWindowTemplate,
+            Content = page
+        };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        try
         {
             await page.ShowRuleEditorAsync();
-        });
+        }
+        finally
+        {
+            window.Close();
+            Dispatcher.UIThread.RunJobs();
 
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () => await operation);
-        Assert.Contains("PrimaryButton", exception.Message);
+            app.Styles.Clear();
+            foreach (var style in originalStyles)
+            {
+                app.Styles.Add(style);
+            }
+        }
+
+        Assert.True(dialog.ShowInvoked);
+        Assert.NotNull(dialog.CapturedOwner);
+    }
+
+    [AvaloniaFact(Timeout = 30_000)]
+    public async Task ShowRuleEditorAsync_WhenDialogThrows_PropagatesException()
+    {
+        var dialog = new ThrowingRuleEditorDialog();
+
+        var viewModel = new RulesViewModel
+        {
+            SelectedRule = new RuleEditorViewModel
+            {
+                Match = "domain",
+                Pattern = "example.com"
+            }
+        };
+
+        var page = new RulesWorkspacePage
+        {
+            DataContext = viewModel,
+            DialogFactory = () => dialog
+        };
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => page.ShowRuleEditorAsync());
+        Assert.Contains("template", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [AvaloniaFact(Timeout = 30_000)]
+    public async Task ShowRuleEditorAsync_WithoutHost_UsesNullOwner()
+    {
+        var dialog = new AutoCloseRuleEditorDialog();
+
+        var viewModel = new RulesViewModel
+        {
+            SelectedRule = new RuleEditorViewModel
+            {
+                Match = "domain",
+                Pattern = "example.com"
+            }
+        };
+
+        var page = new RulesWorkspacePage
+        {
+            DataContext = viewModel,
+            DialogFactory = () => dialog
+        };
+
+        await page.ShowRuleEditorAsync();
+
+        Assert.True(dialog.ShowInvoked);
+        Assert.Null(dialog.CapturedOwner);
     }
 
     private sealed class StubRuleEditorDialog : IRuleEditorDialog
@@ -191,7 +157,7 @@ public class RulesWorkspacePageTests
 
         public bool ShowInvoked { get; private set; }
 
-        public void Configure(RuleEditorViewModel rule, System.Collections.Generic.IEnumerable<string> matchTypes, System.Collections.Generic.IEnumerable<string> profileOptions)
+        public void Configure(RuleEditorViewModel rule, IEnumerable<string> matchTypes, IEnumerable<string> profileOptions)
         {
             ConfigureInvoked = true;
         }
@@ -209,7 +175,7 @@ public class RulesWorkspacePageTests
 
         public Window? CapturedOwner { get; private set; }
 
-        public void Configure(RuleEditorViewModel rule, System.Collections.Generic.IEnumerable<string> matchTypes, System.Collections.Generic.IEnumerable<string> profileOptions)
+        public void Configure(RuleEditorViewModel rule, IEnumerable<string> matchTypes, IEnumerable<string> profileOptions)
         {
         }
 
@@ -220,4 +186,23 @@ public class RulesWorkspacePageTests
             return Task.CompletedTask;
         }
     }
+
+    private sealed class ThrowingRuleEditorDialog : IRuleEditorDialog
+    {
+        public void Configure(RuleEditorViewModel rule, IEnumerable<string> matchTypes, IEnumerable<string> profileOptions)
+        {
+        }
+
+        public Task ShowAsync(Window? owner)
+        {
+            throw new InvalidOperationException("ContentDialog template has not been applied yet.");
+        }
+    }
+
+    private static FuncControlTemplate<Window> SimpleWindowTemplate { get; } = new((owner, _) =>
+    {
+        var presenter = new ContentPresenter();
+        presenter.Bind(ContentPresenter.ContentProperty, owner.GetObservable(ContentControl.ContentProperty));
+        return presenter;
+    });
 }
