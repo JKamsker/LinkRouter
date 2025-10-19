@@ -1,13 +1,15 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
              x:Class="LinkRouter.Settings.Avalonia.Views.ImportExportPage">
     <ScrollViewer>
-        <StackPanel Spacing="16" Margin="16">
+        <StackPanel Spacing="16" Margin="24">
             <TextBlock Text="Import &amp; Export" FontSize="20" FontWeight="SemiBold" />
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+
+            <Border Classes="SettingsCard">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Import configuration" FontWeight="SemiBold" />
+                    <TextBlock Text="Import configuration" Classes="CardTitle" />
+                    <TextBlock Text="Load settings from an existing mappings file." Classes="CardDescription" />
                     <StackPanel Spacing="4">
                         <TextBlock Text="Import Path" />
                         <TextBox Text="{Binding ImportPath, Mode=TwoWay}" />
@@ -21,9 +23,10 @@
                 </StackPanel>
             </Border>
 
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+            <Border Classes="SettingsCard">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Export configuration" FontWeight="SemiBold" />
+                    <TextBlock Text="Export configuration" Classes="CardTitle" />
+                    <TextBlock Text="Save current settings to disk." Classes="CardDescription" />
                     <StackPanel Spacing="4">
                         <TextBlock Text="Export Path" />
                         <TextBox Text="{Binding ExportPath, Mode=TwoWay}" />
@@ -32,10 +35,11 @@
                 </StackPanel>
             </Border>
 
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Backups" FontWeight="SemiBold" />
-                    <ListBox ItemsSource="{Binding Backups}" SelectedItem="{Binding SelectedBackup, Mode=TwoWay}">
+            <Border Classes="SettingsCard">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Backups" Classes="CardTitle" />
+                    <TextBlock Text="Restore a previous configuration snapshot." Classes="CardDescription" />
+                    <ListBox ItemsSource="{Binding Backups}" SelectedItem="{Binding SelectedBackup, Mode=TwoWay}" MinHeight="200">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Spacing="2">
@@ -49,9 +53,10 @@
                 </StackPanel>
             </Border>
 
-            <Border Padding="12" Background="#33FF0000" CornerRadius="4" IsVisible="{Binding HasError}">
-                <TextBlock Text="{Binding Error}" Foreground="Red" />
-            </Border>
+            <fa:InfoBar Title="Error"
+                        Severity="Error"
+                        IsOpen="{Binding HasError}"
+                        Message="{Binding Error}" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>
