@@ -1,11 +1,21 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.Styling;
+using Avalonia.Themes.Simple;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using FluentAvalonia.UI.Controls;
+using FluentAvalonia.Styling;
 using LinkRouter.Settings.Avalonia;
 using LinkRouter.Settings.Avalonia.Views;
+using LinkRouter.Settings.Services;
 using LinkRouter.Settings.ViewModels;
 using Xunit;
 
@@ -85,6 +95,94 @@ public class RulesWorkspacePageTests
         Assert.NotNull(dialog);
         Assert.True(dialog!.ShowInvoked);
         Assert.NotNull(dialog.CapturedOwner);
+    }
+
+    [AvaloniaFact]
+    public async Task EditRuleButtonClick_WithRealDialog_ThrowsKeyNotFound()
+    {
+        var lifetime = TestAppHost.EnsureLifetime();
+
+        var operation = Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
+            window.Show();
+
+            var rulesItem = window.NavView.MenuItems
+                .OfType<NavigationViewItem>()
+                .First(item => string.Equals(item.Tag as string, "rules", StringComparison.Ordinal));
+
+            window.NavView.SelectedItem = rulesItem;
+
+            var page = Assert.IsType<RulesWorkspacePage>(window.ContentHost.Content);
+            var viewModel = Assert.IsType<RulesViewModel>(page.DataContext);
+
+            var state = AppServices.ConfigurationState;
+            state.Rules.Clear();
+
+            var rule = new RuleEditorViewModel
+            {
+                Match = "domain",
+                Pattern = "example.com"
+            };
+
+            state.AddRule(rule);
+            viewModel.SelectedRule = rule;
+
+            if (Application.Current is { } app)
+            {
+                app.Styles.Clear();
+                app.Styles.Add(new SimpleTheme());
+
+                var brokenTemplate = new FuncControlTemplate<ContentDialog>((_, _) => new Border());
+                app.Styles.Add(new Style(x => x.OfType<ContentDialog>())
+                {
+                    Setters =
+                    {
+                        new Setter(TemplatedControl.TemplateProperty, brokenTemplate)
+                    }
+                });
+            }
+
+            try
+            {
+                await page.ShowRuleEditorAsync();
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () => await operation);
+        Assert.Contains("PrimaryButton", exception.Message);
+    }
+
+    [AvaloniaFact]
+    public async Task ShowRuleEditorAsync_WithoutHost_ThrowsKeyNotFound()
+    {
+        TestAppHost.EnsureLifetime();
+
+        var viewModel = new RulesViewModel
+        {
+            SelectedRule = new RuleEditorViewModel
+            {
+                Match = "domain",
+                Pattern = "example.com"
+            }
+        };
+
+        var page = new RulesWorkspacePage
+        {
+            DataContext = viewModel
+        };
+
+        var operation = Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            await page.ShowRuleEditorAsync();
+        });
+
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () => await operation);
+        Assert.Contains("PrimaryButton", exception.Message);
     }
 
     private sealed class StubRuleEditorDialog : IRuleEditorDialog
