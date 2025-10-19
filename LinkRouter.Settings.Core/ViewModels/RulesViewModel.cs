@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -12,8 +14,9 @@ public partial class RulesViewModel : ObservableObject
 {
     private static readonly IReadOnlyList<string> s_matchTypes = new[] { "domain", "regex", "contains" };
 
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
-    private readonly RuleTestService _tester = AppServices.RuleTestService;
+    private readonly ConfigurationState _state;
+    private readonly RuleTestService _tester;
+    private readonly IDialogService _dialogService;
     private readonly List<string> _profileOptions = new();
 
     [ObservableProperty]
@@ -28,8 +31,12 @@ public partial class RulesViewModel : ObservableObject
     [ObservableProperty]
     private string? _testError;
 
-    public RulesViewModel()
+    public RulesViewModel(ConfigurationState state, RuleTestService tester, IDialogService dialogService)
     {
+        _state = state;
+        _tester = tester;
+        _dialogService = dialogService;
+
         _state.StateChanged += OnStateChanged;
         RefreshProfileOptions();
     }
@@ -162,6 +169,18 @@ public partial class RulesViewModel : ObservableObject
 
     private bool CanClearUseProfile() => SelectedRule?.UseProfile is not null;
 
+    [RelayCommand(CanExecute = nameof(HasSelectedRule))]
+    private async Task EditSelectedRuleAsync()
+    {
+        if (SelectedRule is null)
+        {
+            return;
+        }
+
+        var dialogViewModel = new RuleEditorDialogViewModel(SelectedRule, MatchTypes, ProfileOptions);
+        await _dialogService.ShowRuleEditorAsync(dialogViewModel);
+    }
+
     private void RefreshProfileOptions()
     {
         _profileOptions.Clear();
@@ -182,6 +201,7 @@ public partial class RulesViewModel : ObservableObject
     {
         RefreshProfileOptions();
         OnPropertyChanged(nameof(HasSelectedRule));
+        EditSelectedRuleCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnSelectedRuleChanging(RuleEditorViewModel? value)
@@ -201,6 +221,7 @@ public partial class RulesViewModel : ObservableObject
 
         OnPropertyChanged(nameof(HasSelectedRule));
         ClearUseProfileCommand.NotifyCanExecuteChanged();
+        EditSelectedRuleCommand.NotifyCanExecuteChanged();
     }
 
     private void OnSelectedRulePropertyChanged(object? sender, PropertyChangedEventArgs e)

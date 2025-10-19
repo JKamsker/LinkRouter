@@ -14,8 +14,8 @@ namespace LinkRouter.Settings.ViewModels;
 
 public partial class ImportExportViewModel : ObservableObject
 {
-    private readonly ConfigService _configService = AppServices.ConfigService;
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
+    private readonly ConfigService _configService;
+    private readonly ConfigurationState _state;
 
     [ObservableProperty]
     private string _importPath = string.Empty;
@@ -35,8 +35,11 @@ public partial class ImportExportViewModel : ObservableObject
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
-    public ImportExportViewModel()
+    public ImportExportViewModel(ConfigService configService, ConfigurationState state)
     {
+        _configService = configService;
+        _state = state;
+
         RefreshBackups();
         _state.StateChanged += (_, _) => RefreshBackups();
     }
