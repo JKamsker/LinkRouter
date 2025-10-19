@@ -3,25 +3,51 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa="using:FluentAvalonia.UI.Controls"
-        mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
+        xmlns:views="clr-namespace:LinkRouter.Settings.Avalonia.Views"
+        xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+        mc:Ignorable="d"
+        d:DesignWidth="1024"
+        d:DesignHeight="720"
         x:Class="LinkRouter.Settings.Avalonia.MainWindow"
-        Title="LinkRouter Settings">
-    <fa:DialogHost>
-        <fa:NavigationView x:Name="NavView"
-                           PaneDisplayMode="Left"
-                           IsBackButtonVisible="False"
-                           IsSettingsVisible="False"
-                           SelectionChanged="OnSelectionChanged">
-            <fa:NavigationView.MenuItems>
-                <fa:NavigationViewItem Content="Overview" Tag="overview" />
-                <fa:NavigationViewItem Content="Rules" Tag="rules" />
-                <fa:NavigationViewItem Content="Browsers &amp; Profiles" Tag="profiles" />
-                <fa:NavigationViewItem Content="Import / Export" Tag="import" />
-                <fa:NavigationViewItem Content="Advanced" Tag="advanced" />
-                <fa:NavigationViewItem Content="About" Tag="about" />
-            </fa:NavigationView.MenuItems>
+        Title="LinkRouter Settings"
+        Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+        TransparencyBackgroundFallback="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+        TransparencyLevelHint="Mica"
+        ExtendClientAreaToDecorationsHint="True">
+    <Window.DataTemplates>
+        <DataTemplate DataType="{x:Type vm:GeneralViewModel}">
+            <views:OverviewPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:RulesViewModel}">
+            <views:RulesWorkspacePage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProfilesViewModel}">
+            <views:ProfilesPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ImportExportViewModel}">
+            <views:ImportExportPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AdvancedViewModel}">
+            <views:AdvancedPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AboutViewModel}">
+            <views:AboutPage />
+        </DataTemplate>
+    </Window.DataTemplates>
 
-            <ContentControl x:Name="ContentHost" Margin="0" />
-        </fa:NavigationView>
-    </fa:DialogHost>
+    <fa:NavigationView MenuItemsSource="{Binding NavigationItems}"
+                       SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                       PaneDisplayMode="Left"
+                       IsBackButtonVisible="False"
+                       IsSettingsVisible="False"
+                       AlwaysShowHeader="False">
+        <fa:NavigationView.MenuItemTemplate>
+            <DataTemplate>
+                <fa:NavigationViewItem Content="{Binding Title}" />
+            </DataTemplate>
+        </fa:NavigationView.MenuItemTemplate>
+
+        <ContentControl Margin="0"
+                        Content="{Binding CurrentPage}" />
+    </fa:NavigationView>
 </Window>
