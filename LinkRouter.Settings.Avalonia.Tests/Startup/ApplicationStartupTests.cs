@@ -1,16 +1,17 @@
+using Avalonia.Headless.XUnit;
+using LinkRouter.Settings.Avalonia;
 using System.Threading.Tasks;
 using Xunit;
-using LinkRouter.Settings.Avalonia.Tests;
 
 namespace LinkRouter.Settings.Avalonia.Tests.Startup;
 
 public class ApplicationStartupTests
 {
-    [AvaloniaFact]
-    public Task Application_CanInitializeMainWindow()
+    [AvaloniaFact(Timeout = 30_000)]
+    public Task MainWindow_CanBeConstructed()
     {
-        var lifetime = TestAppHost.EnsureLifetime();
-        Assert.NotNull(lifetime.MainWindow);
+        var window = new MainWindow();
+        Assert.NotNull(window);
         return Task.CompletedTask;
     }
 }

@@ -1,24 +1,18 @@
-using System.Threading.Tasks;
-using Avalonia.Threading;
+using Avalonia.Headless.XUnit;
 using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.Avalonia;
 using LinkRouter.Settings.Avalonia.Views;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 
 public class RuleEditorDialogTests
 {
-    [AvaloniaFact]
+    [AvaloniaFact(Timeout = 30_000)]
     public Task RuleEditorDialog_IsContentDialog()
     {
-        TestAppHost.EnsureLifetime();
-
-        ContentDialog? dialog = null;
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            dialog = new RuleEditorDialog();
-        });
+        var dialog = new RuleEditorDialog();
 
         Assert.NotNull(dialog);
         Assert.IsAssignableFrom<ContentDialog>(dialog);

@@ -7,6 +7,10 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Headless" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Headless.XUnit" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Skia" Version="11.3.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1" PrivateAssets="all" />
@@ -15,4 +19,5 @@
   <ItemGroup>
     <ProjectReference Include="..\LinkRouter.Settings.Avalonia\LinkRouter.Settings.Avalonia.csproj" />
   </ItemGroup>
+
 </Project>
