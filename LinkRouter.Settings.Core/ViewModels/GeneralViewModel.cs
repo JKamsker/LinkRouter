@@ -6,14 +6,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
 public partial class GeneralViewModel : ObservableObject
 {
-    private readonly ConfigService _configService = AppServices.ConfigService;
-    private readonly RuleTestService _ruleTestService = AppServices.RuleTestService;
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
+    private readonly ConfigService _configService;
+    private readonly RuleTestService _ruleTestService;
+    private readonly ConfigurationState _state;
+    private readonly IShellService _shellService;
+    private readonly IClipboardService _clipboardService;
 
     [ObservableProperty]
     private string _configPath = string.Empty;
@@ -47,8 +50,19 @@ public partial class GeneralViewModel : ObservableObject
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
     public string LastModifiedDisplay => LastModified?.ToLocalTime().ToString("G") ?? string.Empty;
 
-    public GeneralViewModel()
+    public GeneralViewModel(
+        ConfigService configService,
+        RuleTestService ruleTestService,
+        ConfigurationState state,
+        IShellService shellService,
+        IClipboardService clipboardService)
     {
+        _configService = configService;
+        _ruleTestService = ruleTestService;
+        _state = state;
+        _shellService = shellService;
+        _clipboardService = clipboardService;
+
         LoadMetadata();
         _state.StateChanged += OnStateChanged;
     }
@@ -195,7 +209,7 @@ public partial class GeneralViewModel : ObservableObject
             var folder = Path.GetDirectoryName(_configService.ConfigPath);
             if (!string.IsNullOrEmpty(folder))
             {
-                AppServices.ShellService.OpenFolder(folder);
+                _shellService.OpenFolder(folder);
             }
         }
         catch (Exception ex)
@@ -209,7 +223,7 @@ public partial class GeneralViewModel : ObservableObject
     {
         try
         {
-            AppServices.ClipboardService.SetText(_configService.ConfigPath);
+            _clipboardService.SetText(_configService.ConfigPath);
         }
         catch (Exception ex)
         {

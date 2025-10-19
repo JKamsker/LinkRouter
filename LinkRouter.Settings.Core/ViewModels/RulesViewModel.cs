@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -12,8 +14,9 @@ public partial class RulesViewModel : ObservableObject
 {
     private static readonly IReadOnlyList<string> s_matchTypes = new[] { "domain", "regex", "contains" };
 
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
-    private readonly RuleTestService _tester = AppServices.RuleTestService;
+    private readonly ConfigurationState _state;
+    private readonly RuleTestService _tester;
+    private readonly IDialogService _dialogService;
     private readonly List<string> _profileOptions = new();
 
     [ObservableProperty]
@@ -28,8 +31,11 @@ public partial class RulesViewModel : ObservableObject
     [ObservableProperty]
     private string? _testError;
 
-    public RulesViewModel()
+    public RulesViewModel(ConfigurationState state, RuleTestService tester, IDialogService dialogService)
     {
+        _state = state;
+        _tester = tester;
+        _dialogService = dialogService;
         _state.StateChanged += OnStateChanged;
         RefreshProfileOptions();
     }
@@ -108,6 +114,37 @@ public partial class RulesViewModel : ObservableObject
         if (index >= 0 && index < Rules.Count - 1)
         {
             _state.MoveRule(index, index + 1);
+        }
+    }
+
+    [RelayCommand]
+    private async Task EditRuleAsync()
+    {
+        if (SelectedRule is null)
+        {
+            return;
+        }
+
+        var draft = SelectedRule.Clone();
+        var dialogVm = new RuleEditorDialogViewModel(draft, MatchTypes, ProfileOptions);
+        var request = new DialogRequest<bool?>("RuleEditor", dialogVm)
+        {
+            Title = "Edit rule",
+            PrimaryButtonText = "Save",
+            CloseButtonText = "Cancel",
+            ResultSelector = action => action switch
+            {
+                DialogAction.Primary => true,
+                DialogAction.Close => false,
+                DialogAction.Secondary => false,
+                _ => null
+            }
+        };
+
+        var accepted = await _dialogService.ShowDialogAsync(request).ConfigureAwait(false);
+        if (accepted == true)
+        {
+            SelectedRule.ApplyFrom(draft);
         }
     }
 

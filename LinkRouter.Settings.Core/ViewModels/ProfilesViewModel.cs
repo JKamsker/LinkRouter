@@ -12,8 +12,8 @@ namespace LinkRouter.Settings.ViewModels;
 
 public partial class ProfilesViewModel : ObservableObject
 {
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
-    private readonly BrowserDetectionService _detector = AppServices.BrowserDetectionService;
+    private readonly ConfigurationState _state;
+    private readonly BrowserDetectionService _detector;
     private string? _systemDefaultBrowserPath;
 
     [ObservableProperty]
@@ -66,8 +66,10 @@ public partial class ProfilesViewModel : ObservableObject
 
     private bool _suppressSelectionUpdates;
 
-    public ProfilesViewModel()
+    public ProfilesViewModel(ConfigurationState state, BrowserDetectionService detector)
     {
+        _state = state;
+        _detector = detector;
         RefreshDetections();
         _state.PropertyChanged += OnStatePropertyChanged;
     }
