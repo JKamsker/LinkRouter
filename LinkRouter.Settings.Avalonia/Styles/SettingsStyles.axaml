@@ -1,0 +1,42 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <Thickness x:Key="SettingsPageMargin">24,24,24,32</Thickness>
+        <Thickness x:Key="SettingsCardBodyPadding">0</Thickness>
+        <x:Double x:Key="SettingsPageSpacing">24</x:Double>
+        <x:Double x:Key="SettingsCardSpacing">20</x:Double>
+    </Styles.Resources>
+
+    <Style Selector="TextBlock.PageTitle">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="TextBlock.SectionTitle">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <Style Selector="Border.SettingsCard">
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{DynamicResource LayerFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="StackPanel.SettingsCardContent">
+        <Setter Property="Spacing" Value="12" />
+    </Style>
+
+    <Style Selector="StackPanel.SectionContent">
+        <Setter Property="Spacing" Value="8" />
+    </Style>
+
+    <Style Selector="Border.InlineStatus">
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+</Styles>
