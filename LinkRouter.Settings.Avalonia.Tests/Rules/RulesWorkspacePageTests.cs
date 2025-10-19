@@ -23,7 +23,7 @@ namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 
 public class RulesWorkspacePageTests
 {
-    [AvaloniaFact]
+    [AvaloniaFact(Timeout = AvaloniaTestTimeouts.Default)]
     public Task EditRuleButton_DoesNotCrash()
     {
         TestAppHost.EnsureLifetime();
@@ -55,7 +55,7 @@ public class RulesWorkspacePageTests
         return Task.CompletedTask;
     }
 
-    [AvaloniaFact]
+    [AvaloniaFact(Timeout = AvaloniaTestTimeouts.Default)]
     public async Task ShowRuleEditorAsync_WithContentDialogHost_DoesNotCrash()
     {
         var lifetime = TestAppHost.EnsureLifetime();
@@ -97,7 +97,7 @@ public class RulesWorkspacePageTests
         Assert.NotNull(dialog.CapturedOwner);
     }
 
-    [AvaloniaFact]
+    [AvaloniaFact(Timeout = AvaloniaTestTimeouts.Default)]
     public async Task EditRuleButtonClick_WithRealDialog_ThrowsKeyNotFound()
     {
         var lifetime = TestAppHost.EnsureLifetime();
@@ -157,7 +157,7 @@ public class RulesWorkspacePageTests
         Assert.Contains("PrimaryButton", exception.Message);
     }
 
-    [AvaloniaFact]
+    [AvaloniaFact(Timeout = AvaloniaTestTimeouts.Default)]
     public async Task ShowRuleEditorAsync_WithoutHost_ThrowsKeyNotFound()
     {
         TestAppHost.EnsureLifetime();

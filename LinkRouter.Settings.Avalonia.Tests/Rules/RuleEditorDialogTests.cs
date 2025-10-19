@@ -9,7 +9,7 @@ namespace LinkRouter.Settings.Avalonia.Tests.Rules;
 
 public class RuleEditorDialogTests
 {
-    [AvaloniaFact]
+    [AvaloniaFact(Timeout = AvaloniaTestTimeouts.Default)]
     public Task RuleEditorDialog_IsContentDialog()
     {
         TestAppHost.EnsureLifetime();

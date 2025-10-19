@@ -6,7 +6,7 @@ namespace LinkRouter.Settings.Avalonia.Tests.Startup;
 
 public class ApplicationStartupTests
 {
-    [AvaloniaFact]
+    [AvaloniaFact(Timeout = AvaloniaTestTimeouts.Default)]
     public Task Application_CanInitializeMainWindow()
     {
         var lifetime = TestAppHost.EnsureLifetime();

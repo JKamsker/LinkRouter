@@ -1,41 +1,26 @@
 using Avalonia;
+using System;
+using System.Reflection;
+using System.Threading;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Headless;
-using Avalonia.Skia;
-using LinkRouter.Settings.Avalonia;
 
 namespace LinkRouter.Settings.Avalonia.Tests;
 
 internal static class TestAppHost
 {
-    private static readonly object s_sync = new();
-    private static ClassicDesktopStyleApplicationLifetime? s_lifetime;
-
     public static ClassicDesktopStyleApplicationLifetime EnsureLifetime()
     {
-        lock (s_sync)
+        var session = HeadlessUnitTestSession.GetOrStartForAssembly(typeof(TestAppBuilder).Assembly);
+
+        return session.Dispatch(() =>
         {
-            if (Application.Current?.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime existingLifetime)
+            if (Application.Current?.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime lifetime)
             {
-                s_lifetime = existingLifetime;
-                return existingLifetime;
+                return lifetime;
             }
 
-            if (s_lifetime is { } existing)
-            {
-                return existing;
-            }
-
-            var lifetime = new ClassicDesktopStyleApplicationLifetime();
-            AppBuilder.Configure<App>()
-                .UseSkia()
-                .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
-                .WithInterFont()
-                .LogToTrace()
-                .SetupWithLifetime(lifetime);
-
-            s_lifetime = lifetime;
-            return lifetime;
-        }
+            throw new InvalidOperationException("The Avalonia application lifetime could not be initialized.");
+        }, CancellationToken.None).GetAwaiter().GetResult();
     }
 }
