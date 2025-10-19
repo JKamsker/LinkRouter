@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -12,8 +15,9 @@ public partial class RulesViewModel : ObservableObject
 {
     private static readonly IReadOnlyList<string> s_matchTypes = new[] { "domain", "regex", "contains" };
 
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
-    private readonly RuleTestService _tester = AppServices.RuleTestService;
+    private readonly ConfigurationState _state;
+    private readonly RuleTestService _tester;
+    private readonly IRuleEditorDialogService _dialogService;
     private readonly List<string> _profileOptions = new();
 
     [ObservableProperty]
@@ -28,8 +32,15 @@ public partial class RulesViewModel : ObservableObject
     [ObservableProperty]
     private string? _testError;
 
-    public RulesViewModel()
+    public RulesViewModel(
+        ConfigurationState state,
+        RuleTestService tester,
+        IRuleEditorDialogService dialogService)
     {
+        _state = state;
+        _tester = tester;
+        _dialogService = dialogService;
+
         _state.StateChanged += OnStateChanged;
         RefreshProfileOptions();
     }
@@ -45,9 +56,12 @@ public partial class RulesViewModel : ObservableObject
     [RelayCommand]
     private void AddRule()
     {
-        var vm = new RuleEditorViewModel();
-        vm.Match = "domain";
-        vm.Pattern = "example.com";
+        var vm = new RuleEditorViewModel
+        {
+            Match = "domain",
+            Pattern = "example.com"
+        };
+
         _state.AddRule(vm);
         SelectedRule = vm;
     }
@@ -111,6 +125,19 @@ public partial class RulesViewModel : ObservableObject
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanEditRule))]
+    private async Task EditRuleAsync()
+    {
+        if (SelectedRule is null)
+        {
+            return;
+        }
+
+        await _dialogService.EditRuleAsync(SelectedRule, MatchTypes, ProfileOptions);
+    }
+
+    private bool CanEditRule() => SelectedRule is not null;
+
     [RelayCommand]
     private void TestRule()
     {
@@ -166,12 +193,9 @@ public partial class RulesViewModel : ObservableObject
     {
         _profileOptions.Clear();
 
-        foreach (var profile in _state.Profiles)
+        foreach (var profile in _state.Profiles.Where(p => !string.IsNullOrWhiteSpace(p.Name)))
         {
-            if (!string.IsNullOrWhiteSpace(profile.Name))
-            {
-                _profileOptions.Add(profile.Name);
-            }
+            _profileOptions.Add(profile.Name);
         }
 
         _profileOptions.Sort(StringComparer.OrdinalIgnoreCase);
@@ -182,6 +206,8 @@ public partial class RulesViewModel : ObservableObject
     {
         RefreshProfileOptions();
         OnPropertyChanged(nameof(HasSelectedRule));
+        EditRuleCommand.NotifyCanExecuteChanged();
+        ClearUseProfileCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnSelectedRuleChanging(RuleEditorViewModel? value)
@@ -200,6 +226,7 @@ public partial class RulesViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(HasSelectedRule));
+        EditRuleCommand.NotifyCanExecuteChanged();
         ClearUseProfileCommand.NotifyCanExecuteChanged();
     }
 

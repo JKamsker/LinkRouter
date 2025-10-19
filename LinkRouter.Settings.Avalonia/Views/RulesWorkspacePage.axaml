@@ -1,85 +1,157 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
+             xmlns:conv="clr-namespace:LinkRouter.Settings.Avalonia.Converters"
              x:Class="LinkRouter.Settings.Avalonia.Views.RulesWorkspacePage">
-    <Grid ColumnDefinitions="2*,3*" RowDefinitions="Auto,*" Margin="16" RowSpacing="12" ColumnSpacing="12">
-        <TextBlock Text="Rules" FontSize="20" FontWeight="SemiBold" Grid.ColumnSpan="2" />
-        <Border Grid.Row="1" Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-            <Grid RowDefinitions="Auto,*" RowSpacing="12">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Content="Add" Command="{Binding AddRuleCommand}" />
-                    <Button Content="Duplicate" Command="{Binding DuplicateRuleCommand}" CommandParameter="{Binding SelectedRule}" />
-                    <Button Content="Delete" Command="{Binding DeleteRuleCommand}" CommandParameter="{Binding SelectedRule}" />
-                    <Button Content="Move Up" Command="{Binding MoveUpCommand}" CommandParameter="{Binding SelectedRule}" />
-                    <Button Content="Move Down" Command="{Binding MoveDownCommand}" CommandParameter="{Binding SelectedRule}" />
-                </StackPanel>
-                <ListBox Grid.Row="1" ItemsSource="{Binding Rules}" SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding DisplayName}" />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
-        </Border>
+    <UserControl.Resources>
+        <conv:StringHasValueConverter x:Key="StringHasValueConverter" />
+    </UserControl.Resources>
+    <ScrollViewer>
+        <StackPanel Margin="24" Spacing="16">
+            <TextBlock Text="Rules"
+                       FontSize="20"
+                       FontWeight="SemiBold" />
 
-        <Border Grid.Row="1" Grid.Column="1" Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-            <ScrollViewer>
-                <StackPanel Spacing="16">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Selected Rule" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedRule.DisplayName, FallbackValue=Select a rule to view details., TargetNullValue=Select a rule to view details.}" TextWrapping="Wrap" />
+            <Grid ColumnDefinitions="2*,3*" ColumnSpacing="16">
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                        CornerRadius="12"
+                        Padding="24">
+                    <StackPanel Spacing="16">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Configured rules"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Add, reorder, or duplicate routing rules"
+                                       Opacity="0.7" />
+                        </StackPanel>
+
+                        <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="Add" Command="{Binding AddRuleCommand}" />
+                                <Button Content="Duplicate" Command="{Binding DuplicateRuleCommand}" CommandParameter="{Binding SelectedRule}" />
+                                <Button Content="Delete" Command="{Binding DeleteRuleCommand}" CommandParameter="{Binding SelectedRule}" />
+                                <Button Content="Move Up" Command="{Binding MoveUpCommand}" CommandParameter="{Binding SelectedRule}" />
+                                <Button Content="Move Down" Command="{Binding MoveDownCommand}" CommandParameter="{Binding SelectedRule}" />
+                            </StackPanel>
+
+                            <ListBox Grid.Row="1"
+                                     ItemsSource="{Binding Rules}"
+                                     SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DisplayName}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
                     </StackPanel>
+                </Border>
 
-                    <ToggleSwitch Content="Enabled"
-                                  IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}"
-                                  IsEnabled="{Binding HasSelectedRule}" />
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                        CornerRadius="12"
+                        Padding="24">
+                    <StackPanel Spacing="16">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Rule details"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Update properties and launch behavior"
+                                       Opacity="0.7" />
+                        </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Match" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <ComboBox ItemsSource="{Binding MatchTypes}"
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="{Binding SelectedRule.DisplayName, FallbackValue=Select a rule to view details., TargetNullValue=Select a rule to view details.}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <ToggleSwitch Content="Enabled"
+                                      IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}"
+                                      IsEnabled="{Binding HasSelectedRule}" />
+
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" RowSpacing="12">
+                            <TextBlock Text="Match" VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding MatchTypes}"
                                       SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}"
-                                      Width="140"
                                       IsEnabled="{Binding HasSelectedRule}" />
-                            <TextBox Text="{Binding SelectedRule.Pattern, Mode=TwoWay}"
-                                     Width="220"
-                                     Watermark="Pattern"
+
+                            <TextBlock Grid.Row="1" Text="Pattern" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="1"
+                                     Grid.Column="1"
+                                     Text="{Binding SelectedRule.Pattern, Mode=TwoWay}"
                                      IsEnabled="{Binding HasSelectedRule}" />
-                        </StackPanel>
-                    </StackPanel>
 
+                            <TextBlock Grid.Row="2" Text="Use profile" VerticalAlignment="Center" />
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <ComboBox ItemsSource="{Binding ProfileOptions}"
+                                          SelectedItem="{Binding SelectedRule.UseProfile, Mode=TwoWay}"
+                                          PlaceholderText="Select a configured profile"
+                                          Width="220"
+                                          IsEnabled="{Binding HasSelectedRule}" />
+                                <Button Content="Clear"
+                                        Command="{Binding ClearUseProfileCommand}"
+                                        IsEnabled="{Binding HasSelectedRule}" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="3" Text="Browser" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="3" Grid.Column="1"
+                                     Text="{Binding SelectedRule.Browser, Mode=TwoWay}"
+                                     Watermark="Executable path"
+                                     IsEnabled="{Binding HasSelectedRule}" />
+
+                            <TextBlock Grid.Row="4" Text="Args template" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="4" Grid.Column="1"
+                                     Text="{Binding SelectedRule.ArgsTemplate, Mode=TwoWay}"
+                                     AcceptsReturn="True"
+                                     MinHeight="60"
+                                     IsEnabled="{Binding HasSelectedRule}" />
+
+                            <TextBlock Grid.Row="5" Text="Profile" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="5" Grid.Column="1"
+                                     Text="{Binding SelectedRule.Profile, Mode=TwoWay}"
+                                     IsEnabled="{Binding HasSelectedRule}" />
+
+                            <TextBlock Grid.Row="6" Text="User data dir" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="6" Grid.Column="1"
+                                     Text="{Binding SelectedRule.UserDataDir, Mode=TwoWay}"
+                                     IsEnabled="{Binding HasSelectedRule}" />
+
+                            <TextBlock Grid.Row="7" Text="Working directory" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="7" Grid.Column="1"
+                                     Text="{Binding SelectedRule.WorkingDirectory, Mode=TwoWay}"
+                                     IsEnabled="{Binding HasSelectedRule}" />
+                        </Grid>
+
+                        <Button Content="Open rule editor"
+                                HorizontalAlignment="Left"
+                                Command="{Binding EditRuleCommand}"
+                                IsEnabled="{Binding HasSelectedRule}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="12"
+                    Padding="24">
+                <StackPanel Spacing="16">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Use Profile" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <ComboBox ItemsSource="{Binding ProfileOptions}"
-                                      SelectedItem="{Binding SelectedRule.UseProfile, Mode=TwoWay}"
-                                      Width="200"
-                                      PlaceholderText="Select a configured profile"
-                                      IsEnabled="{Binding HasSelectedRule}" />
-                            <Button Content="Clear"
-                                    Command="{Binding ClearUseProfileCommand}"
-                                    IsEnabled="{Binding HasSelectedRule}" />
-                        </StackPanel>
+                        <TextBlock Text="Test rule"
+                                   FontSize="18"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Simulate matching with a sample URL"
+                                   Opacity="0.7" />
                     </StackPanel>
 
-                    <Button x:Name="EditRuleButton"
-                            Content="More…"
-                            Click="OnEditRuleClick"
-                            HorizontalAlignment="Left"
-                            IsEnabled="{Binding HasSelectedRule}" />
-
-                    <Separator />
-
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Test URL" />
-                        <TextBox Text="{Binding TestUrl, Mode=TwoWay}" />
-                        <Button Content="Test Rule" Command="{Binding TestRuleCommand}" />
-                        <TextBlock Text="{Binding TestResult}" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding TestError}" TextWrapping="Wrap" Foreground="Red" />
-                    </StackPanel>
+                    <TextBox Watermark="Enter URL"
+                             Text="{Binding TestUrl, Mode=TwoWay}" />
+                    <Button Content="Test rule" Command="{Binding TestRuleCommand}" />
+                    <TextBlock Text="{Binding TestResult}" TextWrapping="Wrap" />
+                    <fa:InfoBar IsOpen="True"
+                                IsVisible="{Binding TestError, Converter={StaticResource StringHasValueConverter}}"
+                                Severity="Error"
+                                Message="{Binding TestError}" />
                 </StackPanel>
-            </ScrollViewer>
-        </Border>
-    </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

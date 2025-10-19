@@ -1,43 +1,106 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
+             xmlns:conv="clr-namespace:LinkRouter.Settings.Avalonia.Converters"
              x:Class="LinkRouter.Settings.Avalonia.Views.OverviewPage">
+    <UserControl.Resources>
+        <conv:StringHasValueConverter x:Key="StringHasValueConverter" />
+        <conv:BooleanNotConverter x:Key="BooleanNotConverter" />
+    </UserControl.Resources>
+
     <ScrollViewer>
-        <StackPanel Spacing="16" Margin="16">
-            <TextBlock Text="Overview" FontSize="20" FontWeight="SemiBold" />
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Configuration" FontWeight="SemiBold" />
-                    <TextBlock Text="Path" FontWeight="Medium" />
-                    <TextBlock Text="{Binding ConfigPath}" TextWrapping="Wrap" />
-                    <TextBlock Text="Last Modified" FontWeight="Medium" />
-                    <TextBlock Text="{Binding LastModifiedDisplay}" />
+        <StackPanel Margin="24" Spacing="16">
+            <TextBlock Text="Overview"
+                       FontSize="20"
+                       FontWeight="SemiBold" />
+
+            <fa:InfoBar IsOpen="True"
+                        IsVisible="{Binding HasError}"
+                        Severity="Error"
+                        Message="{Binding ErrorMessage}" />
+
+            <fa:InfoBar IsOpen="True"
+                        IsVisible="{Binding StatusMessage, Converter={StaticResource StringHasValueConverter}}"
+                        Severity="Success"
+                        Message="{Binding StatusMessage}" />
+
+            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="12"
+                    Padding="24">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Configuration"
+                                   FontSize="18"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Manage the settings file and backups"
+                                   Opacity="0.7" />
+                    </StackPanel>
+
+                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="8" ColumnSpacing="12">
+                        <TextBlock Text="Path" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding ConfigPath}"
+                                   TextWrapping="Wrap" />
+
+                        <TextBlock Grid.Row="1" Text="Last modified" FontWeight="SemiBold" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding LastModifiedDisplay}" />
+                    </Grid>
+
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Save Config" Command="{Binding SaveCommand}" />
-                        <Button Content="Open Folder" Command="{Binding OpenConfigFolderCommand}" />
-                        <Button Content="Copy Path" Command="{Binding CopyConfigPathCommand}" />
+                        <Button Content="Save"
+                                Command="{Binding SaveCommand}"
+                                IsEnabled="{Binding IsSaving, Converter={StaticResource BooleanNotConverter}}" />
+                        <Button Content="Open folder"
+                                Command="{Binding OpenConfigFolderCommand}" />
+                        <Button Content="Copy path"
+                                Command="{Binding CopyConfigPathCommand}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Backups"
+                                   FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding Backups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding FileName}" />
+                                        <TextBlock Text="{Binding LastModifiedUtc, StringFormat=({0:G})}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                <StackPanel Spacing="12">
-                    <TextBlock Text="Simulate URL" FontWeight="SemiBold" />
-                    <TextBox Watermark="Enter URL" Text="{Binding TestUrl, Mode=TwoWay}" />
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Simulate" Command="{Binding SimulateCommand}" />
-                        <Button Content="Register" Command="{Binding RegisterCommand}" />
-                        <Button Content="Unregister" Command="{Binding UnregisterCommand}" />
+            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="12"
+                    Padding="24">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Simulation"
+                                   FontSize="18"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Test a URL and preview the resolved rule"
+                                   Opacity="0.7" />
                     </StackPanel>
+
+                    <TextBox Watermark="Enter a URL"
+                             Text="{Binding TestUrl, Mode=TwoWay}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Simulate"
+                                Command="{Binding SimulateCommand}" />
+                        <Button Content="Register"
+                                Command="{Binding RegisterCommand}" />
+                        <Button Content="Unregister"
+                                Command="{Binding UnregisterCommand}" />
+                    </StackPanel>
+
                     <TextBlock Text="{Binding SimulationSummary}" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding SimulationDetails}" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
-
-            <Border Padding="12" CornerRadius="8" Background="#33000000" IsVisible="{Binding HasError}">
-                <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="Red" />
-            </Border>
-            <TextBlock Text="{Binding StatusMessage}" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>
