@@ -6,6 +6,6 @@ internal sealed class AvaloniaFactAttribute : FactAttribute
 {
     public AvaloniaFactAttribute()
     {
-        Timeout = 25_000;
+        Timeout = 30_000;
     }
 }

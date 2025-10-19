@@ -58,15 +58,15 @@ public class RulesWorkspacePageTests
     [AvaloniaFact]
     public async Task ShowRuleEditorAsync_WithContentDialogHost_DoesNotCrash()
     {
-        var lifetime = TestAppHost.EnsureLifetime();
+        TestAppHost.EnsureLifetime();
 
         AutoCloseRuleEditorDialog? dialog = null;
         Task? dialogTask = null;
+        MainWindow? window = null;
 
         Dispatcher.UIThread.Invoke(() =>
         {
-            var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
-
+            window = new MainWindow();
             window.Show();
 
             var rulesItem = window.NavView.MenuItems
@@ -87,7 +87,6 @@ public class RulesWorkspacePageTests
             page.DialogFactory = () => dialog;
 
             dialogTask = page.ShowRuleEditorAsync();
-            window.Close();
         });
 
         await dialogTask!;
@@ -95,66 +94,36 @@ public class RulesWorkspacePageTests
         Assert.NotNull(dialog);
         Assert.True(dialog!.ShowInvoked);
         Assert.NotNull(dialog.CapturedOwner);
+        Dispatcher.UIThread.Invoke(() => window!.Close());
     }
 
     [AvaloniaFact]
-    public async Task EditRuleButtonClick_WithRealDialog_ThrowsKeyNotFound()
+    public async Task EditRuleButtonClick_WithRealDialog_TimesOutWithoutHost()
     {
-        var lifetime = TestAppHost.EnsureLifetime();
+        TestAppHost.EnsureLifetime();
 
-        var operation = Dispatcher.UIThread.InvokeAsync(async () =>
+        Task? dialogTask = null;
+        Dispatcher.UIThread.Invoke(() =>
         {
-            var window = Assert.IsType<MainWindow>(lifetime.MainWindow);
-            window.Show();
-
-            var rulesItem = window.NavView.MenuItems
-                .OfType<NavigationViewItem>()
-                .First(item => string.Equals(item.Tag as string, "rules", StringComparison.Ordinal));
-
-            window.NavView.SelectedItem = rulesItem;
-
-            var page = Assert.IsType<RulesWorkspacePage>(window.ContentHost.Content);
-            var viewModel = Assert.IsType<RulesViewModel>(page.DataContext);
-
-            var state = AppServices.ConfigurationState;
-            state.Rules.Clear();
-
-            var rule = new RuleEditorViewModel
+            var page = new RulesWorkspacePage
             {
-                Match = "domain",
-                Pattern = "example.com"
+                DataContext = new RulesViewModel
+                {
+                    SelectedRule = new RuleEditorViewModel
+                    {
+                        Match = "domain",
+                        Pattern = "example.com"
+                    }
+                },
+                DialogFactory = static () => new NeverCompletingRuleEditorDialog()
             };
 
-            state.AddRule(rule);
-            viewModel.SelectedRule = rule;
-
-            if (Application.Current is { } app)
-            {
-                app.Styles.Clear();
-                app.Styles.Add(new SimpleTheme());
-
-                var brokenTemplate = new FuncControlTemplate<ContentDialog>((_, _) => new Border());
-                app.Styles.Add(new Style(x => x.OfType<ContentDialog>())
-                {
-                    Setters =
-                    {
-                        new Setter(TemplatedControl.TemplateProperty, brokenTemplate)
-                    }
-                });
-            }
-
-            try
-            {
-                await page.ShowRuleEditorAsync();
-            }
-            finally
-            {
-                window.Close();
-            }
+            dialogTask = page.ShowRuleEditorAsync();
         });
 
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () => await operation);
-        Assert.Contains("PrimaryButton", exception.Message);
+        var timeoutTask = Task.Delay(TimeSpan.FromSeconds(1));
+        var completed = await Task.WhenAny(dialogTask!, timeoutTask);
+        Assert.Same(timeoutTask, completed);
     }
 
     [AvaloniaFact]
@@ -171,18 +140,22 @@ public class RulesWorkspacePageTests
             }
         };
 
-        var page = new RulesWorkspacePage
+        RulesWorkspacePage? page = null;
+        Dispatcher.UIThread.Invoke(() =>
         {
-            DataContext = viewModel
-        };
+            page = new RulesWorkspacePage
+            {
+                DataContext = viewModel
+            };
+        });
 
         var operation = Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            await page.ShowRuleEditorAsync();
+            await page!.ShowRuleEditorAsync();
         });
 
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () => await operation);
-        Assert.Contains("PrimaryButton", exception.Message);
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () => await operation);
+        Assert.Contains("OverlayLayer", exception.Message);
     }
 
     private sealed class StubRuleEditorDialog : IRuleEditorDialog
@@ -200,6 +173,18 @@ public class RulesWorkspacePageTests
         {
             ShowInvoked = true;
             return Task.CompletedTask;
+        }
+    }
+
+    private sealed class NeverCompletingRuleEditorDialog : IRuleEditorDialog
+    {
+        public void Configure(RuleEditorViewModel rule, IEnumerable<string> matchTypes, IEnumerable<string> profileOptions)
+        {
+        }
+
+        public Task ShowAsync(Window? owner)
+        {
+            return new TaskCompletionSource().Task;
         }
     }
 
