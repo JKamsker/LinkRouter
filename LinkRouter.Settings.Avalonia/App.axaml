@@ -3,9 +3,14 @@
              xmlns:sty="using:FluentAvalonia.Styling"
              x:Class="LinkRouter.Settings.Avalonia.App"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
     <Application.Styles>
-        <sty:FluentAvaloniaTheme />
+        <sty:FluentAvaloniaTheme ForceWin11Style="True"
+                                 PreferSystemTheme="True"
+                                 UseMicaEffect="True" />
+        <StyleInclude Source="avares://LinkRouter.Settings.Avalonia/Resources/Styles.axaml" />
     </Application.Styles>
+
+    <Application.DataTemplates>
+        <ResourceInclude Source="avares://LinkRouter.Settings.Avalonia/Resources/Views.axaml" />
+    </Application.DataTemplates>
 </Application>

@@ -3,25 +3,28 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa="using:FluentAvalonia.UI.Controls"
-        mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="720"
+        mc:Ignorable="d"
         x:Class="LinkRouter.Settings.Avalonia.MainWindow"
-        Title="LinkRouter Settings">
+        Title="LinkRouter Settings"
+        Width="1024"
+        Height="720"
+        TransparencyLevelHint="Mica"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="PreferSystemChrome">
     <fa:DialogHost>
-        <fa:NavigationView x:Name="NavView"
-                           PaneDisplayMode="Left"
+        <fa:NavigationView PaneDisplayMode="Left"
                            IsBackButtonVisible="False"
                            IsSettingsVisible="False"
-                           SelectionChanged="OnSelectionChanged">
-            <fa:NavigationView.MenuItems>
-                <fa:NavigationViewItem Content="Overview" Tag="overview" />
-                <fa:NavigationViewItem Content="Rules" Tag="rules" />
-                <fa:NavigationViewItem Content="Browsers &amp; Profiles" Tag="profiles" />
-                <fa:NavigationViewItem Content="Import / Export" Tag="import" />
-                <fa:NavigationViewItem Content="Advanced" Tag="advanced" />
-                <fa:NavigationViewItem Content="About" Tag="about" />
-            </fa:NavigationView.MenuItems>
+                           MenuItemsSource="{Binding Pages}"
+                           SelectedItem="{Binding SelectedPage, Mode=TwoWay}">
+            <fa:NavigationView.MenuItemTemplate>
+                <DataTemplate>
+                    <fa:NavigationViewItem Content="{Binding Title}" />
+                </DataTemplate>
+            </fa:NavigationView.MenuItemTemplate>
 
-            <ContentControl x:Name="ContentHost" Margin="0" />
+            <ContentControl Margin="0"
+                            Content="{Binding ActiveContent}" />
         </fa:NavigationView>
     </fa:DialogHost>
 </Window>

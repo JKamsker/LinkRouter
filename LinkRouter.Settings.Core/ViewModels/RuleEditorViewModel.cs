@@ -137,4 +137,22 @@ public sealed class RuleEditorViewModel : ObservableObject
             _useProfile = _useProfile
         };
     }
+
+    public void UpdateFrom(RuleEditorViewModel other)
+    {
+        if (other is null)
+        {
+            throw new ArgumentNullException(nameof(other));
+        }
+
+        Enabled = other.Enabled;
+        Match = other.Match;
+        Pattern = other.Pattern;
+        Browser = other.Browser;
+        ArgsTemplate = other.ArgsTemplate;
+        Profile = other.Profile;
+        UserDataDir = other.UserDataDir;
+        WorkingDirectory = other.WorkingDirectory;
+        UseProfile = other.UseProfile;
+    }
 }
