@@ -70,12 +70,16 @@
 
     <ScrollViewer Padding="12">
         <StackPanel Spacing="12">
+            <StackPanel.DataContext>
+                <Binding Path="Rule" />
+            </StackPanel.DataContext>
+
             <ToggleSwitch Content="Enabled"
                           IsChecked="{Binding Enabled, Mode=TwoWay}" />
 
             <StackPanel Spacing="4">
                 <TextBlock Text="Match" />
-                <ComboBox x:Name="MatchTypeCombo"
+                <ComboBox ItemsSource="{Binding DataContext.MatchTypes, RelativeSource={RelativeSource AncestorType=fa:ContentDialog}}"
                           SelectedItem="{Binding Match, Mode=TwoWay}" />
             </StackPanel>
 
@@ -112,12 +116,12 @@
             <StackPanel Spacing="4">
                 <TextBlock Text="Use Profile" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <ComboBox x:Name="UseProfileCombo"
+                    <ComboBox ItemsSource="{Binding DataContext.ProfileOptions, RelativeSource={RelativeSource AncestorType=fa:ContentDialog}}"
                               PlaceholderText="Select a configured profile"
                               SelectedItem="{Binding UseProfile, Mode=TwoWay}" />
                     <Button Content="Clear"
                             HorizontalAlignment="Left"
-                            Click="OnClearUseProfileClick" />
+                            Command="{Binding DataContext.ClearUseProfileCommand, RelativeSource={RelativeSource AncestorType=fa:ContentDialog}}" />
                 </StackPanel>
             </StackPanel>
         </StackPanel>
