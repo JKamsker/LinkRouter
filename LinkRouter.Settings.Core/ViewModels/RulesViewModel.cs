@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -12,8 +14,9 @@ public partial class RulesViewModel : ObservableObject
 {
     private static readonly IReadOnlyList<string> s_matchTypes = new[] { "domain", "regex", "contains" };
 
-    private readonly ConfigurationState _state = AppServices.ConfigurationState;
-    private readonly RuleTestService _tester = AppServices.RuleTestService;
+    private readonly ConfigurationState _state;
+    private readonly RuleTestService _tester;
+    private readonly IDialogService _dialogService;
     private readonly List<string> _profileOptions = new();
 
     [ObservableProperty]
@@ -28,8 +31,15 @@ public partial class RulesViewModel : ObservableObject
     [ObservableProperty]
     private string? _testError;
 
-    public RulesViewModel()
+    public RulesViewModel(
+        ConfigurationState state,
+        RuleTestService tester,
+        IDialogService dialogService)
     {
+        _state = state;
+        _tester = tester;
+        _dialogService = dialogService;
+
         _state.StateChanged += OnStateChanged;
         RefreshProfileOptions();
     }
@@ -160,6 +170,29 @@ public partial class RulesViewModel : ObservableObject
         SelectedRule.UseProfile = null;
     }
 
+    [RelayCommand(CanExecute = nameof(CanEditRule))]
+    private async Task EditRuleAsync()
+    {
+        if (SelectedRule is null)
+        {
+            return;
+        }
+
+        var workingCopy = SelectedRule.Clone();
+        var accepted = await _dialogService
+            .ShowRuleEditorAsync(workingCopy, MatchTypes, ProfileOptions)
+            .ConfigureAwait(false);
+
+        if (!accepted)
+        {
+            return;
+        }
+
+        SelectedRule.ApplyRuleChanges(workingCopy);
+    }
+
+    private bool CanEditRule() => SelectedRule is not null;
+
     private bool CanClearUseProfile() => SelectedRule?.UseProfile is not null;
 
     private void RefreshProfileOptions()
@@ -182,6 +215,7 @@ public partial class RulesViewModel : ObservableObject
     {
         RefreshProfileOptions();
         OnPropertyChanged(nameof(HasSelectedRule));
+        EditRuleCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnSelectedRuleChanging(RuleEditorViewModel? value)
@@ -201,6 +235,7 @@ public partial class RulesViewModel : ObservableObject
 
         OnPropertyChanged(nameof(HasSelectedRule));
         ClearUseProfileCommand.NotifyCanExecuteChanged();
+        EditRuleCommand.NotifyCanExecuteChanged();
     }
 
     private void OnSelectedRulePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -209,5 +244,21 @@ public partial class RulesViewModel : ObservableObject
         {
             ClearUseProfileCommand.NotifyCanExecuteChanged();
         }
+    }
+}
+
+internal static class RuleEditorViewModelExtensions
+{
+    public static void ApplyRuleChanges(this RuleEditorViewModel target, RuleEditorViewModel source)
+    {
+        target.Enabled = source.Enabled;
+        target.Match = source.Match;
+        target.Pattern = source.Pattern;
+        target.Browser = source.Browser;
+        target.ArgsTemplate = source.ArgsTemplate;
+        target.Profile = source.Profile;
+        target.UserDataDir = source.UserDataDir;
+        target.WorkingDirectory = source.WorkingDirectory;
+        target.UseProfile = source.UseProfile;
     }
 }

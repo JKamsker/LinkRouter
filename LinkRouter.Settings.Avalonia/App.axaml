@@ -6,6 +6,9 @@
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.Styles>
-        <sty:FluentAvaloniaTheme />
+        <sty:FluentAvaloniaTheme PreferSystemTheme="True"
+                                 PreferUserAccentColor="True" />
+        <StyleInclude Source="avares://LinkRouter.Settings.Avalonia/Resources/Styles.axaml" />
+        <StyleInclude Source="avares://LinkRouter.Settings.Avalonia/Resources/Views.axaml" />
     </Application.Styles>
 </Application>
