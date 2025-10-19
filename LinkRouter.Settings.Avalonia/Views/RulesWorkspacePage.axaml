@@ -1,19 +1,33 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:conv="clr-namespace:LinkRouter.Settings.Avalonia.Converters"
              x:Class="LinkRouter.Settings.Avalonia.Views.RulesWorkspacePage">
+    <UserControl.Resources>
+        <conv:BooleanNotConverter x:Key="BooleanNotConverter" />
+        <conv:BooleanGridLengthConverter x:Key="EditorLeftColumnWidthConverter"
+                                         TrueLength="0"
+                                         FalseLength="2*" />
+    </UserControl.Resources>
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="{StaticResource SettingsPageMargin}"
                     Spacing="{StaticResource SettingsPageSpacing}">
             <TextBlock Text="Rules" Classes="PageTitle" />
 
-            <Grid ColumnDefinitions="2*,3*" ColumnSpacing="20">
-                <StackPanel Spacing="{StaticResource SettingsCardSpacing}">
+            <Grid ColumnSpacing="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding IsEditorOpen, Converter={StaticResource EditorLeftColumnWidthConverter}}" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="{StaticResource SettingsCardSpacing}"
+                            IsVisible="{Binding IsEditorOpen, Converter={StaticResource BooleanNotConverter}}">
                     <Border Classes="SettingsCard">
                         <StackPanel Classes="SettingsCardContent">
                             <TextBlock Text="Rule list" Classes="SectionTitle" />
 
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8"
+                                        IsEnabled="{Binding IsEditorOpen, Converter={StaticResource BooleanNotConverter}}">
                                 <Button Content="Add" Command="{Binding AddRuleCommand}" />
                                 <Button Content="Duplicate"
                                         Command="{Binding DuplicateRuleCommand}"
@@ -30,7 +44,8 @@
                             </StackPanel>
 
                             <ListBox ItemsSource="{Binding Rules}"
-                                     SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
+                                     SelectedItem="{Binding SelectedRule, Mode=TwoWay}"
+                                     IsEnabled="{Binding IsEditorOpen, Converter={StaticResource BooleanNotConverter}}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding DisplayName}" />
@@ -43,48 +58,135 @@
 
                 <StackPanel Grid.Column="1" Spacing="{StaticResource SettingsCardSpacing}">
                     <Border Classes="SettingsCard">
-                        <StackPanel Classes="SettingsCardContent">
-                            <TextBlock Text="Selected rule" Classes="SectionTitle" />
-                            <TextBlock Text="{Binding SelectedRule.DisplayName, FallbackValue=Select a rule to view details., TargetNullValue=Select a rule to view details.}"
-                                       TextWrapping="Wrap" />
+                        <Grid>
+                            <StackPanel Classes="SettingsCardContent"
+                                        IsVisible="{Binding IsEditorOpen, Converter={StaticResource BooleanNotConverter}}">
+                                <TextBlock Text="Selected rule" Classes="SectionTitle" />
+                                <TextBlock Text="{Binding SelectedRule.DisplayName, FallbackValue=Select a rule to view details., TargetNullValue=Select a rule to view details.}"
+                                           TextWrapping="Wrap" />
 
-                            <ToggleSwitch Content="Enabled"
-                                          IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}"
-                                          IsEnabled="{Binding HasSelectedRule}" />
-
-                            <StackPanel Classes="SectionContent">
-                                <TextBlock Text="Match" Classes="SectionTitle" />
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <ComboBox ItemsSource="{Binding MatchTypes}"
-                                              SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}"
-                                              Width="160"
+                                <ToggleSwitch Content="Enabled"
+                                              IsChecked="{Binding SelectedRule.Enabled, Mode=TwoWay}"
                                               IsEnabled="{Binding HasSelectedRule}" />
-                                    <TextBox Text="{Binding SelectedRule.Pattern, Mode=TwoWay}"
-                                             Width="240"
-                                             Watermark="Pattern"
-                                             IsEnabled="{Binding HasSelectedRule}" />
+
+                                <StackPanel Classes="SectionContent">
+                                    <TextBlock Text="Match" Classes="SectionTitle" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <ComboBox ItemsSource="{Binding MatchTypes}"
+                                                  SelectedItem="{Binding SelectedRule.Match, Mode=TwoWay}"
+                                                  Width="160"
+                                                  IsEnabled="{Binding HasSelectedRule}" />
+                                        <TextBox Text="{Binding SelectedRule.Pattern, Mode=TwoWay}"
+                                                 Width="240"
+                                                 Watermark="Pattern"
+                                                 IsEnabled="{Binding HasSelectedRule}" />
+                                    </StackPanel>
                                 </StackPanel>
+
+                                <StackPanel Classes="SectionContent">
+                                    <TextBlock Text="Use profile" Classes="SectionTitle" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <ComboBox ItemsSource="{Binding ProfileOptions}"
+                                                  SelectedItem="{Binding SelectedRule.UseProfile, Mode=TwoWay}"
+                                                  Width="220"
+                                                  PlaceholderText="Select a configured profile"
+                                                  IsEnabled="{Binding HasSelectedRule}" />
+                                        <Button Content="Clear"
+                                                Command="{Binding ClearUseProfileCommand}"
+                                                IsEnabled="{Binding HasSelectedRule}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Button Content="Open editor"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding EditRuleCommand}"
+                                        IsEnabled="{Binding HasSelectedRule}"
+                                        IsVisible="{Binding IsEditorOpen, Converter={StaticResource BooleanNotConverter}}" />
                             </StackPanel>
 
-                            <StackPanel Classes="SectionContent">
-                                <TextBlock Text="Use profile" Classes="SectionTitle" />
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <ComboBox ItemsSource="{Binding ProfileOptions}"
-                                              SelectedItem="{Binding SelectedRule.UseProfile, Mode=TwoWay}"
-                                              Width="220"
-                                              PlaceholderText="Select a configured profile"
-                                              IsEnabled="{Binding HasSelectedRule}" />
-                                    <Button Content="Clear"
-                                            Command="{Binding ClearUseProfileCommand}"
-                                            IsEnabled="{Binding HasSelectedRule}" />
-                                </StackPanel>
-                            </StackPanel>
+                            <StackPanel Classes="SettingsCardContent"
+                                        IsVisible="{Binding IsEditorOpen}">
+                                <ContentControl Content="{Binding ActiveEditor}">
+                                    <ContentControl.DataTemplates>
+                                        <DataTemplate DataType="{x:Type vm:RuleEditorDialogViewModel}">
+                                            <StackPanel Spacing="16">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <TextBlock Text="Edit rule" Classes="SectionTitle" />
+                                                    <Button Content="X"
+                                                            Command="{Binding DataContext.CloseEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            Width="32"
+                                                            Height="32"
+                                                            HorizontalAlignment="Right"
+                                                            HorizontalContentAlignment="Center"
+                                                            VerticalContentAlignment="Center" />
+                                                </Grid>
 
-                            <Button Content="Open editor"
-                                    HorizontalAlignment="Left"
-                                    Command="{Binding EditRuleCommand}"
-                                    IsEnabled="{Binding HasSelectedRule}" />
-                        </StackPanel>
+                                                <ToggleSwitch Content="Enabled"
+                                                              IsChecked="{Binding Rule.Enabled, Mode=TwoWay}" />
+
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="Match" Classes="SectionTitle" />
+                                                    <ComboBox ItemsSource="{Binding MatchTypes}"
+                                                              SelectedItem="{Binding Rule.Match, Mode=TwoWay}" />
+                                                </StackPanel>
+
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="Pattern" Classes="SectionTitle" />
+                                                    <TextBox Text="{Binding Rule.Pattern, Mode=TwoWay}" />
+                                                </StackPanel>
+
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="Browser" Classes="SectionTitle" />
+                                                    <TextBox Text="{Binding Rule.Browser, Mode=TwoWay}" />
+                                                </StackPanel>
+
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="Profile" Classes="SectionTitle" />
+                                                    <TextBox Text="{Binding Rule.Profile, Mode=TwoWay}" />
+                                                </StackPanel>
+
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="Args Template" Classes="SectionTitle" />
+                                                    <TextBox Text="{Binding Rule.ArgsTemplate, Mode=TwoWay}" />
+                                                </StackPanel>
+
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="User Data Dir" Classes="SectionTitle" />
+                                                    <TextBox Text="{Binding Rule.UserDataDir, Mode=TwoWay}" />
+                                                </StackPanel>
+
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="Working Directory" Classes="SectionTitle" />
+                                                    <TextBox Text="{Binding Rule.WorkingDirectory, Mode=TwoWay}" />
+                                                </StackPanel>
+
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="Use Profile" Classes="SectionTitle" />
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <ComboBox ItemsSource="{Binding ProfileOptions}"
+                                                                  SelectedItem="{Binding Rule.UseProfile, Mode=TwoWay}"
+                                                                  PlaceholderText="Select a configured profile" />
+                                                        <Button Content="Clear"
+                                                                Command="{Binding ClearUseProfileCommand}" />
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <Separator />
+
+                                                <StackPanel Orientation="Horizontal"
+                                                            HorizontalAlignment="Left"
+                                                            Spacing="8">
+                                                    <Button Content="Done"
+                                                            Command="{Binding DataContext.CloseEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                    <Button Content="Cancel"
+                                                            Command="{Binding DataContext.CloseEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ContentControl.DataTemplates>
+                                </ContentControl>
+                            </StackPanel>
+                        </Grid>
                     </Border>
 
                     <Border Classes="SettingsCard">

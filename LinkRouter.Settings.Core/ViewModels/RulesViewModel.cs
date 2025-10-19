@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter.Settings.Services;
-using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -16,7 +15,6 @@ public partial class RulesViewModel : ObservableObject
 
     private readonly ConfigurationState _state;
     private readonly RuleTestService _tester;
-    private readonly IRuleEditorDialogService _dialogService;
     private readonly List<string> _profileOptions = new();
 
     [ObservableProperty]
@@ -31,14 +29,15 @@ public partial class RulesViewModel : ObservableObject
     [ObservableProperty]
     private string? _testError;
 
+    [ObservableProperty]
+    private RuleEditorDialogViewModel? _activeEditor;
+
     public RulesViewModel(
         ConfigurationState state,
-        RuleTestService tester,
-        IRuleEditorDialogService dialogService)
+        RuleTestService tester)
     {
         _state = state;
         _tester = tester;
-        _dialogService = dialogService;
         _state.StateChanged += OnStateChanged;
         RefreshProfileOptions();
     }
@@ -50,6 +49,8 @@ public partial class RulesViewModel : ObservableObject
     public IReadOnlyList<string> ProfileOptions => _profileOptions;
 
     public bool HasSelectedRule => SelectedRule is not null;
+
+    public bool IsEditorOpen => ActiveEditor is not null;
 
     [RelayCommand]
     private void AddRule()
@@ -172,15 +173,25 @@ public partial class RulesViewModel : ObservableObject
     private bool CanClearUseProfile() => SelectedRule?.UseProfile is not null;
 
     [RelayCommand]
-    private async Task EditRuleAsync()
+    private Task EditRuleAsync()
     {
         if (SelectedRule is null)
         {
-            return;
+            return Task.CompletedTask;
         }
 
-        var dialogViewModel = new RuleEditorDialogViewModel(SelectedRule, MatchTypes, ProfileOptions);
-        await _dialogService.EditRuleAsync(dialogViewModel).ConfigureAwait(false);
+        if (!ReferenceEquals(ActiveEditor?.Rule, SelectedRule))
+        {
+            ActiveEditor = new RuleEditorDialogViewModel(SelectedRule, MatchTypes, ProfileOptions);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private void CloseEditor()
+    {
+        ActiveEditor = null;
     }
 
     private void RefreshProfileOptions()
@@ -220,6 +231,11 @@ public partial class RulesViewModel : ObservableObject
             value.PropertyChanged += OnSelectedRulePropertyChanged;
         }
 
+        if (!ReferenceEquals(value, ActiveEditor?.Rule))
+        {
+            ActiveEditor = null;
+        }
+
         OnPropertyChanged(nameof(HasSelectedRule));
         ClearUseProfileCommand.NotifyCanExecuteChanged();
     }
@@ -230,5 +246,10 @@ public partial class RulesViewModel : ObservableObject
         {
             ClearUseProfileCommand.NotifyCanExecuteChanged();
         }
+    }
+
+    partial void OnActiveEditorChanged(RuleEditorDialogViewModel? value)
+    {
+        OnPropertyChanged(nameof(IsEditorOpen));
     }
 }
