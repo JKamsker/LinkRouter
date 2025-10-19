@@ -1,11 +1,35 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:views="clr-namespace:LinkRouter.Settings.Avalonia.Views"
              x:Class="LinkRouter.Settings.Avalonia.App"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
     <Application.Styles>
-        <sty:FluentAvaloniaTheme />
+        <sty:FluentAvaloniaTheme PreferSystemTheme="True" UseSystemFontSizes="True" />
+        <StyleInclude Source="avares://LinkRouter.Settings.Avalonia/Resources/Styles.axaml" />
     </Application.Styles>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <DataTemplate DataType="{x:Type vm:GeneralViewModel}">
+                <views:OverviewPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:RulesViewModel}">
+                <views:RulesWorkspacePage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ProfilesViewModel}">
+                <views:ProfilesPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ImportExportViewModel}">
+                <views:ImportExportPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AdvancedViewModel}">
+                <views:AdvancedPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AboutViewModel}">
+                <views:AboutPage />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

@@ -1,43 +1,73 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
+             xmlns:fa="using:FluentAvalonia.UI.Controls"
+             xmlns:conv="clr-namespace:LinkRouter.Settings.Avalonia.Converters"
              x:Class="LinkRouter.Settings.Avalonia.Views.OverviewPage">
+    <UserControl.Resources>
+        <conv:StringHasValueConverter x:Key="StringHasValueConverter" />
+    </UserControl.Resources>
+
     <ScrollViewer>
-        <StackPanel Spacing="16" Margin="16">
-            <TextBlock Text="Overview" FontSize="20" FontWeight="SemiBold" />
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Configuration" FontWeight="SemiBold" />
-                    <TextBlock Text="Path" FontWeight="Medium" />
-                    <TextBlock Text="{Binding ConfigPath}" TextWrapping="Wrap" />
-                    <TextBlock Text="Last Modified" FontWeight="Medium" />
-                    <TextBlock Text="{Binding LastModifiedDisplay}" />
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Save Config" Command="{Binding SaveCommand}" />
-                        <Button Content="Open Folder" Command="{Binding OpenConfigFolderCommand}" />
-                        <Button Content="Copy Path" Command="{Binding CopyConfigPathCommand}" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
+        <StackPanel Spacing="24" Margin="32">
+            <TextBlock Text="Overview"
+                       Style="{StaticResource SettingsPageTitleStyle}" />
 
-            <Border Padding="12" CornerRadius="8" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+            <Border Classes="SettingsCard">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Simulate URL" FontWeight="SemiBold" />
-                    <TextBox Watermark="Enter URL" Text="{Binding TestUrl, Mode=TwoWay}" />
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Simulate" Command="{Binding SimulateCommand}" />
-                        <Button Content="Register" Command="{Binding RegisterCommand}" />
-                        <Button Content="Unregister" Command="{Binding UnregisterCommand}" />
+                    <TextBlock Text="Configuration"
+                               Style="{StaticResource SettingsSectionTitleStyle}" />
+                    <TextBlock Text="Path"
+                               Style="{StaticResource SettingsBodyLabelStyle}" />
+                    <TextBlock Text="{Binding ConfigPath}"
+                               Classes="SettingsBodyText"
+                               TextWrapping="Wrap" />
+                    <TextBlock Text="Last Modified"
+                               Style="{StaticResource SettingsBodyLabelStyle}" />
+                    <TextBlock Text="{Binding LastModifiedDisplay}"
+                               Classes="SettingsBodyText" />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Content="Save Config"
+                                Command="{Binding SaveCommand}" />
+                        <Button Content="Open Folder"
+                                Command="{Binding OpenConfigFolderCommand}" />
+                        <Button Content="Copy Path"
+                                Command="{Binding CopyConfigPathCommand}" />
                     </StackPanel>
-                    <TextBlock Text="{Binding SimulationSummary}" TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding SimulationDetails}" TextWrapping="Wrap" />
+                    <fa:InfoBar Title="Status"
+                                Severity="Success"
+                                IsVisible="{Binding StatusMessage, Converter={StaticResource StringHasValueConverter}}"
+                                Message="{Binding StatusMessage}" />
                 </StackPanel>
             </Border>
 
-            <Border Padding="12" CornerRadius="8" Background="#33000000" IsVisible="{Binding HasError}">
-                <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="Red" />
+            <Border Classes="SettingsCard">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Simulate URL"
+                               Style="{StaticResource SettingsSectionTitleStyle}" />
+                    <TextBox Watermark="Enter URL"
+                             Text="{Binding TestUrl, Mode=TwoWay}" />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Content="Simulate"
+                                Command="{Binding SimulateCommand}" />
+                        <Button Content="Register"
+                                Command="{Binding RegisterCommand}" />
+                        <Button Content="Unregister"
+                                Command="{Binding UnregisterCommand}" />
+                    </StackPanel>
+                    <fa:InfoBar Title="Result"
+                                Severity="Informational"
+                                IsVisible="{Binding SimulationSummary, Converter={StaticResource StringHasValueConverter}}"
+                                Message="{Binding SimulationSummary}" />
+                    <TextBlock Text="{Binding SimulationDetails}"
+                               Classes="SettingsBodyText"
+                               TextWrapping="Wrap" />
+                </StackPanel>
             </Border>
-            <TextBlock Text="{Binding StatusMessage}" />
+
+            <fa:InfoBar Title="Error"
+                        Severity="Error"
+                        IsVisible="{Binding HasError}"
+                        Message="{Binding ErrorMessage}" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

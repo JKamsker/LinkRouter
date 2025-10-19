@@ -9,8 +9,8 @@ namespace LinkRouter.Settings.ViewModels;
 
 public partial class AdvancedViewModel : ObservableObject
 {
-    private readonly ConfigService _configService = AppServices.ConfigService;
-    private readonly IShellService _shellService = AppServices.ShellService;
+    private readonly ConfigService _configService;
+    private readonly IShellService _shellService;
     private readonly string _logFilePath;
     private readonly string _loggingTogglePath;
 
@@ -22,8 +22,10 @@ public partial class AdvancedViewModel : ObservableObject
 
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
-    public AdvancedViewModel()
+    public AdvancedViewModel(ConfigService configService, IShellService shellService)
     {
+        _configService = configService;
+        _shellService = shellService;
         var configFolder = Path.GetDirectoryName(_configService.ConfigPath) ?? string.Empty;
         _logFilePath = Path.Combine(configFolder, "args.log");
         _loggingTogglePath = Path.Combine(configFolder, "logging.disabled");
