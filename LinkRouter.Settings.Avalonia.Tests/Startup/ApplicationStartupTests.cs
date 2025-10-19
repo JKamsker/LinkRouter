@@ -1,16 +1,24 @@
+using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Headless.XUnit;
+using FluentAvalonia.UI.Controls;
+using LinkRouter.Settings.Avalonia;
 using Xunit;
-using LinkRouter.Settings.Avalonia.Tests;
 
 namespace LinkRouter.Settings.Avalonia.Tests.Startup;
 
 public class ApplicationStartupTests
 {
-    [AvaloniaFact]
-    public Task Application_CanInitializeMainWindow()
+    [AvaloniaFact(Timeout = 30_000)]
+    public Task MainWindow_LoadsFirstPage()
     {
-        var lifetime = TestAppHost.EnsureLifetime();
-        Assert.NotNull(lifetime.MainWindow);
+        var window = new MainWindow();
+        var navView = window.NavView;
+        var firstItem = navView.MenuItems.OfType<NavigationViewItem>().First();
+        navView.SelectedItem = firstItem;
+
+        Assert.NotNull(window.ContentHost.Content);
+
         return Task.CompletedTask;
     }
 }
