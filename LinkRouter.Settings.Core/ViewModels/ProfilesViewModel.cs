@@ -14,6 +14,7 @@ public partial class ProfilesViewModel : ObservableObject
 {
     private readonly ConfigurationState _state = AppServices.ConfigurationState;
     private readonly BrowserDetectionService _detector = AppServices.BrowserDetectionService;
+    private string? _systemDefaultBrowserPath;
 
     [ObservableProperty]
     private ProfileEditorViewModel? _selectedProfile;
@@ -82,7 +83,9 @@ public partial class ProfilesViewModel : ObservableObject
             }
 
             DetectionError = null;
+            _systemDefaultBrowserPath = _detector.GetDefaultBrowserExecutablePath();
             SyncSelectionsWithProfile();
+            EnsureDefaultSelections();
         }
         catch (Exception ex)
         {
@@ -95,6 +98,7 @@ public partial class ProfilesViewModel : ObservableObject
     partial void OnSelectedProfileChanged(ProfileEditorViewModel? value)
     {
         SyncSelectionsWithProfile();
+        EnsureDefaultSelections();
     }
 
     partial void OnSelectedBrowserChanged(BrowserInfo? value)
@@ -123,7 +127,10 @@ public partial class ProfilesViewModel : ObservableObject
         }
 
         UpdateDetectedProfiles(value);
-        SelectedDetectedProfile = null;
+        if (!SelectedProfile.IsAdvanced)
+        {
+            EnsureDefaultProfileSelection();
+        }
     }
 
     partial void OnSelectedDetectedProfileChanged(BrowserProfileOption? value)
@@ -350,5 +357,102 @@ public partial class ProfilesViewModel : ObservableObject
         {
             OnPropertyChanged(nameof(SelectedProfileIsDefault));
         }
+    }
+
+    private void EnsureDefaultSelections()
+    {
+        EnsureDefaultBrowserSelection();
+        EnsureDefaultProfileSelection();
+    }
+
+    private void EnsureDefaultBrowserSelection()
+    {
+        if (SelectedProfile is null || SelectedProfile.IsAdvanced)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(SelectedProfile.Browser) || SelectedBrowser is not null)
+        {
+            return;
+        }
+
+        var browser = FindDefaultBrowser() ?? Browsers.FirstOrDefault();
+        if (browser is not null)
+        {
+            SelectedBrowser = browser;
+        }
+    }
+
+    private BrowserInfo? FindDefaultBrowser()
+    {
+        if (Browsers.Count == 0)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_systemDefaultBrowserPath))
+        {
+            var match = Browsers.FirstOrDefault(b =>
+                string.Equals(b.Path, _systemDefaultBrowserPath, StringComparison.OrdinalIgnoreCase));
+            if (match is not null)
+            {
+                return match;
+            }
+
+            var defaultFileName = Path.GetFileName(_systemDefaultBrowserPath);
+            if (!string.IsNullOrWhiteSpace(defaultFileName))
+            {
+                match = Browsers.FirstOrDefault(b =>
+                    string.Equals(Path.GetFileName(b.Path), defaultFileName, StringComparison.OrdinalIgnoreCase));
+                if (match is not null)
+                {
+                    return match;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private void EnsureDefaultProfileSelection()
+    {
+        if (SelectedProfile is null || SelectedProfile.IsAdvanced)
+        {
+            return;
+        }
+
+        if (DetectedProfiles.Count == 0)
+        {
+            if (SelectedBrowser?.Family == BrowserFamily.Chromium && string.IsNullOrWhiteSpace(SelectedProfile.Profile))
+            {
+                SelectedProfile.Profile = "Default";
+            }
+
+            return;
+        }
+
+        if (SelectedDetectedProfile is not null || !string.IsNullOrWhiteSpace(SelectedProfile.Profile))
+        {
+            return;
+        }
+
+        var option = FindDefaultProfileOption() ?? DetectedProfiles.FirstOrDefault();
+        if (option is not null)
+        {
+            SelectedDetectedProfile = option;
+        }
+        else if (SelectedBrowser?.Family == BrowserFamily.Chromium && string.IsNullOrWhiteSpace(SelectedProfile.Profile))
+        {
+            SelectedProfile.Profile = "Default";
+        }
+    }
+
+    private BrowserProfileOption? FindDefaultProfileOption()
+    {
+        return DetectedProfiles.FirstOrDefault(option =>
+                   string.Equals(option.ProfileArgument, "Default", StringComparison.OrdinalIgnoreCase))
+               ?? DetectedProfiles.FirstOrDefault(option =>
+                   string.Equals(option.DisplayName, "Default", StringComparison.OrdinalIgnoreCase));
     }
 }

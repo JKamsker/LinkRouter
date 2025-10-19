@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.Win32;
 
 namespace LinkRouter.Settings.Services;
@@ -104,23 +105,18 @@ public sealed class BrowserDetectionService
                 continue;
             }
 
-            foreach (var directory in Directory.GetDirectories(root))
+            var profiles = ReadChromiumProfiles(root);
+            if (profiles.Count == 0)
             {
-                var name = Path.GetFileName(directory);
-                if (string.IsNullOrEmpty(name))
-                {
-                    continue;
-                }
+                profiles = EnumerateChromiumProfilesFallback(root);
+            }
 
-                if (string.Equals(name, "System Profile", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                var key = $"{name}|{root}";
+            foreach (var profile in profiles)
+            {
+                var key = $"{profile.DirectoryName}|{root}";
                 if (seen.Add(key))
                 {
-                    options.Add(new BrowserProfileOption(name, name, root));
+                    options.Add(new BrowserProfileOption(profile.DisplayName, profile.DirectoryName, root));
                 }
             }
         }
@@ -257,6 +253,226 @@ public sealed class BrowserDetectionService
                 {
                     return path;
                 }
+            }
+        }
+
+        return null;
+    }
+
+    public string? GetDefaultBrowserExecutablePath()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return null;
+        }
+
+        try
+        {
+            var progId = ReadUserChoiceProgId("http") ?? ReadUserChoiceProgId("https");
+            if (!string.IsNullOrWhiteSpace(progId))
+            {
+                var command = ReadCommandFromProgId(progId!);
+                var path = ExtractExecutablePath(command);
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    return path;
+                }
+            }
+
+            var fallbackCommand = ReadStartMenuInternetCommand();
+            var fallbackPath = ExtractExecutablePath(fallbackCommand);
+            return string.IsNullOrWhiteSpace(fallbackPath) ? null : fallbackPath;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private sealed record ChromiumProfileEntry(string DirectoryName, string DisplayName);
+
+    private static IReadOnlyList<ChromiumProfileEntry> ReadChromiumProfiles(string root)
+    {
+        var results = new List<ChromiumProfileEntry>();
+        try
+        {
+            var localStatePath = Path.Combine(root, "Local State");
+            if (!File.Exists(localStatePath))
+            {
+                return results;
+            }
+
+            using var stream = File.OpenRead(localStatePath);
+            using var document = JsonDocument.Parse(stream);
+            if (!document.RootElement.TryGetProperty("profile", out var profileElement))
+            {
+                return results;
+            }
+
+            if (!profileElement.TryGetProperty("info_cache", out var infoCache) || infoCache.ValueKind != JsonValueKind.Object)
+            {
+                return results;
+            }
+
+            foreach (var property in infoCache.EnumerateObject())
+            {
+                if (!ShouldIncludeChromiumProfile(property.Value))
+                {
+                    continue;
+                }
+
+                var directoryName = property.Name;
+                if (string.IsNullOrWhiteSpace(directoryName))
+                {
+                    continue;
+                }
+
+                var directoryPath = Path.Combine(root, directoryName);
+                if (!Directory.Exists(directoryPath))
+                {
+                    continue;
+                }
+
+                var displayName = property.Value.TryGetProperty("name", out var nameElement)
+                    && nameElement.ValueKind == JsonValueKind.String
+                    ? nameElement.GetString()
+                    : null;
+
+                results.Add(new ChromiumProfileEntry(
+                    directoryName,
+                    string.IsNullOrWhiteSpace(displayName) ? directoryName : displayName!));
+            }
+        }
+        catch
+        {
+            // Ignore parse errors; we'll fall back to directory scanning.
+        }
+
+        return results;
+    }
+
+    private static IReadOnlyList<ChromiumProfileEntry> EnumerateChromiumProfilesFallback(string root)
+    {
+        var results = new List<ChromiumProfileEntry>();
+        foreach (var directory in Directory.GetDirectories(root))
+        {
+            var name = Path.GetFileName(directory);
+            if (string.IsNullOrEmpty(name))
+            {
+                continue;
+            }
+
+            if (string.Equals(name, "System Profile", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (!File.Exists(Path.Combine(directory, "Preferences")))
+            {
+                continue;
+            }
+
+            results.Add(new ChromiumProfileEntry(name, name));
+        }
+
+        return results;
+    }
+
+    private static bool ShouldIncludeChromiumProfile(JsonElement profileElement)
+    {
+        if (profileElement.ValueKind != JsonValueKind.Object)
+        {
+            return false;
+        }
+
+        if (profileElement.TryGetProperty("is_deleted", out var deletedElement)
+            && deletedElement.ValueKind == JsonValueKind.True)
+        {
+            return false;
+        }
+
+        if (profileElement.TryGetProperty("is_omitted_from_profile_list", out var omittedElement)
+            && omittedElement.ValueKind == JsonValueKind.True)
+        {
+            return false;
+        }
+
+        var profileTypeAllowed = true;
+        if (profileElement.TryGetProperty("profile_type", out var typeElement) && typeElement.ValueKind == JsonValueKind.String)
+        {
+            var typeValue = typeElement.GetString();
+            if (!string.IsNullOrWhiteSpace(typeValue)
+                && typeValue.Equals("System", StringComparison.OrdinalIgnoreCase))
+            {
+                profileTypeAllowed = false;
+            }
+        }
+
+        return profileTypeAllowed;
+    }
+
+    private static string? ReadUserChoiceProgId(string scheme)
+    {
+        using var key = Registry.CurrentUser.OpenSubKey($"Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\{scheme}\\UserChoice");
+        var value = key?.GetValue("ProgId") as string;
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    private static string? ReadCommandFromProgId(string progId)
+    {
+        using var key = Registry.ClassesRoot.OpenSubKey($"{progId}\\shell\\open\\command");
+        return key?.GetValue(null) as string;
+    }
+
+    private static string? ReadStartMenuInternetCommand()
+    {
+        using var userKey = Registry.CurrentUser.OpenSubKey("Software\\Clients\\StartMenuInternet");
+        var userValue = userKey?.GetValue(null) as string;
+        if (!string.IsNullOrWhiteSpace(userValue))
+        {
+            var command = ReadCommandFromProgId(userValue);
+            if (!string.IsNullOrWhiteSpace(command))
+            {
+                return command;
+            }
+        }
+
+        using var machineKey = Registry.LocalMachine.OpenSubKey("Software\\Clients\\StartMenuInternet");
+        var machineValue = machineKey?.GetValue(null) as string;
+        if (!string.IsNullOrWhiteSpace(machineValue))
+        {
+            return ReadCommandFromProgId(machineValue);
+        }
+
+        return null;
+    }
+
+    private static string? ExtractExecutablePath(string? command)
+    {
+        if (string.IsNullOrWhiteSpace(command))
+        {
+            return null;
+        }
+
+        var trimmed = command.Trim();
+        if (trimmed.StartsWith("\"", StringComparison.Ordinal))
+        {
+            var endQuote = trimmed.IndexOf('"', 1);
+            if (endQuote > 1)
+            {
+                var candidate = trimmed.Substring(1, endQuote - 1);
+                candidate = Environment.ExpandEnvironmentVariables(candidate);
+                return candidate;
+            }
+        }
+
+        var parts = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length > 0)
+        {
+            var candidate = Environment.ExpandEnvironmentVariables(parts[0]);
+            if (candidate.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                return candidate;
             }
         }
 

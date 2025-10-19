@@ -6,6 +6,7 @@
     <UserControl.Resources>
         <conv:StringHasValueConverter x:Key="StringHasValueConverter" />
         <conv:BooleanNotConverter x:Key="BooleanNotConverter" />
+        <SolidColorBrush x:Key="SecondaryTextBrush" Color="#606060" />
     </UserControl.Resources>
     <Grid ColumnDefinitions="2*,3*" RowDefinitions="Auto,*" Margin="16" RowSpacing="12" ColumnSpacing="12">
         <TextBlock Text="Browsers &amp; Profiles" FontSize="20" FontWeight="SemiBold" Grid.ColumnSpan="2" />
@@ -20,7 +21,7 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <TextBlock Text="{Binding Name}" />
-                                <TextBlock Text="(Default)" IsVisible="{Binding IsDefault}" Foreground="{DynamicResource SystemControlForegroundAccentBrush}" />
+                                <TextBlock Text="(Default)" IsVisible="{Binding IsDefault}" Foreground="{StaticResource SecondaryTextBrush}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -48,7 +49,7 @@
                                     <DataTemplate>
                                         <StackPanel>
                                             <TextBlock Text="{Binding Name}" />
-                                            <TextBlock Text="{Binding Path}" FontSize="12" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                                            <TextBlock Text="{Binding Path}" FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
@@ -64,7 +65,7 @@
                                     <DataTemplate>
                                         <StackPanel>
                                             <TextBlock Text="{Binding DisplayName}" />
-                                            <TextBlock Text="{Binding UserDataDir}" FontSize="12" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" IsVisible="{Binding UserDataDir, Converter={StaticResource StringHasValueConverter}}" />
+                                            <TextBlock Text="{Binding UserDataDir}" FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" IsVisible="{Binding UserDataDir, Converter={StaticResource StringHasValueConverter}}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
