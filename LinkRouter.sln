@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Settings.Core", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Settings.Avalonia", "LinkRouter.Settings.Avalonia\LinkRouter.Settings.Avalonia.csproj", "{1301BB17-B2A3-4711-BA1A-11BD56800A7D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Settings.Avalonia.Tests", "LinkRouter.Settings.Avalonia.Tests\LinkRouter.Settings.Avalonia.Tests.csproj", "{38685A29-44F1-4F36-B451-F64473C59311}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,9 +66,21 @@ Global
 		{1301BB17-B2A3-4711-BA1A-11BD56800A7D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1301BB17-B2A3-4711-BA1A-11BD56800A7D}.Release|x64.ActiveCfg = Release|Any CPU
 		{1301BB17-B2A3-4711-BA1A-11BD56800A7D}.Release|x64.Build.0 = Release|Any CPU
-		{1301BB17-B2A3-4711-BA1A-11BD56800A7D}.Release|x86.ActiveCfg = Release|Any CPU
-		{1301BB17-B2A3-4711-BA1A-11BD56800A7D}.Release|x86.Build.0 = Release|Any CPU
-	EndGlobalSection
+                {1301BB17-B2A3-4711-BA1A-11BD56800A7D}.Release|x86.ActiveCfg = Release|Any CPU
+                {1301BB17-B2A3-4711-BA1A-11BD56800A7D}.Release|x86.Build.0 = Release|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Debug|x64.ActiveCfg = Debug|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Debug|x64.Build.0 = Debug|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Debug|x86.ActiveCfg = Debug|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Debug|x86.Build.0 = Debug|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Release|Any CPU.Build.0 = Release|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Release|x64.ActiveCfg = Release|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Release|x64.Build.0 = Release|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Release|x86.ActiveCfg = Release|Any CPU
+                {38685A29-44F1-4F36-B451-F64473C59311}.Release|x86.Build.0 = Release|Any CPU
+        EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
