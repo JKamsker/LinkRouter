@@ -13,6 +13,8 @@ using Avalonia.Threading;
 using Avalonia.Themes.Simple;
 using Avalonia.Headless.XUnit;
 using FluentAvalonia.UI.Controls;
+using FluentAvalonia.Styling;
+using FluentAvalonia.UI.Windowing;
 using LinkRouter.Settings.Avalonia.Views;
 using LinkRouter.Settings.ViewModels;
 using Xunit;
@@ -70,7 +72,7 @@ public class RulesWorkspacePageTests
         var app = Application.Current ?? throw new InvalidOperationException("Avalonia application not initialized.");
         var originalStyles = app.Styles.ToArray();
         app.Styles.Clear();
-        app.Styles.Add(new SimpleTheme());
+        app.Styles.Add(new FluentAvaloniaTheme());
 
         var window = new Window
         {
@@ -99,6 +101,62 @@ public class RulesWorkspacePageTests
 
         Assert.True(dialog.ShowInvoked);
         Assert.NotNull(dialog.CapturedOwner);
+    }
+
+    [AvaloniaFact(Timeout = 30_000)]
+    public async Task ShowRuleEditorAsync_WithRealDialog_DoesNotThrow()
+    {
+        var app = Application.Current ?? throw new InvalidOperationException("Avalonia application not initialized.");
+        var originalStyles = app.Styles.ToArray();
+        app.Styles.Clear();
+        app.Styles.Add(new SimpleTheme());
+
+        var viewModel = new RulesViewModel
+        {
+            SelectedRule = new RuleEditorViewModel
+            {
+                Match = "domain",
+                Pattern = "example.com"
+            }
+        };
+
+        var page = new RulesWorkspacePage
+        {
+            DataContext = viewModel,
+        };
+
+        page.DialogFactory = () => new RealRuleEditorDialogAdapter(new RuleEditorDialog());
+
+        var host = new DialogHost
+        {
+            Content = page
+        };
+
+        var window = new AppWindow
+        {
+            Template = SimpleAppWindowTemplate,
+            Content = host
+        };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        try
+        {
+            var exception = await Record.ExceptionAsync(() => page.ShowRuleEditorAsync());
+            Assert.Null(exception);
+        }
+        finally
+        {
+            window.Close();
+            Dispatcher.UIThread.RunJobs();
+
+            app.Styles.Clear();
+            foreach (var style in originalStyles)
+            {
+                app.Styles.Add(style);
+            }
+        }
     }
 
     [AvaloniaFact(Timeout = 30_000)]
@@ -199,10 +257,53 @@ public class RulesWorkspacePageTests
         }
     }
 
+    private sealed class RealRuleEditorDialogAdapter : IRuleEditorDialog
+    {
+        private readonly RuleEditorDialog _dialog;
+
+        public RealRuleEditorDialogAdapter(RuleEditorDialog dialog)
+        {
+            _dialog = dialog;
+        }
+
+        public void Configure(RuleEditorViewModel rule, IEnumerable<string> matchTypes, IEnumerable<string> profileOptions)
+        {
+            _dialog.Configure(rule, matchTypes, profileOptions);
+        }
+
+        public async Task ShowAsync(Window? owner)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => _dialog.ApplyTemplate(), DispatcherPriority.Loaded);
+            Dispatcher.UIThread.Post(() => _dialog.Hide(), DispatcherPriority.Background);
+            await _dialog.ShowAsync(owner);
+        }
+    }
+
     private static FuncControlTemplate<Window> SimpleWindowTemplate { get; } = new((owner, _) =>
     {
         var presenter = new ContentPresenter();
         presenter.Bind(ContentPresenter.ContentProperty, owner.GetObservable(ContentControl.ContentProperty));
         return presenter;
     });
+
+    private static FuncControlTemplate<AppWindow> SimpleAppWindowTemplate { get; } = new((owner, scope) =>
+    {
+        var presenter = new ContentPresenter();
+        presenter.Bind(ContentPresenter.ContentProperty, owner.GetObservable(ContentControl.ContentProperty));
+
+        var layerManager = new VisualLayerManager
+        {
+            Child = presenter
+        };
+
+        var overlay = layerManager.OverlayLayer;
+        if (overlay is not null)
+        {
+            overlay.Name = "OverlayLayer";
+            scope?.Register("OverlayLayer", overlay);
+        }
+
+        return layerManager;
+    });
+
 }
