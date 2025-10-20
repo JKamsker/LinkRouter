@@ -14,4 +14,6 @@ public sealed class NavigationItemViewModel
     public string Title { get; }
 
     public object Content { get; }
+
+    public override string ToString() => Title;
 }

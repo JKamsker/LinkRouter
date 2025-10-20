@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,8 @@ public partial class ProfilesViewModel : ObservableObject
     private readonly ConfigurationState _state;
     private readonly BrowserDetectionService _detector;
     private string? _systemDefaultBrowserPath;
+    private string? _lastSelectedProfileName;
+    private int _lastSelectedProfileIndex;
 
     [ObservableProperty]
     private ProfileEditorViewModel? _selectedProfile;
@@ -72,6 +75,7 @@ public partial class ProfilesViewModel : ObservableObject
         _detector = detector;
         RefreshDetections();
         _state.PropertyChanged += OnStatePropertyChanged;
+        _state.StateChanged += OnStateChanged;
     }
 
     private void RefreshDetections()
@@ -97,8 +101,28 @@ public partial class ProfilesViewModel : ObservableObject
 
     partial void OnDetectionErrorChanged(string? value) => OnPropertyChanged(nameof(HasDetectionError));
 
+    partial void OnSelectedProfileChanging(ProfileEditorViewModel? value)
+    {
+        if (SelectedProfile is not null)
+        {
+            SelectedProfile.PropertyChanged -= OnSelectedProfilePropertyChanged;
+        }
+    }
+
     partial void OnSelectedProfileChanged(ProfileEditorViewModel? value)
     {
+        if (value is not null)
+        {
+            value.PropertyChanged += OnSelectedProfilePropertyChanged;
+            var index = Profiles.IndexOf(value);
+            if (index >= 0)
+            {
+                _lastSelectedProfileIndex = index;
+            }
+
+            _lastSelectedProfileName = value.Name;
+        }
+
         SyncSelectionsWithProfile();
         EnsureDefaultSelections();
     }
@@ -361,6 +385,11 @@ public partial class ProfilesViewModel : ObservableObject
         }
     }
 
+    private void OnStateChanged(object? sender, EventArgs e)
+    {
+        RestoreSelectedProfile();
+    }
+
     private void EnsureDefaultSelections()
     {
         EnsureDefaultBrowserSelection();
@@ -447,6 +476,52 @@ public partial class ProfilesViewModel : ObservableObject
         else if (SelectedBrowser?.Family == BrowserFamily.Chromium && string.IsNullOrWhiteSpace(SelectedProfile.Profile))
         {
             SelectedProfile.Profile = "Default";
+        }
+    }
+
+    private void RestoreSelectedProfile()
+    {
+        if (Profiles.Count == 0)
+        {
+            if (SelectedProfile is not null)
+            {
+                SelectedProfile = null;
+            }
+            return;
+        }
+
+        ProfileEditorViewModel? target = null;
+
+        if (!string.IsNullOrWhiteSpace(_lastSelectedProfileName))
+        {
+            target = Profiles.FirstOrDefault(p =>
+                string.Equals(p.Name, _lastSelectedProfileName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (target is null && _lastSelectedProfileIndex >= 0 && _lastSelectedProfileIndex < Profiles.Count)
+        {
+            target = Profiles[_lastSelectedProfileIndex];
+        }
+
+        target ??= Profiles[0];
+
+        if (!ReferenceEquals(target, SelectedProfile))
+        {
+            SelectedProfile = target;
+        }
+        else
+        {
+            SyncSelectionsWithProfile();
+            EnsureDefaultSelections();
+        }
+    }
+
+    private void OnSelectedProfilePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is ProfileEditorViewModel profile
+            && e.PropertyName == nameof(ProfileEditorViewModel.Name))
+        {
+            _lastSelectedProfileName = profile.Name;
         }
     }
 

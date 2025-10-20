@@ -5,6 +5,9 @@
         <Thickness x:Key="SettingsCardBodyPadding">0</Thickness>
         <x:Double x:Key="SettingsPageSpacing">24</x:Double>
         <x:Double x:Key="SettingsCardSpacing">20</x:Double>
+        <SolidColorBrush x:Key="SettingsFooterBackgroundBrush" Color="#0F000000" />
+        <SolidColorBrush x:Key="SettingsFooterBorderBrush" Color="#33000000" />
+        <Thickness x:Key="SettingsFooterPadding">24,16</Thickness>
     </Styles.Resources>
 
     <Style Selector="TextBlock.PageTitle">

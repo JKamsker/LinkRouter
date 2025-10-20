@@ -17,6 +17,7 @@ public partial class RulesViewModel : ObservableObject
     private readonly ConfigurationState _state;
     private readonly RuleTestService _tester;
     private readonly List<string> _profileOptions = new();
+    private int _lastSelectedRuleIndex;
 
     [ObservableProperty]
     private RuleEditorViewModel? _selectedRule;
@@ -240,6 +241,7 @@ public partial class RulesViewModel : ObservableObject
         RefreshProfileOptions();
         OnPropertyChanged(nameof(HasSelectedRule));
         NotifyActionCommandStates();
+        RestoreSelectedRule();
     }
 
     partial void OnSelectedRuleChanging(RuleEditorViewModel? value)
@@ -255,6 +257,11 @@ public partial class RulesViewModel : ObservableObject
         if (value is not null)
         {
             value.PropertyChanged += OnSelectedRulePropertyChanged;
+            var index = Rules.IndexOf(value);
+            if (index >= 0)
+            {
+                _lastSelectedRuleIndex = index;
+            }
         }
 
         if (!ReferenceEquals(value, ActiveEditor?.TargetRule))
@@ -278,6 +285,34 @@ public partial class RulesViewModel : ObservableObject
     partial void OnActiveEditorChanged(RuleEditorDialogViewModel? value)
     {
         OnPropertyChanged(nameof(IsEditorOpen));
+    }
+
+    private void RestoreSelectedRule()
+    {
+        if (Rules.Count == 0)
+        {
+            if (SelectedRule is not null)
+            {
+                SelectedRule = null;
+            }
+            return;
+        }
+
+        if (_lastSelectedRuleIndex < 0)
+        {
+            _lastSelectedRuleIndex = 0;
+        }
+
+        if (_lastSelectedRuleIndex >= Rules.Count)
+        {
+            _lastSelectedRuleIndex = Rules.Count - 1;
+        }
+
+        var target = Rules[_lastSelectedRuleIndex];
+        if (!ReferenceEquals(target, SelectedRule))
+        {
+            SelectedRule = target;
+        }
     }
 
     private bool CanModifyRule(RuleEditorViewModel? rule) => rule is not null;

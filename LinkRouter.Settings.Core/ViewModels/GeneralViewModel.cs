@@ -182,6 +182,24 @@ public partial class GeneralViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task DiscardChangesAsync()
+    {
+        ErrorMessage = null;
+        StatusMessage = null;
+
+        try
+        {
+            var document = await _configService.LoadAsync();
+            _state.Load(document);
+            StatusMessage = "Changes discarded.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    [RelayCommand]
     private async Task RegisterAsync()
     {
         ErrorMessage = null;

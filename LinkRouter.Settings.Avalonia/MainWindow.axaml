@@ -36,6 +36,7 @@
     </Window.DataTemplates>
 
     <fa:NavigationView MenuItemsSource="{Binding NavigationItems}"
+                       FooterMenuItemsSource="{Binding FooterItems}"
                        SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                        PaneDisplayMode="Left"
                        IsBackButtonVisible="False"
@@ -46,8 +47,31 @@
                 <fa:NavigationViewItem Content="{Binding Title}" />
             </DataTemplate>
         </fa:NavigationView.MenuItemTemplate>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <ContentControl Margin="0"
-                        Content="{Binding CurrentPage}" />
+            <ContentControl Margin="0"
+                            Content="{Binding CurrentPage}" />
+
+            <Border Grid.Row="1"
+                    Background="{StaticResource SettingsFooterBackgroundBrush}"
+                    BorderBrush="{StaticResource SettingsFooterBorderBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="{StaticResource SettingsFooterPadding}">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="12">
+                    <Button Content="Discard changes"
+                            Command="{Binding General.DiscardChangesCommand}"
+                            IsEnabled="{Binding General.HasUnsavedChanges}" />
+                    <Button Content="Save changes"
+                            Command="{Binding General.SaveCommand}"
+                            IsEnabled="{Binding General.CanSave}" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </fa:NavigationView>
 </Window>

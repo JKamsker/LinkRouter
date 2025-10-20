@@ -10,6 +10,8 @@ public partial class MainWindowViewModel : ObservableObject
     private NavigationItemViewModel? _selectedItem;
     private object? _currentPage;
 
+    public GeneralViewModel General { get; }
+
     public MainWindowViewModel(
         GeneralViewModel general,
         RulesViewModel rules,
@@ -18,13 +20,17 @@ public partial class MainWindowViewModel : ObservableObject
         AdvancedViewModel advanced,
         AboutViewModel about)
     {
+        General = general;
         NavigationItems = new ObservableCollection<NavigationItemViewModel>
         {
             new("overview", "Overview", general),
             new("rules", "Rules", rules),
             new("profiles", "Browsers & Profiles", profiles),
             new("import", "Import / Export", importExport),
-            new("advanced", "Advanced", advanced),
+            new("advanced", "Advanced", advanced)
+        };
+        FooterItems = new ObservableCollection<NavigationItemViewModel>
+        {
             new("about", "About", about)
         };
 
@@ -32,6 +38,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
+    public ObservableCollection<NavigationItemViewModel> FooterItems { get; }
 
     public NavigationItemViewModel? SelectedItem
     {
