@@ -9,13 +9,30 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
 public partial class ImportExportViewModel : ObservableObject
 {
+    private static readonly FilePickerOptions ImportFilePickerOptions = new(
+        "Select configuration to import",
+        new[]
+        {
+            new FilePickerFileType("JSON files", new[] { "*.json" })
+        });
+
+    private static readonly FilePickerOptions ExportFilePickerOptions = new(
+        "Choose export destination",
+        new[]
+        {
+            new FilePickerFileType("JSON files", new[] { "*.json" })
+        },
+        "linkrouter-config.json");
+
     private readonly ConfigService _configService;
     private readonly ConfigurationState _state;
+    private readonly IFilePickerService _filePickerService;
 
     [ObservableProperty]
     private string _importPath = string.Empty;
@@ -35,10 +52,11 @@ public partial class ImportExportViewModel : ObservableObject
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
-    public ImportExportViewModel(ConfigService configService, ConfigurationState state)
+    public ImportExportViewModel(ConfigService configService, ConfigurationState state, IFilePickerService filePickerService)
     {
         _configService = configService;
         _state = state;
+        _filePickerService = filePickerService;
         RefreshBackups();
         _state.StateChanged += (_, _) => RefreshBackups();
     }
@@ -56,6 +74,28 @@ public partial class ImportExportViewModel : ObservableObject
     }
 
     partial void OnErrorChanged(string? value) => OnPropertyChanged(nameof(HasError));
+
+    [RelayCommand]
+    private async Task BrowseImportPathAsync()
+    {
+        var path = await _filePickerService.PickOpenFileAsync(ImportFilePickerOptions).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            ImportPath = path;
+            Error = null;
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseExportPathAsync()
+    {
+        var path = await _filePickerService.PickSaveFileAsync(ExportFilePickerOptions).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            ExportPath = path;
+            Error = null;
+        }
+    }
 
     [RelayCommand]
     private async Task AnalyzeImportAsync()
