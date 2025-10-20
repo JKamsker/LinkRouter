@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -16,6 +17,7 @@ public partial class ImportExportViewModel : ObservableObject
 {
     private readonly ConfigService _configService;
     private readonly ConfigurationState _state;
+    private readonly IFilePickerService _filePickerService;
 
     [ObservableProperty]
     private string _importPath = string.Empty;
@@ -35,10 +37,14 @@ public partial class ImportExportViewModel : ObservableObject
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
-    public ImportExportViewModel(ConfigService configService, ConfigurationState state)
+    public ImportExportViewModel(
+        ConfigService configService,
+        ConfigurationState state,
+        IFilePickerService filePickerService)
     {
         _configService = configService;
         _state = state;
+        _filePickerService = filePickerService;
         RefreshBackups();
         _state.StateChanged += (_, _) => RefreshBackups();
     }
@@ -187,6 +193,43 @@ public partial class ImportExportViewModel : ObservableObject
         catch (Exception ex)
         {
             Error = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseImportAsync()
+    {
+        var options = new FilePickerOptions(
+            "Select configuration to import",
+            new[] { new FilePickerFileType("JSON files", new[] { "*.json" }) });
+
+        var path = await _filePickerService.PickOpenFileAsync(options).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            ImportPath = path;
+            Error = null;
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseExportAsync()
+    {
+        var suggested = Path.GetFileName(_configService.ConfigPath);
+        if (string.IsNullOrWhiteSpace(suggested))
+        {
+            suggested = "linkrouter-settings.json";
+        }
+
+        var options = new FilePickerOptions(
+            "Choose export destination",
+            new[] { new FilePickerFileType("JSON files", new[] { "*.json" }) },
+            suggested);
+
+        var path = await _filePickerService.PickSaveFileAsync(options).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            ExportPath = path;
+            Error = null;
         }
     }
 
