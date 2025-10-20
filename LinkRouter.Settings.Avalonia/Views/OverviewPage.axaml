@@ -19,10 +19,15 @@
                             <TextBlock Text="Last modified" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding LastModifiedDisplay}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Content="Save configuration" Command="{Binding SaveCommand}" />
+                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                            <Button Content="Save configuration"
+                                    Command="{Binding SaveCommand}"
+                                    IsEnabled="{Binding CanSave}" />
                             <Button Content="Open folder" Command="{Binding OpenConfigFolderCommand}" />
                             <Button Content="Copy path" Command="{Binding CopyConfigPathCommand}" />
+                            <ProgressBar Width="140"
+                                         IsIndeterminate="True"
+                                         IsVisible="{Binding IsSaving}" />
                         </StackPanel>
                     </StackPanel>
                 </Border>

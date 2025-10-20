@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkRouter;
 using LinkRouter.Settings.Services;
+using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.ViewModels;
 
@@ -16,6 +17,7 @@ public partial class ImportExportViewModel : ObservableObject
 {
     private readonly ConfigService _configService;
     private readonly ConfigurationState _state;
+    private readonly IFilePickerService _filePickerService;
 
     [ObservableProperty]
     private string _importPath = string.Empty;
@@ -35,10 +37,11 @@ public partial class ImportExportViewModel : ObservableObject
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
-    public ImportExportViewModel(ConfigService configService, ConfigurationState state)
+    public ImportExportViewModel(ConfigService configService, ConfigurationState state, IFilePickerService filePickerService)
     {
         _configService = configService;
         _state = state;
+        _filePickerService = filePickerService;
         RefreshBackups();
         _state.StateChanged += (_, _) => RefreshBackups();
     }
@@ -56,6 +59,28 @@ public partial class ImportExportViewModel : ObservableObject
     }
 
     partial void OnErrorChanged(string? value) => OnPropertyChanged(nameof(HasError));
+
+    [RelayCommand]
+    private async Task BrowseImportAsync()
+    {
+        Error = null;
+
+        try
+        {
+            var options = new FilePickerOptions(
+                "Select configuration",
+                new[] { new FilePickerFileType("JSON files", new[] { "*.json" }) });
+            var path = await _filePickerService.PickOpenFileAsync(options).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                ImportPath = path;
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+    }
 
     [RelayCommand]
     private async Task AnalyzeImportAsync()
@@ -150,6 +175,29 @@ public partial class ImportExportViewModel : ObservableObject
 
             await File.WriteAllTextAsync(ExportPath, json, Encoding.UTF8);
             DiffSummary = $"Exported to {ExportPath}.";
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseExportAsync()
+    {
+        Error = null;
+
+        try
+        {
+            var options = new FilePickerOptions(
+                "Choose export location",
+                new[] { new FilePickerFileType("JSON files", new[] { "*.json" }) },
+                "linkrouter-settings.json");
+            var path = await _filePickerService.PickSaveFileAsync(options).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                ExportPath = path;
+            }
         }
         catch (Exception ex)
         {

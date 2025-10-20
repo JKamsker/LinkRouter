@@ -49,6 +49,7 @@ public partial class GeneralViewModel : ObservableObject
     public bool HasUnsavedChanges => _state.HasUnsavedChanges;
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
     public string LastModifiedDisplay => LastModified?.ToLocalTime().ToString("G") ?? string.Empty;
+    public bool CanSave => HasUnsavedChanges && !IsSaving;
 
     public GeneralViewModel(
         ConfigService configService,
@@ -71,6 +72,7 @@ public partial class GeneralViewModel : ObservableObject
     {
         LoadMetadata();
         OnPropertyChanged(nameof(HasUnsavedChanges));
+        OnPropertyChanged(nameof(CanSave));
 
         if (_state.HasUnsavedChanges)
         {
@@ -152,7 +154,7 @@ public partial class GeneralViewModel : ObservableObject
     private async Task SaveAsync()
     {
         ErrorMessage = null;
-        StatusMessage = null;
+        StatusMessage = "Saving...";
         IsSaving = true;
 
         try
@@ -234,6 +236,11 @@ public partial class GeneralViewModel : ObservableObject
     partial void OnErrorMessageChanged(string? value)
     {
         OnPropertyChanged(nameof(HasError));
+    }
+
+    partial void OnIsSavingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanSave));
     }
 
     partial void OnLastModifiedChanged(DateTime? value)
