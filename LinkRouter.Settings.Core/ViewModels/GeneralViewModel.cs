@@ -47,6 +47,7 @@ public partial class GeneralViewModel : ObservableObject
 
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
     public bool HasUnsavedChanges => _state.HasUnsavedChanges;
+    public bool CanSave => HasUnsavedChanges && !IsSaving;
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
     public string LastModifiedDisplay => LastModified?.ToLocalTime().ToString("G") ?? string.Empty;
 
@@ -71,6 +72,7 @@ public partial class GeneralViewModel : ObservableObject
     {
         LoadMetadata();
         OnPropertyChanged(nameof(HasUnsavedChanges));
+        OnPropertyChanged(nameof(CanSave));
 
         if (_state.HasUnsavedChanges)
         {
@@ -154,6 +156,7 @@ public partial class GeneralViewModel : ObservableObject
         ErrorMessage = null;
         StatusMessage = null;
         IsSaving = true;
+        StatusMessage = "Saving...";
 
         try
         {
@@ -171,6 +174,11 @@ public partial class GeneralViewModel : ObservableObject
         {
             IsSaving = false;
         }
+    }
+
+    partial void OnIsSavingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanSave));
     }
 
     [RelayCommand]

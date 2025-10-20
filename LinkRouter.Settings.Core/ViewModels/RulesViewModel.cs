@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -39,7 +40,9 @@ public partial class RulesViewModel : ObservableObject
         _state = state;
         _tester = tester;
         _state.StateChanged += OnStateChanged;
+        _state.Rules.CollectionChanged += OnRulesCollectionChanged;
         RefreshProfileOptions();
+        NotifyActionCommandStates();
     }
 
     public ObservableCollection<RuleEditorViewModel> Rules => _state.Rules;
@@ -62,7 +65,7 @@ public partial class RulesViewModel : ObservableObject
         SelectedRule = vm;
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanModifyRule))]
     private void DeleteRule(RuleEditorViewModel? rule)
     {
         if (rule is null)
@@ -77,7 +80,7 @@ public partial class RulesViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanModifyRule))]
     private void DuplicateRule(RuleEditorViewModel? rule)
     {
         if (rule is null)
@@ -91,7 +94,7 @@ public partial class RulesViewModel : ObservableObject
         SelectedRule = clone;
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanMoveUp))]
     private void MoveUp(RuleEditorViewModel? rule)
     {
         if (rule is null)
@@ -104,9 +107,11 @@ public partial class RulesViewModel : ObservableObject
         {
             _state.MoveRule(index, index - 1);
         }
+
+        NotifyActionCommandStates();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanMoveDown))]
     private void MoveDown(RuleEditorViewModel? rule)
     {
         if (rule is null)
@@ -119,9 +124,11 @@ public partial class RulesViewModel : ObservableObject
         {
             _state.MoveRule(index, index + 1);
         }
+
+        NotifyActionCommandStates();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanTestRule))]
     private void TestRule()
     {
         TestError = null;
@@ -180,7 +187,7 @@ public partial class RulesViewModel : ObservableObject
             return Task.CompletedTask;
         }
 
-        if (!ReferenceEquals(ActiveEditor?.Rule, SelectedRule))
+        if (!ReferenceEquals(ActiveEditor?.TargetRule, SelectedRule))
         {
             ActiveEditor = new RuleEditorDialogViewModel(SelectedRule, MatchTypes, ProfileOptions);
         }
@@ -189,8 +196,26 @@ public partial class RulesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void CloseEditor()
+    private void SaveEditor()
     {
+        if (ActiveEditor is null)
+        {
+            return;
+        }
+
+        ActiveEditor.CommitChanges();
+        ActiveEditor = null;
+    }
+
+    [RelayCommand]
+    private void CancelEditor()
+    {
+        if (ActiveEditor is null)
+        {
+            return;
+        }
+
+        ActiveEditor.ResetChanges();
         ActiveEditor = null;
     }
 
@@ -214,6 +239,7 @@ public partial class RulesViewModel : ObservableObject
     {
         RefreshProfileOptions();
         OnPropertyChanged(nameof(HasSelectedRule));
+        NotifyActionCommandStates();
     }
 
     partial void OnSelectedRuleChanging(RuleEditorViewModel? value)
@@ -231,13 +257,14 @@ public partial class RulesViewModel : ObservableObject
             value.PropertyChanged += OnSelectedRulePropertyChanged;
         }
 
-        if (!ReferenceEquals(value, ActiveEditor?.Rule))
+        if (!ReferenceEquals(value, ActiveEditor?.TargetRule))
         {
             ActiveEditor = null;
         }
 
         OnPropertyChanged(nameof(HasSelectedRule));
         ClearUseProfileCommand.NotifyCanExecuteChanged();
+        NotifyActionCommandStates();
     }
 
     private void OnSelectedRulePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -251,5 +278,45 @@ public partial class RulesViewModel : ObservableObject
     partial void OnActiveEditorChanged(RuleEditorDialogViewModel? value)
     {
         OnPropertyChanged(nameof(IsEditorOpen));
+    }
+
+    private bool CanModifyRule(RuleEditorViewModel? rule) => rule is not null;
+
+    private bool CanMoveUp(RuleEditorViewModel? rule)
+    {
+        if (rule is null)
+        {
+            return false;
+        }
+
+        var index = Rules.IndexOf(rule);
+        return index > 0;
+    }
+
+    private bool CanMoveDown(RuleEditorViewModel? rule)
+    {
+        if (rule is null)
+        {
+            return false;
+        }
+
+        var index = Rules.IndexOf(rule);
+        return index >= 0 && index < Rules.Count - 1;
+    }
+
+    private bool CanTestRule() => SelectedRule is not null;
+
+    private void NotifyActionCommandStates()
+    {
+        DeleteRuleCommand.NotifyCanExecuteChanged();
+        DuplicateRuleCommand.NotifyCanExecuteChanged();
+        MoveUpCommand.NotifyCanExecuteChanged();
+        MoveDownCommand.NotifyCanExecuteChanged();
+        TestRuleCommand.NotifyCanExecuteChanged();
+    }
+
+    private void OnRulesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        NotifyActionCommandStates();
     }
 }
