@@ -1,6 +1,9 @@
+using System.Linq;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactivity;
 using FluentAvalonia.UI.Controls;
 
@@ -15,6 +18,9 @@ public sealed class NavigationViewAutoCollapseBehavior : Behavior<NavigationView
 {
     private bool _hasUserInvokedItem;
     private bool _awaitingPointerExit;
+    private bool _suspendAutoCollapse;
+    private bool _isProgrammaticPaneChange;
+    private bool _userToggledPane;
 
     public static readonly StyledProperty<double> HoverActivationMarginProperty =
         AvaloniaProperty.Register<NavigationViewAutoCollapseBehavior, double>(
@@ -46,7 +52,10 @@ public sealed class NavigationViewAutoCollapseBehavior : Behavior<NavigationView
         }
 
         // Ensure the pane starts expanded for the initial view.
-        navigationView.IsPaneOpen = true;
+        SetPaneOpen(navigationView, true);
+
+        navigationView.PaneOpening += OnPaneOpening;
+        navigationView.PaneClosing += OnPaneClosing;
 
         navigationView.AddHandler(
             InputElement.PointerMovedEvent,
@@ -66,6 +75,8 @@ public sealed class NavigationViewAutoCollapseBehavior : Behavior<NavigationView
     {
         if (AssociatedObject is { } navigationView)
         {
+            navigationView.PaneOpening -= OnPaneOpening;
+            navigationView.PaneClosing -= OnPaneClosing;
             navigationView.RemoveHandler(InputElement.PointerMovedEvent, OnPointerMoved);
             navigationView.RemoveHandler(InputElement.PointerExitedEvent, OnPointerExited);
             navigationView.SelectionChanged -= OnSelectionChanged;
@@ -85,19 +96,29 @@ public sealed class NavigationViewAutoCollapseBehavior : Behavior<NavigationView
         }
 
         var pointerPosition = e.GetPosition(navigationView);
-
         if (!navigationView.IsPaneOpen)
         {
+            if (_awaitingPointerExit && pointerPosition.X > navigationView.CompactPaneLength + HoverActivationMargin)
+            {
+                _awaitingPointerExit = false;
+            }
+
             var activationWidth = navigationView.CompactPaneLength + HoverActivationMargin;
             if (!_awaitingPointerExit &&
                 pointerPosition.X <= activationWidth &&
                 pointerPosition.X >= -HoverActivationMargin)
             {
-                navigationView.IsPaneOpen = true;
+                SetPaneOpen(navigationView, true);
             }
         }
         else
         {
+            // Don't auto-collapse if user manually toggled pane or auto-collapse is suspended
+            if (_suspendAutoCollapse || _userToggledPane)
+            {
+                return;
+            }
+
             if (!_hasUserInvokedItem)
             {
                 return;
@@ -108,7 +129,7 @@ public sealed class NavigationViewAutoCollapseBehavior : Behavior<NavigationView
                 pointerPosition.Y < -CollapseProximityMargin ||
                 pointerPosition.Y > navigationView.Bounds.Height + CollapseProximityMargin)
             {
-                navigationView.IsPaneOpen = false;
+                SetPaneOpen(navigationView, false);
             }
         }
     }
@@ -116,6 +137,11 @@ public sealed class NavigationViewAutoCollapseBehavior : Behavior<NavigationView
     private void OnPointerExited(object? sender, PointerEventArgs e)
     {
         if (e.Pointer.Type != PointerType.Mouse)
+        {
+            return;
+        }
+
+        if (_suspendAutoCollapse || _userToggledPane)
         {
             return;
         }
@@ -140,26 +166,78 @@ public sealed class NavigationViewAutoCollapseBehavior : Behavior<NavigationView
     private void OnItemInvoked(object? sender, NavigationViewItemInvokedEventArgs e)
     {
         _hasUserInvokedItem = true;
+        _suspendAutoCollapse = false;
+        _userToggledPane = false; // Reset manual toggle state when navigating
         CollapsePane(waitForPointerExit: true);
     }
 
-    private void CollapsePane(bool waitForPointerExit = false)
+    private void OnPaneOpening(NavigationView sender, object args)
     {
-        if (!_hasUserInvokedItem ||
-            AssociatedObject is not { } navigationView ||
+        if (_isProgrammaticPaneChange)
+        {
+            return;
+        }
+
+        // User manually toggled the pane open
+        _userToggledPane = true;
+        _suspendAutoCollapse = true;
+        _awaitingPointerExit = false;
+    }
+
+    private void OnPaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args)
+    {
+        if (_isProgrammaticPaneChange)
+        {
+            return;
+        }
+
+        // User manually toggled the pane closed
+        _userToggledPane = false;
+        _suspendAutoCollapse = false;
+    }
+
+    private void CollapsePane(bool waitForPointerExit = false, bool force = false)
+    {
+        if (AssociatedObject is not { } navigationView ||
             navigationView.PaneDisplayMode != NavigationViewPaneDisplayMode.Left)
         {
             return;
         }
 
+        if (!force)
+        {
+            if (!_hasUserInvokedItem || _suspendAutoCollapse)
+            {
+                return;
+            }
+        }
+
         if (navigationView.IsPaneOpen)
         {
-            navigationView.IsPaneOpen = false;
+            SetPaneOpen(navigationView, false);
         }
 
         if (waitForPointerExit)
         {
             _awaitingPointerExit = true;
+        }
+    }
+
+    private void SetPaneOpen(NavigationView navigationView, bool isOpen)
+    {
+        if (navigationView.IsPaneOpen == isOpen)
+        {
+            return;
+        }
+
+        _isProgrammaticPaneChange = true;
+        try
+        {
+            navigationView.IsPaneOpen = isOpen;
+        }
+        finally
+        {
+            _isProgrammaticPaneChange = false;
         }
     }
 }
