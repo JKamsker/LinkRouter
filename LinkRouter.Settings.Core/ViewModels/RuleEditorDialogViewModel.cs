@@ -11,10 +11,13 @@ public partial class RuleEditorDialogViewModel : ObservableObject
         IEnumerable<string> matchTypes,
         IEnumerable<string> profileOptions)
     {
-        Rule = rule;
+        OriginalRule = rule;
+        Rule = rule.Clone();
         MatchTypes = new List<string>(matchTypes);
         ProfileOptions = new List<string>(profileOptions);
     }
+
+    public RuleEditorViewModel OriginalRule { get; }
 
     public RuleEditorViewModel Rule { get; }
 
@@ -26,5 +29,18 @@ public partial class RuleEditorDialogViewModel : ObservableObject
     private void ClearUseProfile()
     {
         Rule.UseProfile = null;
+    }
+
+    public void CommitEdits()
+    {
+        OriginalRule.Enabled = Rule.Enabled;
+        OriginalRule.Match = Rule.Match;
+        OriginalRule.Pattern = Rule.Pattern;
+        OriginalRule.Browser = Rule.Browser;
+        OriginalRule.ArgsTemplate = Rule.ArgsTemplate;
+        OriginalRule.Profile = Rule.Profile;
+        OriginalRule.UserDataDir = Rule.UserDataDir;
+        OriginalRule.WorkingDirectory = Rule.WorkingDirectory;
+        OriginalRule.UseProfile = Rule.UseProfile;
     }
 }
