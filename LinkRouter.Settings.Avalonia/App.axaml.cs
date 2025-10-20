@@ -34,17 +34,20 @@ public partial class App : Application
                 .GetResult();
 
             desktop.MainWindow = Services.GetRequiredService<MainWindow>();
+            Services.GetRequiredService<SettingsTrayIconService>();
         }
 
         base.OnFrameworkInitializationCompleted();
     }
 
-    private static void ConfigureServices(IServiceCollection services, IClassicDesktopStyleApplicationLifetime desktop)
+    internal static void ConfigureServices(IServiceCollection services, IClassicDesktopStyleApplicationLifetime desktop)
     {
         services.AddSingleton<ConfigService>();
         services.AddSingleton<RuleTestService>();
         services.AddSingleton<BrowserDetectionService>();
         services.AddSingleton<ConfigurationState>();
+
+        services.AddSingleton<IClassicDesktopStyleApplicationLifetime>(desktop);
 
         services.AddSingleton<IClipboardService>(_ => new AvaloniaClipboardService(() => desktop.MainWindow));
         services.AddSingleton<IShellService, AvaloniaShellService>();
@@ -53,6 +56,7 @@ public partial class App : Application
         services.AddSingleton<IRuleEditorDialogService>(_ => new RuleEditorDialogService(() => desktop.MainWindow));
 
         services.AddSingleton<AppInitializationService>();
+        services.AddSingleton<SettingsTrayIconService>();
 
         services.AddSingleton<GeneralViewModel>();
         services.AddSingleton<RulesViewModel>();

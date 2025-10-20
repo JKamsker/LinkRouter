@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>LinkRouter.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,5 +27,9 @@
   <ItemGroup>
     <ProjectReference Include="..\LinkRouter.Settings.Core\LinkRouter.Settings.Core.csproj" />
     <ProjectReference Include="..\LinkRouter.Core\LinkRouter.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="LinkRouter.ico" />
   </ItemGroup>
 </Project>

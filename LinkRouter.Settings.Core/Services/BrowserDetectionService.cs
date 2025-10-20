@@ -167,6 +167,20 @@ public sealed class BrowserDetectionService
                 null));
         }
 
+        // Sort: default-release comes first
+        profiles.Sort((a, b) =>
+        {
+            if (string.Equals(a.ProfileArgument, "default-release", StringComparison.OrdinalIgnoreCase))
+            {
+                return -1;
+            }
+            if (string.Equals(b.ProfileArgument, "default-release", StringComparison.OrdinalIgnoreCase))
+            {
+                return 1;
+            }
+            return Comparer<BrowserProfileOption>.Default.Compare(a, b);
+        });
+
         return profiles;
     }
 
