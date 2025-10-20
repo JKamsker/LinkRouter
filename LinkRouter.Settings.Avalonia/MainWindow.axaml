@@ -13,7 +13,8 @@
         Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
         TransparencyBackgroundFallback="{DynamicResource SolidBackgroundFillColorBaseBrush}"
         TransparencyLevelHint="Mica"
-        ExtendClientAreaToDecorationsHint="True">
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="56">
     <Window.DataTemplates>
         <DataTemplate DataType="{x:Type vm:GeneralViewModel}">
             <views:OverviewPage />
