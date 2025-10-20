@@ -3,6 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa="using:FluentAvalonia.UI.Controls"
+        xmlns:i="using:Avalonia.Xaml.Interactivity"
+        xmlns:behaviors="clr-namespace:LinkRouter.Settings.Avalonia.Behaviors"
         xmlns:views="clr-namespace:LinkRouter.Settings.Avalonia.Views"
         xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels;assembly=LinkRouter.Settings.Core"
         mc:Ignorable="d"
@@ -40,9 +42,14 @@
                        FooterMenuItemsSource="{Binding FooterItems}"
                        SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                        PaneDisplayMode="Left"
+                       IsPaneOpen="True"
                        IsBackButtonVisible="False"
                        IsSettingsVisible="False"
                        AlwaysShowHeader="False">
+        <i:Interaction.Behaviors>
+            <behaviors:NavigationViewAutoCollapseBehavior HoverActivationMargin="24"
+                                                          CollapseProximityMargin="16" />
+        </i:Interaction.Behaviors>
         <fa:NavigationView.MenuItemTemplate>
             <DataTemplate>
                 <fa:NavigationViewItem Content="{Binding Title}" />
