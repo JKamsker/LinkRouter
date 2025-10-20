@@ -52,6 +52,7 @@ public partial class App : Application
         services.AddSingleton<IFilePickerService>(_ => new AvaloniaFilePickerService(() => desktop.MainWindow));
         services.AddSingleton<IMessageDialogService>(_ => new AvaloniaMessageDialogService(() => desktop.MainWindow));
         services.AddSingleton<IRuleEditorDialogService>(_ => new RuleEditorDialogService(() => desktop.MainWindow));
+        services.AddSingleton<IRouterPathResolver, RouterPathResolver>();
 
         services.AddSingleton<AppInitializationService>();
         services.AddSingleton<SettingsTrayIconService>();

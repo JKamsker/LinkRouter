@@ -15,36 +15,14 @@ class Program
             return 2;
         }
 
-        // Handle registration commands first
+        // Registration is now controlled via the Settings UI.
         if (args.Length >= 1)
         {
             var cmd = args[0].Trim().ToLowerInvariant();
-            if (cmd is "--register-defaults" or "/register" or "-register")
+            if (cmd is "--register-defaults" or "/register" or "-register" or "--unregister-defaults" or "/unregister" or "-unregister")
             {
-                try
-                {
-                    DefaultAppRegistrar.RegisterPerUser();
-                    return 0;
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Failed to register defaults: {ex.Message}");
-                    return 7;
-                }
-            }
-
-            if (cmd is "--unregister-defaults" or "/unregister" or "-unregister")
-            {
-                try
-                {
-                    DefaultAppRegistrar.UnregisterPerUser();
-                    return 0;
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Failed to unregister defaults: {ex.Message}");
-                    return 8;
-                }
+                Console.Error.WriteLine("Registration commands are managed in LinkRouter Settings. Launch the GUI to register or unregister defaults.");
+                return 2;
             }
         }
 

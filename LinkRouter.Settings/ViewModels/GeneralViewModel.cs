@@ -17,6 +17,7 @@ public partial class GeneralViewModel : ObservableObject
     private readonly ConfigurationState _state;
     private readonly IShellService _shellService;
     private readonly IClipboardService _clipboardService;
+    private readonly IRouterPathResolver _routerPathResolver;
 
     [ObservableProperty]
     private string _configPath = string.Empty;
@@ -56,13 +57,15 @@ public partial class GeneralViewModel : ObservableObject
         RuleTestService ruleTestService,
         ConfigurationState state,
         IShellService shellService,
-        IClipboardService clipboardService)
+        IClipboardService clipboardService,
+        IRouterPathResolver routerPathResolver)
     {
         _configService = configService;
         _ruleTestService = ruleTestService;
         _state = state;
         _shellService = shellService;
         _clipboardService = clipboardService;
+        _routerPathResolver = routerPathResolver;
 
         LoadMetadata();
         _state.StateChanged += OnStateChanged;
@@ -203,9 +206,18 @@ public partial class GeneralViewModel : ObservableObject
     private async Task RegisterAsync()
     {
         ErrorMessage = null;
+        StatusMessage = null;
+
+        if (!_routerPathResolver.TryGetRouterExecutable(out var routerPath))
+        {
+            ErrorMessage = "Unable to locate the LinkRouter executable. Launch the settings installer or build the CLI project.";
+            return;
+        }
+
         try
         {
-            await Task.Run(DefaultAppRegistrar.RegisterPerUser);
+            await Task.Run(() => DefaultAppRegistrar.RegisterPerUser(routerPath));
+            StatusMessage = "Registration command executed. Windows Settings will prompt for defaults.";
         }
         catch (Exception ex)
         {
@@ -217,9 +229,11 @@ public partial class GeneralViewModel : ObservableObject
     private async Task UnregisterAsync()
     {
         ErrorMessage = null;
+        StatusMessage = null;
         try
         {
             await Task.Run(DefaultAppRegistrar.UnregisterPerUser);
+            StatusMessage = "Unregistration command executed.";
         }
         catch (Exception ex)
         {

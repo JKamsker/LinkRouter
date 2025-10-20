@@ -16,7 +16,8 @@ public class GeneralViewModelTests
         var shell = new NullShellService();
         var clipboard = new NullClipboardService();
 
-        var viewModel = new GeneralViewModel(configService, ruleTestService, state, shell, clipboard);
+        var resolver = new NullRouterPathResolver();
+        var viewModel = new GeneralViewModel(configService, ruleTestService, state, shell, clipboard, resolver);
 
         Assert.False(viewModel.CanSave);
 
@@ -40,5 +41,14 @@ public class GeneralViewModelTests
     private sealed class NullClipboardService : IClipboardService
     {
         public void SetText(string text) { }
+    }
+
+    private sealed class NullRouterPathResolver : IRouterPathResolver
+    {
+        public bool TryGetRouterExecutable(out string? path)
+        {
+            path = null;
+            return false;
+        }
     }
 }

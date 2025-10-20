@@ -10,9 +10,9 @@ public static class DefaultAppRegistrar
     private const string AppName = "LinkRouter";
     private const string ProgId = "LinkRouterURL"; // Our per-user ProgID
 
-    public static void RegisterPerUser()
+    public static void RegisterPerUser(string? executablePath = null)
     {
-        string exePath = GetExecutablePath();
+        string exePath = ResolveExecutablePath(executablePath);
         string iconRef = exePath + ",0";
         string command = $"\"{exePath}\" \"%1\"";
 
@@ -130,6 +130,28 @@ public static class DefaultAppRegistrar
                 }
             }
         }
+    }
+
+    private static string ResolveExecutablePath(string? executablePath)
+    {
+        if (!string.IsNullOrWhiteSpace(executablePath))
+        {
+            var fullPath = Path.GetFullPath(executablePath);
+            if (!File.Exists(fullPath))
+            {
+                throw new FileNotFoundException("LinkRouter executable not found.", fullPath);
+            }
+
+            return fullPath;
+        }
+
+        var inferredPath = GetExecutablePath();
+        if (!File.Exists(inferredPath))
+        {
+            throw new FileNotFoundException("LinkRouter executable not found.", inferredPath);
+        }
+
+        return inferredPath;
     }
 
     private static string GetExecutablePath()

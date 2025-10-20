@@ -5,6 +5,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>..\LinkRouter.Settings\LinkRouter.ico</ApplicationIcon>
     <!-- Avoid apphost permission issues on non-Windows during CI/WSL builds -->
     <!-- cross-platform build paths configured in Directory.Build.props -->
   </PropertyGroup>
