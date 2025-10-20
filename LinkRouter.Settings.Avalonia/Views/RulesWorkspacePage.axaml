@@ -117,7 +117,7 @@
                                                 <Grid ColumnDefinitions="*,Auto">
                                                     <TextBlock Text="Edit rule" Classes="SectionTitle" />
                                                     <Button Content="X"
-                                                            Command="{Binding DataContext.CloseEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            Command="{Binding DataContext.CancelEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             Width="32"
                                                             Height="32"
                                                             HorizontalAlignment="Right"
@@ -181,9 +181,9 @@
                                                             HorizontalAlignment="Left"
                                                             Spacing="8">
                                                     <Button Content="Done"
-                                                            Command="{Binding DataContext.CloseEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                            Command="{Binding DataContext.SaveEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                     <Button Content="Cancel"
-                                                            Command="{Binding DataContext.CloseEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                            Command="{Binding DataContext.CancelEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                 </StackPanel>
                                             </StackPanel>
                                         </DataTemplate>

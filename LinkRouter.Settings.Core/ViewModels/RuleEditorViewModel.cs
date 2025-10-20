@@ -137,4 +137,17 @@ public sealed class RuleEditorViewModel : ObservableObject
             _useProfile = _useProfile
         };
     }
+
+    public void UpdateFrom(RuleEditorViewModel source)
+    {
+        Enabled = source.Enabled;
+        Match = source.Match;
+        Pattern = source.Pattern;
+        Browser = source.Browser;
+        ArgsTemplate = source.ArgsTemplate;
+        Profile = source.Profile;
+        UserDataDir = source.UserDataDir;
+        WorkingDirectory = source.WorkingDirectory;
+        UseProfile = source.UseProfile;
+    }
 }
