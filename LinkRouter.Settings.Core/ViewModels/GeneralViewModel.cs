@@ -67,6 +67,11 @@ public partial class GeneralViewModel : ObservableObject
         _state.StateChanged += OnStateChanged;
     }
 
+    partial void OnIsSavingChanged(bool value)
+    {
+        SaveCommand.NotifyCanExecuteChanged();
+    }
+
     private void OnStateChanged(object? sender, EventArgs e)
     {
         LoadMetadata();
@@ -80,6 +85,8 @@ public partial class GeneralViewModel : ObservableObject
         {
             StatusMessage = "All changes saved.";
         }
+
+        SaveCommand.NotifyCanExecuteChanged();
     }
 
     private void LoadMetadata()
@@ -148,11 +155,12 @@ public partial class GeneralViewModel : ObservableObject
         return $"Browser: {rule.browser}\nArgs: {launchArgs}";
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task SaveAsync()
     {
         ErrorMessage = null;
         StatusMessage = null;
+        StatusMessage = "Saving…";
         IsSaving = true;
 
         try
@@ -172,6 +180,8 @@ public partial class GeneralViewModel : ObservableObject
             IsSaving = false;
         }
     }
+
+    private bool CanSave() => HasUnsavedChanges && !IsSaving;
 
     [RelayCommand]
     private async Task RegisterAsync()

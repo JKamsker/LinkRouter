@@ -13,7 +13,10 @@
                         <TextBlock Text="Import configuration" Classes="SectionTitle" />
                         <StackPanel Classes="SectionContent">
                             <TextBlock Text="Import path" FontWeight="SemiBold" />
-                            <TextBox Text="{Binding ImportPath, Mode=TwoWay}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBox Text="{Binding ImportPath, Mode=TwoWay}" Width="320" />
+                                <Button Content="Browse…" Command="{Binding BrowseImportCommand}" />
+                            </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Button Content="Analyze" Command="{Binding AnalyzeImportCommand}" />
@@ -29,7 +32,10 @@
                         <TextBlock Text="Export configuration" Classes="SectionTitle" />
                         <StackPanel Classes="SectionContent">
                             <TextBlock Text="Export path" FontWeight="SemiBold" />
-                            <TextBox Text="{Binding ExportPath, Mode=TwoWay}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBox Text="{Binding ExportPath, Mode=TwoWay}" Width="320" />
+                                <Button Content="Browse…" Command="{Binding BrowseExportCommand}" />
+                            </StackPanel>
                         </StackPanel>
                         <Button Content="Export" Command="{Binding ExportCommand}" HorizontalAlignment="Left" />
                     </StackPanel>

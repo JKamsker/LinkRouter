@@ -181,7 +181,8 @@
                                                             HorizontalAlignment="Left"
                                                             Spacing="8">
                                                     <Button Content="Done"
-                                                            Command="{Binding DataContext.CloseEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                            Command="{Binding DataContext.CommitEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}" />
                                                     <Button Content="Cancel"
                                                             Command="{Binding DataContext.CloseEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                 </StackPanel>
