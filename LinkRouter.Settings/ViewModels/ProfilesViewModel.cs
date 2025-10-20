@@ -278,14 +278,14 @@ public partial class ProfilesViewModel : ObservableObject
             {
                 SelectedBrowser = null;
                 DetectedProfiles.Clear();
-                SelectedDetectedProfile = null;
+                SetSelectedDetectedProfileSilently(null);
                 SelectedProfileNewWindow = false;
             }
             else
             {
                 SelectedBrowser = FindBrowserByPath(SelectedProfile.Browser);
                 UpdateDetectedProfiles(SelectedBrowser);
-                SelectedDetectedProfile = MatchProfileOption(SelectedProfile);
+                SetSelectedDetectedProfileSilently(MatchProfileOption(SelectedProfile));
                 SelectedProfileNewWindow = DetermineNewWindow(SelectedProfile);
             }
         }
@@ -310,15 +310,45 @@ public partial class ProfilesViewModel : ObservableObject
 
     private void UpdateDetectedProfiles(BrowserInfo? browser)
     {
-        DetectedProfiles.Clear();
         if (browser is null)
+        {
+            if (DetectedProfiles.Count > 0)
+            {
+                DetectedProfiles.Clear();
+            }
+
+            return;
+        }
+
+        var options = _detector.GetBrowserProfileOptions(browser);
+
+        var needsUpdate = options.Count != DetectedProfiles.Count;
+        if (!needsUpdate)
+        {
+            for (var i = 0; i < options.Count; i++)
+            {
+                if (!Equals(DetectedProfiles[i], options[i]))
+                {
+                    needsUpdate = true;
+                    break;
+                }
+            }
+        }
+
+        if (!needsUpdate)
         {
             return;
         }
 
-        foreach (var option in _detector.GetBrowserProfileOptions(browser))
+        DetectedProfiles.Clear();
+        foreach (var option in options)
         {
             DetectedProfiles.Add(option);
+        }
+
+        if (_suppressSelectionUpdates && SelectedProfile is not null)
+        {
+            SetSelectedDetectedProfileSilently(MatchProfileOption(SelectedProfile));
         }
     }
 
@@ -339,6 +369,31 @@ public partial class ProfilesViewModel : ObservableObject
         }
 
         return null;
+    }
+
+    private void SetSelectedDetectedProfileSilently(BrowserProfileOption? option)
+    {
+        if (ReferenceEquals(SelectedDetectedProfile, option))
+        {
+            return;
+        }
+
+        var wasSuppressed = _suppressSelectionUpdates;
+        _suppressSelectionUpdates = true;
+
+        try
+        {
+            if (Equals(SelectedDetectedProfile, option) && option is not null)
+            {
+                SelectedDetectedProfile = null;
+            }
+
+            SelectedDetectedProfile = option;
+        }
+        finally
+        {
+            _suppressSelectionUpdates = wasSuppressed;
+        }
     }
 
     private static bool DetermineNewWindow(ProfileEditorViewModel profile)

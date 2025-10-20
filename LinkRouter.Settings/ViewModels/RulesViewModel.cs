@@ -222,17 +222,38 @@ public partial class RulesViewModel : ObservableObject
 
     private void RefreshProfileOptions()
     {
-        _profileOptions.Clear();
+        var options = new List<string>();
 
         foreach (var profile in _state.Profiles)
         {
             if (!string.IsNullOrWhiteSpace(profile.Name))
             {
-                _profileOptions.Add(profile.Name);
+                options.Add(profile.Name);
             }
         }
 
-        _profileOptions.Sort(StringComparer.OrdinalIgnoreCase);
+        options.Sort(StringComparer.OrdinalIgnoreCase);
+
+        if (options.Count == _profileOptions.Count)
+        {
+            var identical = true;
+            for (var i = 0; i < options.Count; i++)
+            {
+                if (!string.Equals(options[i], _profileOptions[i], StringComparison.Ordinal))
+                {
+                    identical = false;
+                    break;
+                }
+            }
+
+            if (identical)
+            {
+                return;
+            }
+        }
+
+        _profileOptions.Clear();
+        _profileOptions.AddRange(options);
         OnPropertyChanged(nameof(ProfileOptions));
     }
 
