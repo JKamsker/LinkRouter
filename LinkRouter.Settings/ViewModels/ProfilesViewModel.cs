@@ -68,6 +68,7 @@ public partial class ProfilesViewModel : ObservableObject
     public bool CanEnterAdvanced => SelectedProfile is not null && !SelectedProfile.IsAdvanced;
 
     private bool _suppressSelectionUpdates;
+    private bool _ensuringDefaultProfileSelection;
 
     public ProfilesViewModel(ConfigurationState state, BrowserDetectionService detector)
     {
@@ -503,34 +504,69 @@ public partial class ProfilesViewModel : ObservableObject
 
     private void EnsureDefaultProfileSelection()
     {
-        if (SelectedProfile is null || SelectedProfile.IsAdvanced)
+        if (_ensuringDefaultProfileSelection)
         {
             return;
         }
 
-        if (DetectedProfiles.Count == 0)
+        _ensuringDefaultProfileSelection = true;
+        try
         {
-            if (SelectedBrowser?.Family == BrowserFamily.Chromium && string.IsNullOrWhiteSpace(SelectedProfile.Profile))
+            if (SelectedProfile is null || SelectedProfile.IsAdvanced)
+            {
+                return;
+            }
+
+            if (DetectedProfiles.Count == 0)
+            {
+                if (SelectedDetectedProfile is not null)
+                {
+                    SelectedDetectedProfile = null;
+                }
+
+                if (SelectedBrowser?.Family == BrowserFamily.Chromium && string.IsNullOrWhiteSpace(SelectedProfile.Profile))
+                {
+                    SelectedProfile.Profile = "Default";
+                }
+
+                return;
+            }
+
+            var matchedOption = MatchProfileOption(SelectedProfile);
+            if (matchedOption is not null)
+            {
+                if (!Equals(SelectedDetectedProfile, matchedOption))
+                {
+                    SelectedDetectedProfile = matchedOption;
+                }
+
+                return;
+            }
+
+            if (SelectedDetectedProfile is not null && DetectedProfiles.Contains(SelectedDetectedProfile))
+            {
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(SelectedProfile.Profile) || !string.IsNullOrWhiteSpace(SelectedProfile.UserDataDir))
+            {
+                SelectedProfile.Profile = null;
+                SelectedProfile.UserDataDir = null;
+            }
+
+            var option = FindDefaultProfileOption() ?? DetectedProfiles.FirstOrDefault();
+            if (option is not null)
+            {
+                SelectedDetectedProfile = option;
+            }
+            else if (SelectedBrowser?.Family == BrowserFamily.Chromium && string.IsNullOrWhiteSpace(SelectedProfile.Profile))
             {
                 SelectedProfile.Profile = "Default";
             }
-
-            return;
         }
-
-        if (SelectedDetectedProfile is not null || !string.IsNullOrWhiteSpace(SelectedProfile.Profile))
+        finally
         {
-            return;
-        }
-
-        var option = FindDefaultProfileOption() ?? DetectedProfiles.FirstOrDefault();
-        if (option is not null)
-        {
-            SelectedDetectedProfile = option;
-        }
-        else if (SelectedBrowser?.Family == BrowserFamily.Chromium && string.IsNullOrWhiteSpace(SelectedProfile.Profile))
-        {
-            SelectedProfile.Profile = "Default";
+            _ensuringDefaultProfileSelection = false;
         }
     }
 
@@ -583,6 +619,10 @@ public partial class ProfilesViewModel : ObservableObject
     private BrowserProfileOption? FindDefaultProfileOption()
     {
         return DetectedProfiles.FirstOrDefault(option =>
+                   string.Equals(option.ProfileArgument, "default-release", StringComparison.OrdinalIgnoreCase))
+               ?? DetectedProfiles.FirstOrDefault(option =>
+                   string.Equals(option.DisplayName, "default-release", StringComparison.OrdinalIgnoreCase))
+               ?? DetectedProfiles.FirstOrDefault(option =>
                    string.Equals(option.ProfileArgument, "Default", StringComparison.OrdinalIgnoreCase))
                ?? DetectedProfiles.FirstOrDefault(option =>
                    string.Equals(option.DisplayName, "Default", StringComparison.OrdinalIgnoreCase));
