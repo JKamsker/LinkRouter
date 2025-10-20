@@ -1,5 +1,5 @@
 using Avalonia.Headless.XUnit;
-using LinkRouter.Settings.Avalonia;
+using LinkRouter.Settings;
 using System.Threading.Tasks;
 using Xunit;
 

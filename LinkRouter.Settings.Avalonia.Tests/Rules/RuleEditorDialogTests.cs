@@ -1,7 +1,7 @@
 using Avalonia.Headless.XUnit;
 using FluentAvalonia.UI.Controls;
-using LinkRouter.Settings.Avalonia;
-using LinkRouter.Settings.Avalonia.Views;
+using LinkRouter.Settings;
+using LinkRouter.Settings.Views;
 using System.Threading.Tasks;
 using Xunit;
 

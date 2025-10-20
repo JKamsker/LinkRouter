@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LinkRouter.Settings.ViewModels"
+             x:Class="LinkRouter.Settings.Views.AdvancedPage">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="{StaticResource SettingsPageMargin}"
+                    Spacing="{StaticResource SettingsPageSpacing}">
+            <TextBlock Text="Advanced" Classes="PageTitle" />
+
+            <Border Classes="SettingsCard">
+                <StackPanel Classes="SettingsCardContent">
+                    <ToggleSwitch Content="Enable launch logging" IsChecked="{Binding IsLoggingEnabled, Mode=TwoWay}" />
+                    <Button Content="Open configuration folder" Command="{Binding OpenConfigFolderCommand}" />
+                    <Button Content="Open log file" Command="{Binding OpenLogFileCommand}" />
+                    <Button Content="Open Windows default apps" Command="{Binding OpenDefaultAppsCommand}" />
+
+                    <Border Classes="InlineStatus"
+                            Background="#10FF0000"
+                            BorderBrush="#40FF0000"
+                            IsVisible="{Binding HasError}">
+                        <TextBlock Text="{Binding Error}" Foreground="Red" />
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

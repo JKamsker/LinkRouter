@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Skia;
-using LinkRouter.Settings.Avalonia;
+using LinkRouter.Settings;
 
 namespace LinkRouter.Settings.Avalonia.Tests;
 

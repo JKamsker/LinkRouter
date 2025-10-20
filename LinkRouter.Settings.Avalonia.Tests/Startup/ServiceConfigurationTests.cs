@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Headless.XUnit;
-using LinkRouter.Settings.Avalonia;
-using LinkRouter.Settings.Avalonia.Services;
+using LinkRouter.Settings;
+using LinkRouter.Settings.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using SettingsApp = LinkRouter.Settings.Avalonia.App;
+using SettingsApp = LinkRouter.Settings.App;
 
 namespace LinkRouter.Settings.Avalonia.Tests.Startup;
 

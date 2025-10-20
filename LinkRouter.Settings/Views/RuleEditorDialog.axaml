@@ -1,0 +1,124 @@
+<fa:ContentDialog xmlns="https://github.com/avaloniaui"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:fa="using:FluentAvalonia.UI.Controls"
+                  xmlns:conv="clr-namespace:LinkRouter.Settings.Converters"
+                  x:Class="LinkRouter.Settings.Views.RuleEditorDialog"
+                  Title="Edit Rule"
+                  PrimaryButtonText="Done"
+                  CloseButtonText="Cancel"
+                  DefaultButton="Primary">
+    <fa:ContentDialog.Resources>
+        <conv:StringHasValueConverter x:Key="StringHasValueConverter" />
+    </fa:ContentDialog.Resources>
+
+    <fa:ContentDialog.Template>
+        <ControlTemplate TargetType="fa:ContentDialog">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="12"
+                    Padding="24"
+                    MinWidth="380"
+                    MaxWidth="{TemplateBinding MaxWidth}">
+                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="16">
+                    <ContentPresenter Grid.Row="0"
+                                      x:Name="TitlePresenter"
+                                      Content="{TemplateBinding Title}"
+                                      ContentTemplate="{TemplateBinding TitleTemplate}"
+                                      FontSize="20"
+                                      FontWeight="SemiBold"
+                                      HorizontalAlignment="Stretch"
+                                      Margin="0,0,0,4" />
+
+                    <Border Grid.Row="1">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                            <ContentPresenter x:Name="PART_ContentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Padding="0" />
+                        </ScrollViewer>
+                    </Border>
+
+                    <StackPanel Grid.Row="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Spacing="8">
+                        <Button x:Name="SecondaryButton"
+                                Content="{TemplateBinding SecondaryButtonText}"
+                                IsEnabled="{TemplateBinding IsSecondaryButtonEnabled}"
+                                IsVisible="{Binding SecondaryButtonText, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringHasValueConverter}}"
+                                HorizontalAlignment="Right"
+                                MinWidth="88" />
+
+                        <Button x:Name="CloseButton"
+                                Content="{TemplateBinding CloseButtonText}"
+                                IsVisible="{Binding CloseButtonText, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringHasValueConverter}}"
+                                HorizontalAlignment="Right"
+                                MinWidth="88" />
+
+                        <Button x:Name="PrimaryButton"
+                                Content="{TemplateBinding PrimaryButtonText}"
+                                IsEnabled="{TemplateBinding IsPrimaryButtonEnabled}"
+                                IsVisible="{Binding PrimaryButtonText, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringHasValueConverter}}"
+                                HorizontalAlignment="Right"
+                                MinWidth="88" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </ControlTemplate>
+    </fa:ContentDialog.Template>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" Padding="8">
+        <StackPanel Spacing="16">
+            <ToggleSwitch Content="Enabled"
+                          IsChecked="{Binding Rule.Enabled, Mode=TwoWay}" />
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Match" Classes="SectionTitle" />
+                <ComboBox ItemsSource="{Binding MatchTypes}"
+                          SelectedItem="{Binding Rule.Match, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Pattern" Classes="SectionTitle" />
+                <TextBox Text="{Binding Rule.Pattern, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Browser" Classes="SectionTitle" />
+                <TextBox Text="{Binding Rule.Browser, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Profile" Classes="SectionTitle" />
+                <TextBox Text="{Binding Rule.Profile, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Args Template" Classes="SectionTitle" />
+                <TextBox Text="{Binding Rule.ArgsTemplate, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="User Data Dir" Classes="SectionTitle" />
+                <TextBox Text="{Binding Rule.UserDataDir, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Working Directory" Classes="SectionTitle" />
+                <TextBox Text="{Binding Rule.WorkingDirectory, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Use Profile" Classes="SectionTitle" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <ComboBox ItemsSource="{Binding ProfileOptions}"
+                              SelectedItem="{Binding Rule.UseProfile, Mode=TwoWay}"
+                              PlaceholderText="Select a configured profile" />
+                    <Button Content="Clear"
+                            Command="{Binding ClearUseProfileCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</fa:ContentDialog>

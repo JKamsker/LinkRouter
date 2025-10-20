@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LinkRouter.Settings.Avalonia\LinkRouter.Settings.Avalonia.csproj" />
+    <ProjectReference Include="..\LinkRouter.Settings\LinkRouter.Settings.csproj" />
   </ItemGroup>
 
 </Project>
