@@ -32,6 +32,9 @@ public partial class ProfilesViewModel : ObservableObject
     private bool _selectedProfileNewWindow;
 
     [ObservableProperty]
+    private bool _selectedProfileIncognito;
+
+    [ObservableProperty]
     private string? _detectionError;
 
     public ObservableCollection<ProfileEditorViewModel> Profiles => _state.Profiles;
@@ -147,7 +150,7 @@ public partial class ProfilesViewModel : ObservableObject
         SelectedProfile.Browser = value.Path;
         if (!SelectedProfile.IsAdvanced)
         {
-            SelectedProfile.ArgsTemplate = BuildArgsTemplate(value, SelectedProfileNewWindow);
+            SelectedProfile.ArgsTemplate = BuildArgsTemplate(value, SelectedProfileNewWindow, SelectedProfileIncognito);
             SelectedProfile.WorkingDirectory = GetBrowserWorkingDirectory(value);
             SelectedProfile.Profile = null;
             SelectedProfile.UserDataDir = null;
@@ -186,7 +189,27 @@ public partial class ProfilesViewModel : ObservableObject
             return;
         }
 
-        SelectedProfile.ArgsTemplate = BuildArgsTemplate(SelectedBrowser, value);
+        SelectedProfile.ArgsTemplate = BuildArgsTemplate(SelectedBrowser, value, SelectedProfileIncognito);
+    }
+
+    partial void OnSelectedProfileIncognitoChanged(bool value)
+    {
+        if (_suppressSelectionUpdates || SelectedProfile is null)
+        {
+            return;
+        }
+
+        if (SelectedProfile.Incognito != value)
+        {
+            SelectedProfile.Incognito = value;
+        }
+
+        if (SelectedProfile.IsAdvanced)
+        {
+            return;
+        }
+
+        SelectedProfile.ArgsTemplate = BuildArgsTemplate(SelectedBrowser, SelectedProfileNewWindow, value);
     }
 
     [RelayCommand]
@@ -251,6 +274,7 @@ public partial class ProfilesViewModel : ObservableObject
                 userDataDir: profile.UserDataDir,
                 workingDirectory: profile.WorkingDirectory,
                 useProfile: profile.Name,
+                incognito: profile.Incognito,
                 Enabled: true
             );
 
@@ -281,6 +305,7 @@ public partial class ProfilesViewModel : ObservableObject
                 DetectedProfiles.Clear();
                 SetSelectedDetectedProfileSilently(null);
                 SelectedProfileNewWindow = false;
+                SelectedProfileIncognito = false;
             }
             else
             {
@@ -288,6 +313,7 @@ public partial class ProfilesViewModel : ObservableObject
                 UpdateDetectedProfiles(SelectedBrowser);
                 SetSelectedDetectedProfileSilently(MatchProfileOption(SelectedProfile));
                 SelectedProfileNewWindow = DetermineNewWindow(SelectedProfile);
+                SelectedProfileIncognito = DetermineIncognito(SelectedProfile);
             }
         }
         finally
@@ -397,6 +423,16 @@ public partial class ProfilesViewModel : ObservableObject
         }
     }
 
+    private static bool DetermineIncognito(ProfileEditorViewModel profile)
+    {
+        if (profile.Incognito)
+        {
+            return true;
+        }
+
+        return ContainsIncognitoArgument(profile.ArgsTemplate);
+    }
+
     private static bool DetermineNewWindow(ProfileEditorViewModel profile)
     {
         if (string.IsNullOrWhiteSpace(profile.ArgsTemplate))
@@ -408,15 +444,46 @@ public partial class ProfilesViewModel : ObservableObject
             || profile.ArgsTemplate.Contains("-new-window", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string BuildArgsTemplate(BrowserInfo? browser, bool newWindow)
+    private static bool ContainsIncognitoArgument(string? argsTemplate)
+    {
+        if (string.IsNullOrWhiteSpace(argsTemplate))
+        {
+            return false;
+        }
+
+        return argsTemplate.Contains("--incognito", StringComparison.OrdinalIgnoreCase)
+               || argsTemplate.Contains("--inprivate", StringComparison.OrdinalIgnoreCase)
+               || argsTemplate.Contains("-private-window", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string BuildArgsTemplate(BrowserInfo? browser, bool newWindow, bool incognito)
     {
         var family = browser?.Family ?? BrowserFamily.Unknown;
-        return family switch
+        if (family == BrowserFamily.Firefox)
         {
-            BrowserFamily.Firefox => newWindow ? "-new-window \"{url}\"" : "\"{url}\"",
-            BrowserFamily.Chromium => newWindow ? "--new-window \"{url}\"" : "\"{url}\"",
-            _ => newWindow ? "--new-window \"{url}\"" : "\"{url}\""
-        };
+            if (incognito)
+            {
+                return "-private-window \"{url}\"";
+            }
+
+            return newWindow ? "-new-window \"{url}\"" : "\"{url}\"";
+        }
+
+        var browserPath = browser?.Path ?? string.Empty;
+        var lowerPath = browserPath.ToLowerInvariant();
+        var prefix = string.Empty;
+
+        if (incognito)
+        {
+            prefix = lowerPath.Contains("msedge") ? "--inprivate " : "--incognito ";
+        }
+
+        if (newWindow)
+        {
+            prefix += "--new-window ";
+        }
+
+        return $"{prefix}\"{{url}}\"".TrimStart();
     }
 
     private static string? GetBrowserWorkingDirectory(BrowserInfo browser)

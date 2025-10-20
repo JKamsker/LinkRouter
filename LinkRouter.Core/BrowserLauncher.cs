@@ -37,6 +37,7 @@ public static class BrowserLauncher
         var browserLower = (rule.browser ?? string.Empty).ToLowerInvariant();
         bool isFirefox = browserLower.Contains("firefox");
         bool isChromium = browserLower.Contains("chrome") || browserLower.Contains("msedge") || browserLower.Contains("chromium");
+        bool incognito = rule.incognito ?? false;
 
         if (!string.IsNullOrWhiteSpace(rule.profile))
         {
@@ -46,6 +47,11 @@ public static class BrowserLauncher
         if (isChromium && !string.IsNullOrWhiteSpace(rule.userDataDir))
         {
             argsToPass = AddUserDataDirArgument(argsToPass, rule.userDataDir);
+        }
+
+        if (incognito)
+        {
+            argsToPass = AddIncognitoArgument(argsToPass, browserLower, isFirefox, isChromium);
         }
 
         return argsToPass;
@@ -83,5 +89,51 @@ public static class BrowserLauncher
         }
 
         return args;
+    }
+
+    private static string AddIncognitoArgument(string args, string browserLower, bool isFirefox, bool isChromium)
+    {
+        if (ContainsIncognitoArgument(args))
+        {
+            return args;
+        }
+
+        if (isFirefox)
+        {
+            args = RemoveFirefoxNewWindow(args);
+            return $"-private-window {args}";
+        }
+
+        if (browserLower.Contains("msedge"))
+        {
+            return $"--inprivate {args}";
+        }
+
+        if (isChromium)
+        {
+            return $"--incognito {args}";
+        }
+
+        return $"--incognito {args}";
+    }
+
+    private static bool ContainsIncognitoArgument(string args)
+    {
+        return args.Contains("--incognito", StringComparison.OrdinalIgnoreCase)
+               || args.Contains("--inprivate", StringComparison.OrdinalIgnoreCase)
+               || args.Contains("-private-window", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string RemoveFirefoxNewWindow(string args)
+    {
+        if (string.IsNullOrWhiteSpace(args))
+        {
+            return args;
+        }
+
+        return args
+            .Replace("-new-window", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("--new-window", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Trim();
     }
 }

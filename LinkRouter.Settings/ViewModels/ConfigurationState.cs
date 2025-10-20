@@ -302,9 +302,42 @@ public sealed class ConfigurationState : ObservableObject
             return true;
         }
 
-        template = template.Trim();
-        return template is not "\"{url}\"" and not "-new-window \"{url}\"" and not "--new-window \"{url}\"";
+        return !IsSimpleTemplate(template);
     }
+
+    private static bool IsSimpleTemplate(string template)
+    {
+        var normalized = NormalizeTemplate(template);
+        foreach (var candidate in SimpleArgsTemplates)
+        {
+            if (string.Equals(normalized, candidate, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static string NormalizeTemplate(string template)
+    {
+        var parts = template.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        return string.Join(' ', parts);
+    }
+
+    private static readonly string[] SimpleArgsTemplates =
+    {
+        "\"{url}\"",
+        "-new-window \"{url}\"",
+        "--new-window \"{url}\"",
+        "-private-window \"{url}\"",
+        "--incognito \"{url}\"",
+        "--incognito --new-window \"{url}\"",
+        "--new-window --incognito \"{url}\"",
+        "--inprivate \"{url}\"",
+        "--inprivate --new-window \"{url}\"",
+        "--new-window --inprivate \"{url}\""
+    };
 
     private ProfileEditorViewModel? FindProfileByName(string? name)
     {
@@ -322,13 +355,14 @@ public sealed class ConfigurationState : ObservableObject
             || !string.IsNullOrWhiteSpace(rule.argsTemplate)
             || !string.IsNullOrWhiteSpace(rule.profile)
             || !string.IsNullOrWhiteSpace(rule.userDataDir)
-            || !string.IsNullOrWhiteSpace(rule.workingDirectory);
+            || !string.IsNullOrWhiteSpace(rule.workingDirectory)
+            || rule.incognito.HasValue;
     }
 
     private ProfileEditorViewModel CreateProfileFromDefault(Rule rule)
     {
         var name = GenerateUniqueProfileName("Default");
-        var profile = new Profile(rule.browser, rule.argsTemplate, rule.profile, rule.userDataDir, rule.workingDirectory);
+        var profile = new Profile(rule.browser, rule.argsTemplate, rule.profile, rule.userDataDir, rule.workingDirectory, rule.incognito ?? false);
         var vm = new ProfileEditorViewModel(name, profile);
         vm.InitializeAdvanced(true);
         vm.SetDefaultFlag(false);

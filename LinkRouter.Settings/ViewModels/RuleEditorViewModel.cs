@@ -35,6 +35,9 @@ public sealed partial class RuleEditorViewModel : ObservableObject
     [ObservableProperty]
     private string? useProfile;
 
+    [ObservableProperty]
+    private bool? incognito;
+
     public RuleEditorViewModel()
     {
     }
@@ -50,6 +53,7 @@ public sealed partial class RuleEditorViewModel : ObservableObject
         UserDataDir = rule.userDataDir;
         WorkingDirectory = rule.workingDirectory;
         UseProfile = rule.useProfile;
+        Incognito = rule.incognito;
     }
 
     public Guid Id { get; } = Guid.NewGuid();
@@ -67,6 +71,7 @@ public sealed partial class RuleEditorViewModel : ObservableObject
             userDataDir: UserDataDir,
             workingDirectory: WorkingDirectory,
             useProfile: UseProfile,
+            incognito: Incognito,
             Enabled: Enabled
         );
     }
@@ -83,7 +88,8 @@ public sealed partial class RuleEditorViewModel : ObservableObject
             Profile = Profile,
             UserDataDir = UserDataDir,
             WorkingDirectory = WorkingDirectory,
-            UseProfile = UseProfile
+            UseProfile = UseProfile,
+            Incognito = Incognito
         };
 
         return clone;
@@ -100,5 +106,6 @@ public sealed partial class RuleEditorViewModel : ObservableObject
         UserDataDir = source.UserDataDir;
         WorkingDirectory = source.WorkingDirectory;
         UseProfile = source.UseProfile;
+        Incognito = source.Incognito;
     }
 }

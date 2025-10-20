@@ -85,6 +85,10 @@
                                 <CheckBox Content="Open in new window"
                                           IsChecked="{Binding SelectedProfileNewWindow, Mode=TwoWay}"
                                           IsEnabled="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}" />
+
+                                <CheckBox Content="Open in incognito/private mode"
+                                          IsChecked="{Binding SelectedProfileIncognito, Mode=TwoWay}"
+                                          IsEnabled="{Binding SelectedProfile.IsAdvanced, Converter={StaticResource BooleanNotConverter}, FallbackValue=False, TargetNullValue=False}" />
                             </StackPanel>
 
                             <Button Content="Advanced mode"

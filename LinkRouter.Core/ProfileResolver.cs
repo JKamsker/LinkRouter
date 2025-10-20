@@ -20,6 +20,7 @@ public static class ProfileResolver
         string? browserProfile = FirstNonEmpty(rule.profile, prof?.profile);
         string? userDataDir = FirstNonEmpty(rule.userDataDir, prof?.userDataDir);
         string? workingDirectory = FirstNonEmpty(rule.workingDirectory, prof?.workingDirectory);
+        bool? incognito = rule.incognito ?? (prof is not null ? prof.incognito : (bool?)null);
 
         if (string.IsNullOrWhiteSpace(browser))
         {
@@ -39,6 +40,7 @@ public static class ProfileResolver
             userDataDir: userDataDir,
             workingDirectory: workingDirectory,
             useProfile: rule.useProfile,
+            incognito: incognito,
             Enabled: rule.Enabled
         );
     }

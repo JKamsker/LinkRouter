@@ -217,6 +217,10 @@ public sealed class ConfigService
         {
             map["useProfile"] = rule.useProfile;
         }
+        if (rule.incognito.HasValue)
+        {
+            map["incognito"] = rule.incognito.Value;
+        }
         if (!rule.Enabled)
         {
             map["enabled"] = false;
@@ -248,6 +252,10 @@ public sealed class ConfigService
         if (!string.IsNullOrWhiteSpace(profile.workingDirectory))
         {
             map["workingDirectory"] = profile.workingDirectory;
+        }
+        if (profile.incognito)
+        {
+            map["incognito"] = true;
         }
 
         return map;
@@ -327,4 +335,3 @@ public sealed record ConfigBackup
 public sealed record ProfileUiState(bool IsAdvanced);
 
 public sealed record SettingsSnapshot(Config Config, IReadOnlyDictionary<string, ProfileUiState> ProfileStates);
-

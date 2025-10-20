@@ -30,7 +30,8 @@ public static class ConfigLoader
                 string? pProfile = val.TryGetProperty("profile", out var jpp) ? jpp.GetString() : null;
                 string? pUserDataDir = val.TryGetProperty("userDataDir", out var jpud) ? jpud.GetString() : null;
                 string? pWorkingDirectory = val.TryGetProperty("workingDirectory", out var jpwd) ? jpwd.GetString() : null;
-                profiles[prop.Name] = new Profile(pBrowser, pArgsTemplate, pProfile, pUserDataDir, pWorkingDirectory);
+                bool pIncognito = val.TryGetProperty("incognito", out var jpi) && jpi.ValueKind == JsonValueKind.True;
+                profiles[prop.Name] = new Profile(pBrowser, pArgsTemplate, pProfile, pUserDataDir, pWorkingDirectory, pIncognito);
             }
         }
 
@@ -46,6 +47,18 @@ public static class ConfigLoader
                 string? useProfile = el.TryGetProperty("useProfile", out var jup) ? jup.GetString() : null; // profile reference
                 string? browser = el.TryGetProperty("browser", out var jbr) ? jbr.GetString() : null;
                 string? argsTemplate = el.TryGetProperty("argsTemplate", out var jat) ? jat.GetString() : null;
+                bool? incognito = null;
+                if (el.TryGetProperty("incognito", out var jinc))
+                {
+                    if (jinc.ValueKind == JsonValueKind.True)
+                    {
+                        incognito = true;
+                    }
+                    else if (jinc.ValueKind == JsonValueKind.False)
+                    {
+                        incognito = false;
+                    }
+                }
                 bool enabled = el.TryGetProperty("enabled", out var jenabled) && jenabled.ValueKind == JsonValueKind.False ? false : true;
 
                 rules.Add(new Rule(
@@ -57,6 +70,7 @@ public static class ConfigLoader
                     userDataDir: userDataDir,
                     workingDirectory: workingDirectory,
                     useProfile: useProfile,
+                    incognito: incognito,
                     Enabled: enabled
                 ));
             }
@@ -72,6 +86,18 @@ public static class ConfigLoader
             string? dUseProfile = jd.TryGetProperty("useProfile", out var jdup) ? jdup.GetString() : null;
             string? dBrowser = jd.TryGetProperty("browser", out var jdb) ? jdb.GetString() : null;
             string? dArgsTemplate = jd.TryGetProperty("argsTemplate", out var jda) ? jda.GetString() : null;
+            bool? dIncognito = null;
+            if (jd.TryGetProperty("incognito", out var jdinc))
+            {
+                if (jdinc.ValueKind == JsonValueKind.True)
+                {
+                    dIncognito = true;
+                }
+                else if (jdinc.ValueKind == JsonValueKind.False)
+                {
+                    dIncognito = false;
+                }
+            }
             bool dEnabled = jd.TryGetProperty("enabled", out var jden) && jden.ValueKind == JsonValueKind.False ? false : true;
             def = new Rule(
                 match: "default",
@@ -82,6 +108,7 @@ public static class ConfigLoader
                 userDataDir: dUserDataDir,
                 workingDirectory: dWorkingDirectory,
                 useProfile: dUseProfile,
+                incognito: dIncognito,
                 Enabled: dEnabled
             );
         }

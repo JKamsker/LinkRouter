@@ -1,3 +1,4 @@
+using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LinkRouter;
 
@@ -24,6 +25,9 @@ public sealed partial class ProfileEditorViewModel : ObservableObject
     private string? workingDirectory;
 
     [ObservableProperty]
+    private bool incognito;
+
+    [ObservableProperty]
     private bool isDefault;
 
     private bool _isAdvanced;
@@ -40,6 +44,7 @@ public sealed partial class ProfileEditorViewModel : ObservableObject
         Profile = profile.profile;
         UserDataDir = profile.userDataDir;
         WorkingDirectory = profile.workingDirectory;
+        Incognito = profile.incognito || ContainsIncognitoArgument(profile.argsTemplate);
     }
 
     public bool IsAdvanced
@@ -69,14 +74,15 @@ public sealed partial class ProfileEditorViewModel : ObservableObject
 
     public Profile ToProfile()
     {
-        return new Profile(Browser, ArgsTemplate, Profile, UserDataDir, WorkingDirectory);
+        return new Profile(Browser, ArgsTemplate, Profile, UserDataDir, WorkingDirectory, Incognito);
     }
 
     public ProfileEditorViewModel Clone()
     {
         var clone = new ProfileEditorViewModel
         {
-            IsDefault = IsDefault
+            IsDefault = IsDefault,
+            Incognito = Incognito
         };
 
         clone.InitializeAdvanced(_isAdvanced);
@@ -88,5 +94,17 @@ public sealed partial class ProfileEditorViewModel : ObservableObject
         clone.WorkingDirectory = WorkingDirectory;
 
         return clone;
+    }
+
+    private static bool ContainsIncognitoArgument(string? argsTemplate)
+    {
+        if (string.IsNullOrWhiteSpace(argsTemplate))
+        {
+            return false;
+        }
+
+        return argsTemplate.Contains("--incognito", StringComparison.OrdinalIgnoreCase)
+               || argsTemplate.Contains("--inprivate", StringComparison.OrdinalIgnoreCase)
+               || argsTemplate.Contains("-private-window", StringComparison.OrdinalIgnoreCase);
     }
 }
