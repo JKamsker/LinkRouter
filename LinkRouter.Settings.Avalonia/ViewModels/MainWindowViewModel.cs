@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.ViewModels;
 
 namespace LinkRouter.Settings.Avalonia.ViewModels;
@@ -23,15 +24,15 @@ public partial class MainWindowViewModel : ObservableObject
         General = general;
         NavigationItems = new ObservableCollection<NavigationItemViewModel>
         {
-            new("overview", "Overview", general),
-            new("rules", "Rules", rules),
-            new("profiles", "Browsers & Profiles", profiles),
-            new("import", "Import / Export", importExport),
-            new("advanced", "Advanced", advanced)
+            new("overview", "Overview", general, Symbol.Home),
+            new("rules", "Rules", rules, Symbol.Code),
+            new("profiles", "Browsers & Profiles", profiles, Symbol.Globe),
+            new("import", "Import / Export", importExport, Symbol.Sync),
+            new("advanced", "Advanced", advanced, Symbol.Settings)
         };
         FooterItems = new ObservableCollection<NavigationItemViewModel>
         {
-            new("about", "About", about)
+            new("about", "About", about, Symbol.Help)
         };
 
         SelectedItem = NavigationItems.FirstOrDefault();
