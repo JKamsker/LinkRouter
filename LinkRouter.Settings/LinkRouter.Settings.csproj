@@ -31,4 +31,11 @@
   <ItemGroup>
     <AvaloniaResource Include="LinkRouter.ico" />
   </ItemGroup>
+
+  <!-- Ensure the launcher CLI is built alongside the settings UI without becoming a referenced assembly -->
+  <Target Name="BuildLinkRouterLauncher" BeforeTargets="Build">
+    <MSBuild Projects="..\LinkRouter.Launcher\LinkRouter.Launcher.csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  </Target>
 </Project>
