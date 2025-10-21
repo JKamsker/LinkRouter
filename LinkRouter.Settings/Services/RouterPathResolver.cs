@@ -40,7 +40,7 @@ internal sealed class RouterPathResolver : IRouterPathResolver
     private static string GetInstalledPath(string executableName)
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "LinkRouter", executableName);
+        return Path.Combine(appData, "LinkRouter", "bin", executableName);
     }
 
 #if DEBUG

@@ -24,7 +24,9 @@ public sealed class ConfigService
 
     public ConfigService()
     {
-        _rootFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LinkRouter");
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var baseFolder = Path.Combine(appData, "LinkRouter");
+        _rootFolder = Path.Combine(baseFolder, ".config");
         _settingsPath = Path.Combine(_rootFolder, "settings.json");
         _manifestPath = Path.Combine(_rootFolder, "mappings.json");
         _backupFolder = Path.Combine(_rootFolder, "backups");

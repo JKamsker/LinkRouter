@@ -37,16 +37,34 @@ class Program
             return 3;
         }
 
-        // Load configuration with fallback to %AppData% if not found next to the executable
-        string configPath = Path.Combine(AppContext.BaseDirectory, "mappings.json");
-        if (!File.Exists(configPath))
+        // Load configuration with fallback to %AppData%\LinkRouter\.config
+        string? configPath = null;
+        var baseDirectoryCandidate = Path.Combine(AppContext.BaseDirectory, "mappings.json");
+        if (File.Exists(baseDirectoryCandidate))
+        {
+            configPath = baseDirectoryCandidate;
+        }
+        else
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var altPath = Path.Combine(appData, "LinkRouter", "mappings.json");
-            if (File.Exists(altPath))
+            var configRoot = Path.Combine(appData, "LinkRouter");
+            var legacyCandidate = Path.Combine(configRoot, "mappings.json");
+            var relocatedCandidate = Path.Combine(configRoot, ".config", "mappings.json");
+
+            if (File.Exists(relocatedCandidate))
             {
-                configPath = altPath;
+                configPath = relocatedCandidate;
             }
+            else if (File.Exists(legacyCandidate))
+            {
+                configPath = legacyCandidate;
+            }
+        }
+
+        if (configPath is null)
+        {
+            Console.Error.WriteLine("No mappings.json could be found. Launch LinkRouter Settings to create a configuration.");
+            return 4;
         }
 
         Config config;
