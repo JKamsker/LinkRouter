@@ -6,7 +6,7 @@
   IgnorableNamespaces="uap rescap">
   <Identity
     Name="com.linkrouter.settings"
-    Publisher="CN=LinkRouter"
+    Publisher="CN=LinkRouter, O=LinkRouter, C=US"
     Version="{{Version}}" />
   <Properties>
     <DisplayName>LinkRouter</DisplayName>
