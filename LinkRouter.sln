@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter", "LinkRouter\LinkRouter.csproj", "{EB7610A1-8CE2-43E7-A487-375D8F0B35BF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Launcher", "LinkRouter.Launcher\LinkRouter.Launcher.csproj", "{EB7610A1-8CE2-43E7-A487-375D8F0B35BF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkRouter.Core", "LinkRouter.Core\LinkRouter.Core.csproj", "{AC9E6EFA-402C-4D3E-93A4-02E39AAE0C7B}"
 EndProject

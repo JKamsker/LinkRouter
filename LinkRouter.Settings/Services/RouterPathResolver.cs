@@ -9,7 +9,7 @@ internal sealed class RouterPathResolver : IRouterPathResolver
 {
     public bool TryGetRouterExecutable(out string? path)
     {
-        var executableName = OperatingSystem.IsWindows() ? "LinkRouter.exe" : "LinkRouter";
+        var executableName = OperatingSystem.IsWindows() ? "LinkRouter.Launcher.exe" : "LinkRouter.Launcher";
 
 #if DEBUG
         if (Debugger.IsAttached && TryResolveDevelopmentBuild(executableName, out path))
@@ -61,7 +61,7 @@ internal sealed class RouterPathResolver : IRouterPathResolver
                 "..",
                 "..",
                 "..",
-                "LinkRouter",
+                "LinkRouter.Launcher",
                 "bin",
                 configurationDirectory.Name,
                 frameworkDirectory.Name,

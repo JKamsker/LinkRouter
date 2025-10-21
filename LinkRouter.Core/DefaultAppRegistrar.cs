@@ -139,7 +139,7 @@ public static class DefaultAppRegistrar
             var fullPath = Path.GetFullPath(executablePath);
             if (!File.Exists(fullPath))
             {
-                throw new FileNotFoundException("LinkRouter executable not found.", fullPath);
+                throw new FileNotFoundException("LinkRouter.Launcher executable not found.", fullPath);
             }
 
             return fullPath;
@@ -148,7 +148,7 @@ public static class DefaultAppRegistrar
         var inferredPath = GetExecutablePath();
         if (!File.Exists(inferredPath))
         {
-            throw new FileNotFoundException("LinkRouter executable not found.", inferredPath);
+            throw new FileNotFoundException("LinkRouter.Launcher executable not found.", inferredPath);
         }
 
         return inferredPath;

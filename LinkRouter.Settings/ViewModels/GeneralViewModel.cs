@@ -210,7 +210,7 @@ public partial class GeneralViewModel : ObservableObject
 
         if (!_routerPathResolver.TryGetRouterExecutable(out var routerPath))
         {
-            ErrorMessage = "Unable to locate the LinkRouter executable. Launch the settings installer or build the CLI project.";
+            ErrorMessage = "Unable to locate the LinkRouter.Launcher executable. Launch the settings installer or build the CLI project.";
             return;
         }
 

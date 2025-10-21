@@ -56,7 +56,7 @@ LinkRouter.Settings/
 - `Frame` for page navigation, `BreadcrumbBar` for sub-navigation where needed.
 
 ## Data Model Mapping
-- Reuse existing config schema as parsed by `LinkRouter/ConfigLoader.cs`:
+- Reuse existing config schema as parsed by `LinkRouter.Core/ConfigLoader.cs`:
   - `rules: Rule[]`
   - `default: Rule?`
   - `profiles: Dictionary<string, Profile>?`
@@ -113,9 +113,9 @@ LinkRouter.Settings/
 - Confirmations for destructive actions (delete rule/profile, replace on import).
 
 ## Integration Points
-- Registration: reuse `LinkRouter/DefaultAppRegistrar.cs` methods directly.
-- Simulation: reuse `LinkRouter/RuleMatcher.cs` and `LinkRouter/ProfileResolver.cs` to match and resolve.
-- Config IO: reuse `LinkRouter/ConfigLoader.cs` for load; mirror its schema for save with `System.Text.Json`.
+- Registration: reuse `LinkRouter.Core/DefaultAppRegistrar.cs` methods directly.
+- Simulation: reuse `LinkRouter.Core/RuleMatcher.cs` and `LinkRouter.Core/ProfileResolver.cs` to match and resolve.
+- Config IO: reuse `LinkRouter.Core/ConfigLoader.cs` for load; mirror its schema for save with `System.Text.Json`.
 - Optional: move shared code to `LinkRouter.Core` to avoid cross-project internals access.
 
 ## UX Details
@@ -146,4 +146,3 @@ LinkRouter.Settings/
 ---
 
 If you want, I can scaffold `LinkRouter.Settings` and wire it to the existing code next.
-

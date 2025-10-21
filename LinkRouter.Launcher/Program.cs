@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using LinkRouter;
 
-namespace LinkRouter;
+namespace LinkRouter.Launcher;
 
 class Program
 {

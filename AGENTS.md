@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `LinkRouter/` contains the console router that reads `mappings.json` and delegates link handling through the core library.
+- `LinkRouter.Launcher/` contains the console router that reads `mappings.json` and delegates link handling through the core library.
 - `LinkRouter.Core/` is the cross-platform rules and launcher engine shared by every host.
 - `LinkRouter.Settings/` hosts the Avalonia desktop settings app and shared settings logic; XAML layouts live under `Views/`, view-models under `ViewModels/`, and cross-layer services under `Services/`.
 - `LinkRouter.Settings.Avalonia.Tests/` provides headless UI and integration tests; supporting fixtures sit under `Rules/` and `Startup/`.
@@ -10,7 +10,7 @@
 ## Build, Test, and Development Commands
 - Restore once per environment: `dotnet restore LinkRouter.sln`.
 - Build Windows or cross-platform artifacts: `dotnet build LinkRouter.sln -c Debug`.
-- Launch the router CLI: `dotnet run --project LinkRouter/LinkRouter.csproj -- <url>`.
+- Launch the router CLI: `dotnet run --project LinkRouter.Launcher/LinkRouter.Launcher.csproj -- <url>`.
 - Launch the settings UI: `dotnet run --project LinkRouter.Settings/LinkRouter.Settings.csproj`.
 - Run the full suite (2-minute timeout baked in): `pwsh ./run-tests.ps1`. Pass extra `dotnet test` arguments via `-Arguments @('test','--filter', 'FullyQualifiedName~RuleEditor')`.
 
