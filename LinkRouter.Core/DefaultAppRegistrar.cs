@@ -10,7 +10,7 @@ public static class DefaultAppRegistrar
     private const string AppName = "LinkRouter";
     private const string ProgId = "LinkRouterURL"; // Our per-user ProgID
 
-    public static void RegisterPerUser(string? executablePath = null)
+    public static void RegisterPerUser(string? executablePath = null, string? appUserModelId = null)
     {
         string exePath = ResolveExecutablePath(executablePath);
         string iconRef = exePath + ",0";
@@ -67,7 +67,7 @@ public static class DefaultAppRegistrar
         }
 
         // 4) Prompt user to set defaults in Settings (we cannot set it silently due to Windows protections)
-        TryOpenDefaultAppsSettings();
+        TryOpenDefaultAppsSettings(appUserModelId);
 
         Console.WriteLine("Registration complete. Opened Windows Settings where you can set LinkRouter as the default handler for HTTP and HTTPS.");
     }
@@ -90,45 +90,66 @@ public static class DefaultAppRegistrar
         }
     }
 
-    private static void TryOpenDefaultAppsSettings()
+    private static void TryOpenDefaultAppsSettings(string? appUserModelId)
+    {
+        if (!string.IsNullOrWhiteSpace(appUserModelId)
+            && TryLaunchSettingsUri($"ms-settings:appsforwebsite?appid={Uri.EscapeDataString(appUserModelId!)}"))
+        {
+            return;
+        }
+
+        if (TryLaunchSettingsUri($"ms-settings:defaultapps?name={Uri.EscapeDataString(AppName)}"))
+        {
+            return;
+        }
+
+        // Windows 10/11: jump straight to the HTTP protocol picker so LinkRouter is pre-filtered.
+        if (TryLaunchSettingsUri("ms-settings:defaultapps?protocol=http"))
+        {
+            return;
+        }
+
+        // Fallback: generic default apps page.
+        if (TryLaunchSettingsUri("ms-settings:defaultapps"))
+        {
+            return;
+        }
+
+        // As last resort, open classic Default Programs (older systems).
+        TryLaunchClassicDefaultPrograms();
+    }
+
+    private static bool TryLaunchSettingsUri(string uri)
     {
         try
         {
-            // Windows 11: can open app-specific page
             Process.Start(new ProcessStartInfo
             {
-                FileName = $"ms-settings:defaultapps?name={Uri.EscapeDataString(AppName)}",
+                FileName = uri,
+                UseShellExecute = true
+            });
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void TryLaunchClassicDefaultPrograms()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "control.exe"),
+                Arguments = "/name Microsoft.DefaultPrograms",
                 UseShellExecute = true
             });
         }
         catch
         {
-            try
-            {
-                // Fallback: general default apps page (Windows 10/11)
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "ms-settings:defaultapps",
-                    UseShellExecute = true
-                });
-            }
-            catch
-            {
-                // As last resort, open classic Default Programs (older systems)
-                try
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "control.exe"),
-                        Arguments = "/name Microsoft.DefaultPrograms",
-                        UseShellExecute = true
-                    });
-                }
-                catch
-                {
-                    // swallow – nothing more to do
-                }
-            }
+            // swallow - nothing more to do
         }
     }
 

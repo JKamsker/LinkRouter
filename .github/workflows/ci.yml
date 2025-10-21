@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build-test-package:
+    runs-on: windows-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
+      DOTNET_NOLOGO: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.306'
+
+      - name: Restore
+        run: dotnet restore LinkRouter.sln
+
+      - name: Build
+        run: dotnet build LinkRouter.sln -c Release --no-restore
+
+      - name: Test
+        run: pwsh ./run-tests.ps1 -Arguments "test","-c","Release"
+
+      - name: Package MSIX
+        run: pwsh ./build/package-msix.ps1 -Configuration Release -Runtime win-x64 -Version 1.0.${{ github.run_number }}.0
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkrouter-msix
+          path: artifacts/msix/*.msix
+          if-no-files-found: error
+
+      - name: Upload MSIX layout
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkrouter-msix-layout
+          path: artifacts/msix/layout/**
+          if-no-files-found: warn
