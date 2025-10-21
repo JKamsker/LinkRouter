@@ -35,7 +35,7 @@ $msixPath = Join-Path $OutputDirectory $msixName
 New-Item -ItemType Directory -Path $publishDir,$layoutDir,$assetsDir -Force | Out-Null
 
 Write-Host "Restoring solution ($Runtime)..."
-dotnet restore "$repoRoot/LinkRouter.sln" -r $Runtime | Out-Null
+dotnet restore "$repoRoot/LinkRouter.sln" -r $Runtime
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet restore failed."
 }
@@ -48,7 +48,7 @@ dotnet publish "$repoRoot/LinkRouter.Settings/LinkRouter.Settings.csproj" `
     --no-restore `
     -p:PublishReadyToRun=true `
     -p:IncludeNativeLibrariesForSelfExtract=true `
-    -o $publishDir | Out-Null
+    -o $publishDir
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed."
 }
