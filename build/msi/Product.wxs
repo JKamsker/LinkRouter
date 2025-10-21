@@ -44,6 +44,11 @@
                   Icon="AppIcon" />
         <RemoveFolder Id="RemoveProgramMenuDir" On="uninstall" />
         <RegistryValue Root="HKCU" Key="Software\LinkRouter" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+        <RegistryValue Root="HKCU"
+                       Key="Software\Microsoft\Windows\CurrentVersion\Run"
+                       Name="LinkRouter"
+                       Type="string"
+                       Value="&quot;[INSTALLBIN]LinkRouter.Settings.exe&quot; --minimized" />
       </Component>
     </DirectoryRef>
   </Fragment>

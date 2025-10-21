@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using LinkRouter.Settings.Services;
@@ -31,7 +33,25 @@ public partial class App : Application
                 .GetAwaiter()
                 .GetResult();
 
+            var startHidden = desktop.Args?.Any(arg =>
+                string.Equals(arg, "--minimized", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(arg, "--background", StringComparison.OrdinalIgnoreCase)) == true;
+
             desktop.MainWindow = Services.GetRequiredService<MainWindow>();
+
+            if (startHidden)
+            {
+                desktop.Startup += (_, _) =>
+                {
+                    if (desktop.MainWindow is { } window)
+                    {
+                        window.WindowState = WindowState.Minimized;
+                        window.ShowInTaskbar = false;
+                        window.Hide();
+                    }
+                };
+            }
+
             Services.GetRequiredService<SettingsTrayIconService>();
         }
 
@@ -53,6 +73,9 @@ public partial class App : Application
         services.AddSingleton<IMessageDialogService>(_ => new AvaloniaMessageDialogService(() => desktop.MainWindow));
         services.AddSingleton<IRuleEditorDialogService>(_ => new RuleEditorDialogService(() => desktop.MainWindow));
         services.AddSingleton<IRouterPathResolver, RouterPathResolver>();
+        services.AddSingleton<IAutostartService>(_ => OperatingSystem.IsWindows()
+            ? new WindowsAutostartService()
+            : new NoOpAutostartService());
 
         services.AddSingleton<AppInitializationService>();
         services.AddSingleton<SettingsTrayIconService>();

@@ -15,6 +15,7 @@ public sealed class ConfigurationState : ObservableObject
     private ConfigDocument? _document;
     private ProfileEditorViewModel? _defaultProfile;
     private bool _isDefaultEnabled;
+    private bool _isAutostartEnabled = true;
 
     public ObservableCollection<RuleEditorViewModel> Rules { get; } = new();
     public ObservableCollection<ProfileEditorViewModel> Profiles { get; } = new();
@@ -56,6 +57,8 @@ public sealed class ConfigurationState : ObservableObject
             }
         }
     }
+
+    public bool IsAutostartEnabled => _isAutostartEnabled;
 
     public event EventHandler? StateChanged;
 
@@ -122,6 +125,9 @@ public sealed class ConfigurationState : ObservableObject
             IsDefaultEnabled = false;
         }
 
+        _isAutostartEnabled = document.ApplicationSettings.AutostartEnabled;
+        OnPropertyChanged(nameof(IsAutostartEnabled));
+
         UpdateDefaultFlags();
 
         Document = document;
@@ -167,7 +173,7 @@ public sealed class ConfigurationState : ObservableObject
                 p => new ProfileUiState(p.IsAdvanced),
                 StringComparer.OrdinalIgnoreCase);
 
-        return new SettingsSnapshot(config, profileStates);
+        return new SettingsSnapshot(config, new ApplicationSettings(_isAutostartEnabled), profileStates);
     }
 
     public void MarkSaved()
@@ -179,6 +185,18 @@ public sealed class ConfigurationState : ObservableObject
     {
         HasUnsavedChanges = true;
         StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void SetAutostartEnabled(bool value)
+    {
+        if (_isAutostartEnabled == value)
+        {
+            return;
+        }
+
+        _isAutostartEnabled = value;
+        OnPropertyChanged(nameof(IsAutostartEnabled));
+        MarkDirty();
     }
 
     public void AddRule(RuleEditorViewModel rule)

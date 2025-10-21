@@ -121,7 +121,10 @@ public partial class ImportExportViewModel : ObservableObject
                 newConfig = incoming;
             }
 
-            var snapshot = new SettingsSnapshot(newConfig, new Dictionary<string, ProfileUiState>(StringComparer.OrdinalIgnoreCase));
+            var snapshot = new SettingsSnapshot(
+                newConfig,
+                new ApplicationSettings(_state.IsAutostartEnabled),
+                new Dictionary<string, ProfileUiState>(StringComparer.OrdinalIgnoreCase));
             await _configService.SaveAsync(snapshot);
             var document = await _configService.LoadAsync();
             _state.Load(document);
@@ -184,7 +187,10 @@ public partial class ImportExportViewModel : ObservableObject
             await File.WriteAllTextAsync(tempPath, json);
 
             var restored = ConfigLoader.LoadConfig(tempPath);
-            var snapshot = new SettingsSnapshot(restored, new Dictionary<string, ProfileUiState>(StringComparer.OrdinalIgnoreCase));
+            var snapshot = new SettingsSnapshot(
+                restored,
+                new ApplicationSettings(_state.IsAutostartEnabled),
+                new Dictionary<string, ProfileUiState>(StringComparer.OrdinalIgnoreCase));
             await _configService.SaveAsync(snapshot);
             var document = await _configService.LoadAsync();
             _state.Load(document);

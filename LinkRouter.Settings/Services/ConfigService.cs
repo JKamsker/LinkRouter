@@ -54,6 +54,7 @@ public sealed class ConfigService
         Directory.CreateDirectory(_backupFolder);
 
         Config config;
+        var appSettings = new ApplicationSettings(true);
         var profileStates = new Dictionary<string, ProfileUiState>(StringComparer.OrdinalIgnoreCase);
         DateTime? settingsLastModified = null;
         DateTime? manifestLastModified = null;
@@ -63,6 +64,7 @@ public sealed class ConfigService
             var loaded = LoadSettingsFile(_settingsPath);
             config = loaded.Config;
             profileStates = loaded.ProfileStates;
+            appSettings = loaded.AppSettings;
             settingsLastModified = File.GetLastWriteTime(_settingsPath);
         }
         else if (File.Exists(_manifestPath))
@@ -90,6 +92,7 @@ public sealed class ConfigService
 
         return new ConfigDocument(
             config,
+            appSettings,
             _settingsPath,
             settingsLastModified,
             _manifestPath,
@@ -153,6 +156,11 @@ public sealed class ConfigService
         var root = new JsonObject
         {
             ["config"] = configNode
+        };
+
+        root["app"] = new JsonObject
+        {
+            ["autostart"] = snapshot.ApplicationSettings.AutostartEnabled
         };
 
         if (snapshot.ProfileStates.Count > 0)
@@ -268,7 +276,7 @@ public sealed class ConfigService
         return new Config(Array.Empty<Rule>(), null, new Dictionary<string, Profile>(StringComparer.OrdinalIgnoreCase));
     }
 
-    private (Config Config, Dictionary<string, ProfileUiState> ProfileStates) LoadSettingsFile(string path)
+    private (Config Config, Dictionary<string, ProfileUiState> ProfileStates, ApplicationSettings AppSettings) LoadSettingsFile(string path)
     {
         var json = File.ReadAllText(path);
         using var doc = JsonDocument.Parse(json);
@@ -297,12 +305,26 @@ public sealed class ConfigService
             }
         }
 
-        return (config, profileStates);
+        var applicationSettings = new ApplicationSettings(true);
+        if (root.TryGetProperty("app", out var appNode) && appNode.ValueKind == JsonValueKind.Object)
+        {
+            if (appNode.TryGetProperty("autostart", out var autostartNode) && autostartNode.ValueKind == JsonValueKind.False)
+            {
+                applicationSettings = new ApplicationSettings(false);
+            }
+            else if (appNode.TryGetProperty("autostart", out autostartNode) && autostartNode.ValueKind == JsonValueKind.True)
+            {
+                applicationSettings = new ApplicationSettings(true);
+            }
+        }
+
+        return (config, profileStates, applicationSettings);
     }
 }
 
 public sealed record ConfigDocument(
     Config Config,
+    ApplicationSettings ApplicationSettings,
     string SettingsPath,
     DateTime? SettingsLastModified,
     string ManifestPath,
@@ -336,4 +358,6 @@ public sealed record ConfigBackup
 
 public sealed record ProfileUiState(bool IsAdvanced);
 
-public sealed record SettingsSnapshot(Config Config, IReadOnlyDictionary<string, ProfileUiState> ProfileStates);
+public sealed record SettingsSnapshot(Config Config, ApplicationSettings ApplicationSettings, IReadOnlyDictionary<string, ProfileUiState> ProfileStates);
+
+public sealed record ApplicationSettings(bool AutostartEnabled);

@@ -19,9 +19,11 @@ public partial class GeneralViewModel : ObservableObject
     private readonly IShellService _shellService;
     private readonly IClipboardService _clipboardService;
     private readonly IRouterPathResolver _routerPathResolver;
+    private readonly IAutostartService _autostartService;
     private bool _simulationOwnsError;
     private Rule? _lastEffectiveRule;
     private string? _lastLaunchArguments;
+    private bool _suppressAutostartPropagation;
 
     [ObservableProperty]
     private string _configPath = string.Empty;
@@ -50,11 +52,16 @@ public partial class GeneralViewModel : ObservableObject
     [ObservableProperty]
     private string? _statusMessage;
 
+    [ObservableProperty]
+    private bool _isAutostartEnabled;
+
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
     public bool HasUnsavedChanges => _state.HasUnsavedChanges;
     public bool CanSave => HasUnsavedChanges && !IsSaving;
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
     public string LastModifiedDisplay => LastModified?.ToLocalTime().ToString("G") ?? string.Empty;
+    public bool CanConfigureAutostart => _autostartService.IsSupported;
+    public bool CannotConfigureAutostart => !CanConfigureAutostart;
 
     public GeneralViewModel(
         ConfigService configService,
@@ -62,7 +69,8 @@ public partial class GeneralViewModel : ObservableObject
         ConfigurationState state,
         IShellService shellService,
         IClipboardService clipboardService,
-        IRouterPathResolver routerPathResolver)
+        IRouterPathResolver routerPathResolver,
+        IAutostartService autostartService)
     {
         _configService = configService;
         _ruleTestService = ruleTestService;
@@ -70,9 +78,11 @@ public partial class GeneralViewModel : ObservableObject
         _shellService = shellService;
         _clipboardService = clipboardService;
         _routerPathResolver = routerPathResolver;
+        _autostartService = autostartService;
 
         LoadMetadata();
         _state.StateChanged += OnStateChanged;
+        SyncAutostartFromState();
         SetLaunchContext(null, null);
     }
 
@@ -92,6 +102,7 @@ public partial class GeneralViewModel : ObservableObject
         }
 
         UpdateSimulation();
+        SyncAutostartFromState();
     }
 
     private void LoadMetadata()
@@ -219,6 +230,10 @@ public partial class GeneralViewModel : ObservableObject
             await _configService.SaveAsync(snapshot);
             var document = await _configService.LoadAsync();
             _state.Load(document);
+            if (_autostartService.IsSupported)
+            {
+                _autostartService.SetEnabled(snapshot.ApplicationSettings.AutostartEnabled);
+            }
             StatusMessage = "Saved.";
         }
         catch (Exception ex)
@@ -234,6 +249,16 @@ public partial class GeneralViewModel : ObservableObject
     partial void OnIsSavingChanged(bool value)
     {
         OnPropertyChanged(nameof(CanSave));
+    }
+
+    partial void OnIsAutostartEnabledChanged(bool value)
+    {
+        if (_suppressAutostartPropagation)
+        {
+            return;
+        }
+
+        _state.SetAutostartEnabled(value);
     }
 
     [RelayCommand]
@@ -361,5 +386,24 @@ public partial class GeneralViewModel : ObservableObject
     partial void OnLastModifiedChanged(DateTime? value)
     {
         OnPropertyChanged(nameof(LastModifiedDisplay));
+    }
+
+    private void SyncAutostartFromState()
+    {
+        var desired = _state.IsAutostartEnabled;
+        if (IsAutostartEnabled == desired && _suppressAutostartPropagation == false)
+        {
+            return;
+        }
+
+        _suppressAutostartPropagation = true;
+        try
+        {
+            IsAutostartEnabled = desired;
+        }
+        finally
+        {
+            _suppressAutostartPropagation = false;
+        }
     }
 }

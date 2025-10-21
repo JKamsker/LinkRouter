@@ -17,7 +17,8 @@ public class GeneralViewModelTests
         var clipboard = new NullClipboardService();
 
         var resolver = new NullRouterPathResolver();
-        var viewModel = new GeneralViewModel(configService, ruleTestService, state, shell, clipboard, resolver);
+        var autostart = new NullAutostartService();
+        var viewModel = new GeneralViewModel(configService, ruleTestService, state, shell, clipboard, resolver, autostart);
 
         Assert.False(viewModel.CanSave);
 
@@ -50,5 +51,14 @@ public class GeneralViewModelTests
             path = null;
             return false;
         }
+    }
+
+    private sealed class NullAutostartService : IAutostartService
+    {
+        public bool IsSupported => false;
+
+        public bool IsEnabled() => false;
+
+        public void SetEnabled(bool enabled) { }
     }
 }

@@ -31,6 +31,20 @@
                                          IsVisible="{Binding IsSaving}" />
                         </StackPanel>
                         <Separator Margin="0,12,0,0" />
+                        <StackPanel Classes="SectionContent"
+                                    IsVisible="{Binding CanConfigureAutostart}">
+                            <TextBlock Text="Launch on sign-in" FontWeight="SemiBold" />
+                            <ToggleSwitch Content="Start LinkRouter Settings in the background"
+                                          HorizontalAlignment="Left"
+                                          IsChecked="{Binding IsAutostartEnabled, Mode=TwoWay}" />
+                        </StackPanel>
+                        <Separator Margin="0,12,0,0"
+                                   IsVisible="{Binding CanConfigureAutostart}" />
+                        <StackPanel Classes="SectionContent"
+                                    IsVisible="{Binding CannotConfigureAutostart}">
+                            <TextBlock Text="Autostart is only available on Windows builds."
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
                         <StackPanel Classes="SectionContent">
                             <TextBlock Text="Register as default Browser" FontWeight="SemiBold" />
                             <StackPanel Orientation="Horizontal" Spacing="12">
