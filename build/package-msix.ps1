@@ -29,10 +29,11 @@ New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 $publishDir = Join-Path $OutputDirectory "publish"
 $layoutDir = Join-Path $OutputDirectory "layout"
 $assetsDir = Join-Path $layoutDir "Assets"
+$launcherPublishDir = Join-Path $OutputDirectory "launcher"
 $msixName = "LinkRouter.Settings_${Version}_${Runtime}.msix"
 $msixPath = Join-Path $OutputDirectory $msixName
 
-New-Item -ItemType Directory -Path $publishDir,$layoutDir,$assetsDir -Force | Out-Null
+New-Item -ItemType Directory -Path $publishDir,$layoutDir,$assetsDir,$launcherPublishDir -Force | Out-Null
 
 Write-Host "Restoring solution ($Runtime)..."
 dotnet restore "$repoRoot/LinkRouter.sln" -r $Runtime
@@ -52,6 +53,18 @@ if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed."
 }
 
+Write-Host "Publishing LinkRouter.Launcher as NativeAOT ($Configuration | $Runtime)..."
+dotnet publish "$repoRoot/LinkRouter.Launcher/LinkRouter.Launcher.csproj" `
+    -c $Configuration `
+    -r $Runtime `
+    --self-contained `
+    -p:PublishAot=true `
+    -p:StripSymbols=true `
+    -o $launcherPublishDir
+if ($LASTEXITCODE -ne 0) {
+    throw "dotnet publish (launcher native AOT) failed."
+}
+
 Write-Host "Preparing MSIX layout..."
 Get-ChildItem $publishDir -Recurse | ForEach-Object {
     $targetPath = $_.FullName.Replace($publishDir, $layoutDir)
@@ -63,6 +76,13 @@ Get-ChildItem $publishDir -Recurse | ForEach-Object {
         Copy-Item $_.FullName -Destination $targetPath -Force
     }
 }
+
+# Drop the NativeAOT launcher into the application root
+$launcherBinary = Join-Path $launcherPublishDir "LinkRouter.Launcher.exe"
+if (-not (Test-Path $launcherBinary)) {
+    throw "NativeAOT launcher binary not found at $launcherBinary"
+}
+Copy-Item $launcherBinary -Destination (Join-Path $layoutDir "LinkRouter.Launcher.exe") -Force
 
 $assetsSource = Join-Path $PSScriptRoot "windows/assets"
 Copy-Item -Path (Join-Path $assetsSource "*") -Destination $assetsDir -Recurse -Force
