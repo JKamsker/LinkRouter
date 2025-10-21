@@ -46,7 +46,6 @@ dotnet publish "$repoRoot/LinkRouter.Settings/LinkRouter.Settings.csproj" `
     -r $Runtime `
     --self-contained `
     --no-restore `
-    -p:PublishReadyToRun=true `
     -p:IncludeNativeLibrariesForSelfExtract=true `
     -o $publishDir
 if ($LASTEXITCODE -ne 0) {
