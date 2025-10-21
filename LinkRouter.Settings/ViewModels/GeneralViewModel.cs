@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -18,6 +19,9 @@ public partial class GeneralViewModel : ObservableObject
     private readonly IShellService _shellService;
     private readonly IClipboardService _clipboardService;
     private readonly IRouterPathResolver _routerPathResolver;
+    private bool _simulationOwnsError;
+    private Rule? _lastEffectiveRule;
+    private string? _lastLaunchArguments;
 
     [ObservableProperty]
     private string _configPath = string.Empty;
@@ -69,6 +73,7 @@ public partial class GeneralViewModel : ObservableObject
 
         LoadMetadata();
         _state.StateChanged += OnStateChanged;
+        SetLaunchContext(null, null);
     }
 
     private void OnStateChanged(object? sender, EventArgs e)
@@ -85,6 +90,8 @@ public partial class GeneralViewModel : ObservableObject
         {
             StatusMessage = "All changes saved.";
         }
+
+        UpdateSimulation();
     }
 
     private void LoadMetadata()
@@ -107,16 +114,15 @@ public partial class GeneralViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    private void Simulate()
+    private void UpdateSimulation()
     {
-        ErrorMessage = null;
         SimulationSummary = null;
         SimulationDetails = null;
+        SetSimulationError(null);
+        SetLaunchContext(null, null);
 
         if (string.IsNullOrWhiteSpace(TestUrl))
         {
-            ErrorMessage = "Enter a URL to test.";
             return;
         }
 
@@ -126,11 +132,12 @@ public partial class GeneralViewModel : ObservableObject
             var result = _ruleTestService.Test(config, TestUrl);
             if (!result.Success)
             {
-                ErrorMessage = result.Error;
                 if (!string.IsNullOrWhiteSpace(result.NormalizedUrl))
                 {
                     SimulationSummary = $"Normalized URL: {result.NormalizedUrl}";
                 }
+
+                SetSimulationError(result.Error);
                 return;
             }
 
@@ -141,22 +148,67 @@ public partial class GeneralViewModel : ObservableObject
             SimulationDetails = result.EffectiveRule is null
                 ? null
                 : BuildDetails(result.EffectiveRule, result.LaunchArguments ?? string.Empty);
+            SetLaunchContext(result.EffectiveRule, result.LaunchArguments);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            SimulationSummary = null;
+            SimulationDetails = null;
+            SetSimulationError(ex.Message);
+            SetLaunchContext(null, null);
         }
     }
 
     private static string BuildDetails(Rule rule, string launchArgs)
     {
-        return $"Browser: {rule.browser}\nArgs: {launchArgs}";
+        var argsDisplay = string.IsNullOrWhiteSpace(launchArgs) ? "(none)" : launchArgs;
+        return $"Would launch:{Environment.NewLine}Browser: {rule.browser}{Environment.NewLine}Args: {argsDisplay}";
     }
+
+    partial void OnTestUrlChanged(string value)
+    {
+        UpdateSimulation();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanLaunchTest))]
+    private void LaunchTest()
+    {
+        if (_lastEffectiveRule?.browser is null)
+        {
+            return;
+        }
+
+        try
+        {
+            SetOperationError(null);
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = _lastEffectiveRule.browser,
+                Arguments = _lastLaunchArguments ?? string.Empty,
+                UseShellExecute = false
+            };
+
+            if (!string.IsNullOrWhiteSpace(_lastEffectiveRule.workingDirectory))
+            {
+                startInfo.WorkingDirectory = _lastEffectiveRule.workingDirectory;
+            }
+
+            Process.Start(startInfo);
+            StatusMessage = "Launched test URL.";
+        }
+        catch (Exception ex)
+        {
+            SetOperationError(ex.Message);
+        }
+    }
+
+    private bool CanLaunchTest() => _lastEffectiveRule?.browser is not null;
 
     [RelayCommand]
     private async Task SaveAsync()
     {
-        ErrorMessage = null;
+        SetOperationError(null);
         StatusMessage = null;
         IsSaving = true;
         StatusMessage = "Saving...";
@@ -171,7 +223,7 @@ public partial class GeneralViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            SetOperationError(ex.Message);
         }
         finally
         {
@@ -187,7 +239,7 @@ public partial class GeneralViewModel : ObservableObject
     [RelayCommand]
     private async Task DiscardChangesAsync()
     {
-        ErrorMessage = null;
+        SetOperationError(null);
         StatusMessage = null;
 
         try
@@ -198,19 +250,19 @@ public partial class GeneralViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            SetOperationError(ex.Message);
         }
     }
 
     [RelayCommand]
     private async Task RegisterAsync()
     {
-        ErrorMessage = null;
+        SetOperationError(null);
         StatusMessage = null;
 
         if (!_routerPathResolver.TryGetRouterExecutable(out var routerPath))
         {
-            ErrorMessage = "Unable to locate the LinkRouter.Launcher executable. Launch the settings installer or build the CLI project.";
+            SetOperationError("Unable to locate the LinkRouter.Launcher executable. Launch the settings installer or build the CLI project.");
             return;
         }
 
@@ -221,14 +273,14 @@ public partial class GeneralViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            SetOperationError(ex.Message);
         }
     }
 
     [RelayCommand]
     private async Task UnregisterAsync()
     {
-        ErrorMessage = null;
+        SetOperationError(null);
         StatusMessage = null;
         try
         {
@@ -237,7 +289,7 @@ public partial class GeneralViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            SetOperationError(ex.Message);
         }
     }
 
@@ -254,7 +306,7 @@ public partial class GeneralViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            SetOperationError(ex.Message);
         }
     }
 
@@ -267,8 +319,38 @@ public partial class GeneralViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            SetOperationError(ex.Message);
         }
+    }
+
+    private void SetLaunchContext(Rule? rule, string? arguments)
+    {
+        _lastEffectiveRule = rule;
+        _lastLaunchArguments = arguments;
+        LaunchTestCommand.NotifyCanExecuteChanged();
+    }
+
+    private void SetOperationError(string? message)
+    {
+        _simulationOwnsError = false;
+        ErrorMessage = message;
+    }
+
+    private void SetSimulationError(string? message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            if (_simulationOwnsError)
+            {
+                ErrorMessage = null;
+                _simulationOwnsError = false;
+            }
+
+            return;
+        }
+
+        ErrorMessage = message;
+        _simulationOwnsError = true;
     }
 
     partial void OnErrorMessageChanged(string? value)

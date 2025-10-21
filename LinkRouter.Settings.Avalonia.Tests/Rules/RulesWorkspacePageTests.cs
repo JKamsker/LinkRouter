@@ -11,8 +11,7 @@ public class RulesWorkspacePageTests
     public async Task EditRuleCommand_WithSelection_OpensInlineEditor()
     {
         var state = new ConfigurationState();
-        var tester = new RuleTestService();
-        var viewModel = new RulesViewModel(state, tester);
+        var viewModel = new RulesViewModel(state);
 
         var rule = new RuleEditorViewModel
         {
@@ -35,8 +34,7 @@ public class RulesWorkspacePageTests
     public async Task EditRuleCommand_WithoutSelection_DoesNotOpenEditor()
     {
         var state = new ConfigurationState();
-        var tester = new RuleTestService();
-        var viewModel = new RulesViewModel(state, tester);
+        var viewModel = new RulesViewModel(state);
 
         await viewModel.EditRuleCommand.ExecuteAsync(null);
 
@@ -48,8 +46,7 @@ public class RulesWorkspacePageTests
     public async Task CancelEditorCommand_ClosesEditorWithoutSaving()
     {
         var state = new ConfigurationState();
-        var tester = new RuleTestService();
-        var viewModel = new RulesViewModel(state, tester);
+        var viewModel = new RulesViewModel(state);
 
         var rule = new RuleEditorViewModel
         {
@@ -77,8 +74,7 @@ public class RulesWorkspacePageTests
     public async Task SaveEditorCommand_CommitsChanges()
     {
         var state = new ConfigurationState();
-        var tester = new RuleTestService();
-        var viewModel = new RulesViewModel(state, tester);
+        var viewModel = new RulesViewModel(state);
 
         var rule = new RuleEditorViewModel
         {
@@ -102,14 +98,12 @@ public class RulesWorkspacePageTests
     public void ActionCommands_DisableWithoutSelection()
     {
         var state = new ConfigurationState();
-        var tester = new RuleTestService();
-        var viewModel = new RulesViewModel(state, tester);
+        var viewModel = new RulesViewModel(state);
 
         Assert.False(viewModel.DeleteRuleCommand.CanExecute(null));
         Assert.False(viewModel.DuplicateRuleCommand.CanExecute(null));
         Assert.False(viewModel.MoveUpCommand.CanExecute(null));
         Assert.False(viewModel.MoveDownCommand.CanExecute(null));
-        Assert.False(viewModel.TestRuleCommand.CanExecute(null));
 
         var rule = new RuleEditorViewModel();
         state.AddRule(rule);
@@ -119,15 +113,13 @@ public class RulesWorkspacePageTests
         Assert.True(viewModel.DuplicateRuleCommand.CanExecute(rule));
         Assert.False(viewModel.MoveUpCommand.CanExecute(rule));
         Assert.False(viewModel.MoveDownCommand.CanExecute(rule));
-        Assert.True(viewModel.TestRuleCommand.CanExecute(null));
     }
 
     [Fact]
     public void MoveCommandsRespectBoundaries()
     {
         var state = new ConfigurationState();
-        var tester = new RuleTestService();
-        var viewModel = new RulesViewModel(state, tester);
+        var viewModel = new RulesViewModel(state);
 
         var first = new RuleEditorViewModel { Pattern = "first" };
         var second = new RuleEditorViewModel { Pattern = "second" };

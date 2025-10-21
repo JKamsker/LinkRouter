@@ -193,15 +193,6 @@
                         </Grid>
                     </Border>
 
-                    <Border Classes="SettingsCard">
-                        <StackPanel Classes="SettingsCardContent">
-                            <TextBlock Text="Test URL" Classes="SectionTitle" />
-                            <TextBox Text="{Binding TestUrl, Mode=TwoWay}" />
-                            <Button Content="Test rule" Command="{Binding TestRuleCommand}" />
-                            <TextBlock Text="{Binding TestResult}" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding TestError}" TextWrapping="Wrap" Foreground="Red" />
-                        </StackPanel>
-                    </Border>
                 </StackPanel>
             </Grid>
         </StackPanel>

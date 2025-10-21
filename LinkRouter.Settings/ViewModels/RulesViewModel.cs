@@ -15,7 +15,6 @@ public partial class RulesViewModel : ObservableObject
     private static readonly IReadOnlyList<string> s_matchTypes = new[] { "domain", "regex", "contains" };
 
     private readonly ConfigurationState _state;
-    private readonly RuleTestService _tester;
     private readonly List<string> _profileOptions = new();
     private int _lastSelectedRuleIndex;
 
@@ -23,23 +22,12 @@ public partial class RulesViewModel : ObservableObject
     private RuleEditorViewModel? _selectedRule;
 
     [ObservableProperty]
-    private string _testUrl = string.Empty;
-
-    [ObservableProperty]
-    private string? _testResult;
-
-    [ObservableProperty]
-    private string? _testError;
-
-    [ObservableProperty]
     private RuleEditorDialogViewModel? _activeEditor;
 
     public RulesViewModel(
-        ConfigurationState state,
-        RuleTestService tester)
+        ConfigurationState state)
     {
         _state = state;
-        _tester = tester;
         _state.StateChanged += OnStateChanged;
         _state.Rules.CollectionChanged += OnRulesCollectionChanged;
         RefreshProfileOptions();
@@ -128,45 +116,6 @@ public partial class RulesViewModel : ObservableObject
 
         NotifyActionCommandStates();
     }
-
-    [RelayCommand(CanExecute = nameof(CanTestRule))]
-    private void TestRule()
-    {
-        TestError = null;
-        TestResult = null;
-
-        if (SelectedRule is null)
-        {
-            TestError = "Select a rule to test.";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(TestUrl))
-        {
-            TestError = "Enter a URL to test.";
-            return;
-        }
-
-        try
-        {
-            var config = _state.BuildConfig();
-            var result = _tester.Test(config, TestUrl);
-            if (!result.Success)
-            {
-                TestError = result.Error;
-                return;
-            }
-
-            TestResult = result.EffectiveRule is null
-                ? "No rule resolved."
-                : $"Browser: {result.EffectiveRule.browser}\nArgs: {result.LaunchArguments}";
-        }
-        catch (Exception ex)
-        {
-            TestError = ex.Message;
-        }
-    }
-
     [RelayCommand(CanExecute = nameof(CanClearUseProfile))]
     private void ClearUseProfile()
     {
@@ -360,15 +309,12 @@ public partial class RulesViewModel : ObservableObject
         return index >= 0 && index < Rules.Count - 1;
     }
 
-    private bool CanTestRule() => SelectedRule is not null;
-
     private void NotifyActionCommandStates()
     {
         DeleteRuleCommand.NotifyCanExecuteChanged();
         DuplicateRuleCommand.NotifyCanExecuteChanged();
         MoveUpCommand.NotifyCanExecuteChanged();
         MoveDownCommand.NotifyCanExecuteChanged();
-        TestRuleCommand.NotifyCanExecuteChanged();
     }
 
     private void OnRulesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
