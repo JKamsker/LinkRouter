@@ -5,6 +5,7 @@ on:
     branches:
       - master
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build-test-package:
@@ -29,7 +30,7 @@ jobs:
         run: dotnet build LinkRouter.sln -c Release --no-restore
 
       - name: Test
-        run: pwsh ./run-tests.ps1 -Arguments "test","-c","Release"
+        run: ./run-tests.ps1 -Arguments test,-c,Release
 
       - name: Package MSIX
         run: pwsh ./build/package-msix.ps1 -Configuration Release -Runtime win-x64 -Version 1.0.${{ github.run_number }}.0
