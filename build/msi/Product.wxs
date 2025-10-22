@@ -22,7 +22,7 @@
     </Feature>
     <CustomAction Id="LaunchSettingsBackground"
                   Directory="INSTALLBIN"
-                  Execute="commit"
+                  Execute="immediate"
                   Impersonate="yes"
                   ExeCommand="cmd.exe /C start &quot;&quot; &quot;[INSTALLBIN]LinkRouter.Settings.exe&quot; --background"
                   Return="asyncNoWait" />
