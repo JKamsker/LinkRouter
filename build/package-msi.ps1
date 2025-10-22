@@ -56,6 +56,7 @@ dotnet publish "$repoRoot/LinkRouter.Settings/LinkRouter.Settings.csproj" `
     -r $Runtime `
     --self-contained `
     --no-restore `
+    -p:Version=$Version `
     -p:IncludeNativeLibrariesForSelfExtract=true `
     -o $publishDir
 if ($LASTEXITCODE -ne 0) {
@@ -67,6 +68,7 @@ dotnet publish "$repoRoot/LinkRouter.Launcher/LinkRouter.Launcher.csproj" `
     -c $Configuration `
     -r $Runtime `
     --self-contained `
+    -p:Version=$Version `
     -p:PublishAot=true `
     -p:StripSymbols=true `
     -o $launcherPublishDir
@@ -100,9 +102,20 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Validating WiX CLI availability..."
-dotnet tool run wix --version | Out-Null
+$wixVersionOutput = dotnet tool run wix -- --version
 if ($LASTEXITCODE -ne 0) {
     throw "WiX CLI failed to execute after dotnet tool restore."
+}
+$wixVersionMatch = [regex]::Match(($wixVersionOutput | Out-String), '\d+\.\d+\.\d+')
+if (-not $wixVersionMatch.Success) {
+    throw "Unable to determine WiX version from output: $wixVersionOutput"
+}
+$wixVersion = $wixVersionMatch.Value
+
+Write-Host "Ensuring WiX Util extension is available (v$wixVersion)..."
+dotnet tool run wix -- extension add "WixToolset.Util.wixext/$wixVersion" | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to add WixToolset.Util extension."
 }
 
 function New-SafeId {
@@ -228,6 +241,7 @@ $wixArgs = @(
     "build",
     (Join-Path $repoRoot "build/msi/Product.wxs"),
     $componentFragmentPath,
+    "-ext", "WixToolset.Util.wixext",
     "-arch", "x64",
     "-d", "BinDir=$publishDir",
     "-d", "ConfigDir=$configDir",
