@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 namespace LinkRouter;
@@ -10,6 +11,7 @@ public static class DefaultAppRegistrar
     private const string AppName = "LinkRouter";
     private const string ProgId = "LinkRouterURL"; // Our per-user ProgID
 
+    [SupportedOSPlatform("windows")]
     public static void RegisterPerUser(string? executablePath = null, string? appUserModelId = null)
     {
         string exePath = ResolveExecutablePath(executablePath);
@@ -72,6 +74,7 @@ public static class DefaultAppRegistrar
         Console.WriteLine("Registration complete. Opened Windows Settings where you can set LinkRouter as the default handler for HTTP and HTTPS.");
     }
 
+    [SupportedOSPlatform("windows")]
     public static void UnregisterPerUser()
     {
         try

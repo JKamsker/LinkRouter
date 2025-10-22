@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 namespace LinkRouter.Settings.Services.BrowserDetection;
@@ -17,6 +18,7 @@ internal sealed class FirefoxBrowserDetectionStrategy : IBrowserDetectionStrateg
 
     public BrowserFamily Family => BrowserFamily.Firefox;
 
+    [SupportedOSPlatform("windows")]
     public IEnumerable<BrowserInfo> DetectInstalledBrowsers()
     {
         foreach (var entry in FirefoxKeys)
@@ -68,6 +70,7 @@ internal sealed class FirefoxBrowserDetectionStrategy : IBrowserDetectionStrateg
         return profiles;
     }
 
+    [SupportedOSPlatform("windows")]
     private static string? ReadFirefoxPath(IEnumerable<string> registryKeys)
     {
         foreach (var root in new[] { Registry.CurrentUser, Registry.LocalMachine })

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using Microsoft.Win32;
 
@@ -27,6 +28,7 @@ internal sealed class ChromiumBrowserDetectionStrategy : IBrowserDetectionStrate
 
     public BrowserFamily Family => BrowserFamily.Chromium;
 
+    [SupportedOSPlatform("windows")]
     public IEnumerable<BrowserInfo> DetectInstalledBrowsers()
     {
         foreach (var browser in ChromiumBrowsers)
@@ -75,6 +77,7 @@ internal sealed class ChromiumBrowserDetectionStrategy : IBrowserDetectionStrate
         return options;
     }
 
+    [SupportedOSPlatform("windows")]
     private static string? ReadExecutablePath(IEnumerable<string> registryKeys)
     {
         foreach (var root in new[] { Registry.CurrentUser, Registry.LocalMachine })

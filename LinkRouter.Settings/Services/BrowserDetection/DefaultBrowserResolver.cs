@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 namespace LinkRouter.Settings.Services.BrowserDetection;
@@ -35,6 +36,7 @@ internal static class DefaultBrowserResolver
         }
     }
 
+    [SupportedOSPlatform("windows")]
     private static string? ReadUserChoiceProgId(string scheme)
     {
         using var key = Registry.CurrentUser.OpenSubKey($"Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\{scheme}\\UserChoice");
@@ -42,6 +44,7 @@ internal static class DefaultBrowserResolver
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
+    [SupportedOSPlatform("windows")]
     private static string? ReadCommandFromProgId(string? progId)
     {
         if (string.IsNullOrWhiteSpace(progId))
@@ -53,6 +56,7 @@ internal static class DefaultBrowserResolver
         return key?.GetValue(null) as string;
     }
 
+    [SupportedOSPlatform("windows")]
     private static string? ReadStartMenuInternetCommand()
     {
         using var userKey = Registry.CurrentUser.OpenSubKey("Software\\Clients\\StartMenuInternet");

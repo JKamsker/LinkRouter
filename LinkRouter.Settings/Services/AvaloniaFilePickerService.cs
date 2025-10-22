@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using LinkRouter.Settings.Services.Abstractions;
 
 namespace LinkRouter.Settings.Services;
@@ -19,46 +20,52 @@ internal sealed class AvaloniaFilePickerService : IFilePickerService
 
     public async Task<string?> PickOpenFileAsync(FilePickerOptions options, CancellationToken cancellationToken = default)
     {
-        var dialog = new OpenFileDialog
+        var window = _getWindow();
+        if (window?.StorageProvider is not { } storageProvider)
         {
+            return null;
+        }
+
+        var pickerOptions = new FilePickerOpenOptions
+        {
+            Title = options.Title,
             AllowMultiple = false,
-            Title = options.Title
+            FileTypeFilter = BuildFileTypes(options.FileTypes)
         };
 
-        dialog.Filters = BuildFilters(options.FileTypes);
-        var window = _getWindow();
-        var result = window is null
-            ? await dialog.ShowAsync(null)
-            : await dialog.ShowAsync(window);
-        return result?.FirstOrDefault();
+        var result = await storageProvider.OpenFilePickerAsync(pickerOptions);
+        return result.Count > 0 ? result[0].Path.LocalPath : null;
     }
 
     public async Task<string?> PickSaveFileAsync(FilePickerOptions options, CancellationToken cancellationToken = default)
     {
-        var dialog = new SaveFileDialog
+        var window = _getWindow();
+        if (window?.StorageProvider is not { } storageProvider)
+        {
+            return null;
+        }
+
+        var pickerOptions = new FilePickerSaveOptions
         {
             Title = options.Title,
-            InitialFileName = options.SuggestedFileName
+            SuggestedFileName = options.SuggestedFileName,
+            FileTypeChoices = BuildFileTypes(options.FileTypes)
         };
 
-        dialog.Filters = BuildFilters(options.FileTypes);
-        var window = _getWindow();
-        return window is null
-            ? await dialog.ShowAsync(null)
-            : await dialog.ShowAsync(window);
+        var result = await storageProvider.SaveFilePickerAsync(pickerOptions);
+        return result?.Path.LocalPath;
     }
 
-    private static List<FileDialogFilter>? BuildFilters(IReadOnlyList<FilePickerFileType> types)
+    private static List<Avalonia.Platform.Storage.FilePickerFileType>? BuildFileTypes(IReadOnlyList<Services.Abstractions.FilePickerFileType> types)
     {
         if (types.Count == 0)
         {
             return null;
         }
 
-        return types.Select(t => new FileDialogFilter
+        return types.Select(t => new Avalonia.Platform.Storage.FilePickerFileType(t.DisplayName)
         {
-            Name = t.DisplayName,
-            Extensions = t.Patterns.Select(p => p.TrimStart('.')).ToList()
+            Patterns = t.Patterns
         }).ToList();
     }
 }

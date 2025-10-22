@@ -46,7 +46,7 @@ public class GeneralViewModelTests
 
     private sealed class NullRouterPathResolver : IRouterPathResolver
     {
-        public bool TryGetRouterExecutable(out string? path)
+        public bool TryGetRouterExecutable([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? path)
         {
             path = null;
             return false;

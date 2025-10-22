@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -280,6 +281,7 @@ public partial class GeneralViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [SupportedOSPlatform("windows")]
     private async Task RegisterAsync()
     {
         SetOperationError(null);
@@ -303,6 +305,7 @@ public partial class GeneralViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [SupportedOSPlatform("windows")]
     private async Task UnregisterAsync()
     {
         SetOperationError(null);
