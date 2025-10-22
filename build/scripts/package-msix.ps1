@@ -86,10 +86,10 @@ if (-not (Test-Path $launcherBinary)) {
 }
 Copy-Item $launcherBinary -Destination (Join-Path $layoutDir "LinkRouter.Launcher.exe") -Force
 
-$assetsSource = Join-Path $PSScriptRoot "windows/assets"
+$assetsSource = Join-Path $PSScriptRoot "../windows/assets"
 Copy-Item -Path (Join-Path $assetsSource "*") -Destination $assetsDir -Recurse -Force
 
-$manifestTemplate = Get-Content (Join-Path $PSScriptRoot "windows/AppxManifest.template.xml") -Raw
+$manifestTemplate = Get-Content (Join-Path $PSScriptRoot "../windows/AppxManifest.template.xml") -Raw
 $manifestContent = $manifestTemplate -replace "{{Version}}", $Version
 Set-Content -Path (Join-Path $layoutDir "AppxManifest.xml") -Value $manifestContent -Encoding UTF8
 
