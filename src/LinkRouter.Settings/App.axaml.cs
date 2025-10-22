@@ -37,19 +37,13 @@ public partial class App : Application
                 string.Equals(arg, "--minimized", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(arg, "--background", StringComparison.OrdinalIgnoreCase)) == true;
 
-            desktop.MainWindow = Services.GetRequiredService<MainWindow>();
+            var mainWindow = Services.GetRequiredService<MainWindow>();
 
-            if (startHidden)
+            // Only set as MainWindow if not starting hidden
+            // This prevents the window from being shown when using --background
+            if (!startHidden)
             {
-                desktop.Startup += (_, _) =>
-                {
-                    if (desktop.MainWindow is { } window)
-                    {
-                        window.WindowState = WindowState.Minimized;
-                        window.ShowInTaskbar = false;
-                        window.Hide();
-                    }
-                };
+                desktop.MainWindow = mainWindow;
             }
 
             Services.GetRequiredService<SettingsTrayIconService>();
