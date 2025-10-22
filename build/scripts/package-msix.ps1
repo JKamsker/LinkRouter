@@ -12,7 +12,7 @@ if (-not $Version -or $Version -notmatch '^\d+\.\d+\.\d+\.\d+$') {
     throw "MSIX version must include four numeric components (e.g. 1.0.0.0)."
 }
 
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).ProviderPath
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).ProviderPath
 
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
     $OutputDirectory = Join-Path $repoRoot "artifacts/msix"
@@ -42,7 +42,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Publishing LinkRouter.Settings ($Configuration | $Runtime)..."
-dotnet publish "$repoRoot/LinkRouter.Settings/LinkRouter.Settings.csproj" `
+dotnet publish "$repoRoot/src/LinkRouter.Settings/LinkRouter.Settings.csproj" `
     -c $Configuration `
     -r $Runtime `
     --self-contained `
@@ -55,7 +55,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Publishing LinkRouter.Launcher as NativeAOT ($Configuration | $Runtime)..."
-dotnet publish "$repoRoot/LinkRouter.Launcher/LinkRouter.Launcher.csproj" `
+dotnet publish "$repoRoot/src/LinkRouter.Launcher/LinkRouter.Launcher.csproj" `
     -c $Configuration `
     -r $Runtime `
     --self-contained `

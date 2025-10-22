@@ -21,7 +21,7 @@ if ($major -gt 255 -or $minor -gt 255 -or $build -gt 65535) {
     throw "MSI version components exceed Windows Installer limits (major/minor <= 255, build <= 65535)."
 }
 
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).ProviderPath
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).ProviderPath
 
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
     $OutputDirectory = Join-Path $repoRoot "artifacts/msi"
@@ -51,7 +51,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Publishing LinkRouter.Settings ($Configuration | $Runtime)..."
-dotnet publish "$repoRoot/LinkRouter.Settings/LinkRouter.Settings.csproj" `
+dotnet publish "$repoRoot/src/LinkRouter.Settings/LinkRouter.Settings.csproj" `
     -c $Configuration `
     -r $Runtime `
     --self-contained `
@@ -64,7 +64,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Publishing LinkRouter.Launcher as NativeAOT ($Configuration | $Runtime)..."
-dotnet publish "$repoRoot/LinkRouter.Launcher/LinkRouter.Launcher.csproj" `
+dotnet publish "$repoRoot/src/LinkRouter.Launcher/LinkRouter.Launcher.csproj" `
     -c $Configuration `
     -r $Runtime `
     --self-contained `
@@ -84,7 +84,7 @@ if (-not (Test-Path $launcherBinary)) {
 Copy-Item $launcherBinary -Destination (Join-Path $publishDir "LinkRouter.Launcher.exe") -Force
 
 # Seed default configuration assets into the new .config directory.
-$defaultMappingsSource = Join-Path $repoRoot "LinkRouter.Launcher/mappings.json"
+$defaultMappingsSource = Join-Path $repoRoot "src/LinkRouter.Launcher/mappings.json"
 if (Test-Path $defaultMappingsSource) {
     Copy-Item $defaultMappingsSource -Destination (Join-Path $configDir "mappings.json") -Force
 } else {
