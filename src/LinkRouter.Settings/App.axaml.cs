@@ -58,7 +58,7 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    internal static void ConfigureServices(IServiceCollection services, IClassicDesktopStyleApplicationLifetime desktop)
+    public static void ConfigureServices(IServiceCollection services, IClassicDesktopStyleApplicationLifetime desktop)
     {
         services.AddSingleton<ConfigService>();
         services.AddSingleton<RuleTestService>();

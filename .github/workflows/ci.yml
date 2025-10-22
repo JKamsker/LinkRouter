@@ -33,10 +33,10 @@ jobs:
         run: dotnet build LinkRouter.sln -c Release --no-restore
 
       - name: Test
-        run: ./run-tests.ps1 -Arguments test,-c,Release
+        run: ./build/scripts/run-tests.ps1 -Arguments test,-c,Release
 
       - name: Package MSIX
-        run: pwsh ./build/package-msix.ps1 -Configuration Release -Runtime win-x64 -Version 1.0.${{ github.run_number }}.0
+        run: pwsh ./build/scripts/package-msix.ps1 -Configuration Release -Runtime win-x64 -Version 1.0.${{ github.run_number }}.0
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
@@ -57,7 +57,7 @@ jobs:
           $msiPatch = [int]$env:GITHUB_RUN_NUMBER % 65536
           $msiVersion = "1.0.{0}" -f $msiPatch
           Write-Host "Packaging MSI version $msiVersion"
-          ./build/package-msi.ps1 -Configuration Release -Runtime win-x64 -Version $msiVersion
+          ./build/scripts/package-msi.ps1 -Configuration Release -Runtime win-x64 -Version $msiVersion
 
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v4

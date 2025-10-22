@@ -8,7 +8,7 @@ using LinkRouter.Settings;
 
 namespace LinkRouter.Settings.Services;
 
-internal sealed class SettingsTrayIconService : IDisposable
+public sealed class SettingsTrayIconService : IDisposable
 {
     private readonly Application application;
     private readonly IClassicDesktopStyleApplicationLifetime desktopLifetime;
