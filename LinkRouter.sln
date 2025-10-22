@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Launcher", "LinkRouter.Launcher\LinkRouter.Launcher.csproj", "{EB7610A1-8CE2-43E7-A487-375D8F0B35BF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Launcher", "src\LinkRouter.Launcher\LinkRouter.Launcher.csproj", "{EB7610A1-8CE2-43E7-A487-375D8F0B35BF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkRouter.Core", "LinkRouter.Core\LinkRouter.Core.csproj", "{AC9E6EFA-402C-4D3E-93A4-02E39AAE0C7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkRouter.Core", "src\LinkRouter.Core\LinkRouter.Core.csproj", "{AC9E6EFA-402C-4D3E-93A4-02E39AAE0C7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Settings", "LinkRouter.Settings\LinkRouter.Settings.csproj", "{1301BB17-B2A3-4711-BA1A-11BD56800A7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Settings", "src\LinkRouter.Settings\LinkRouter.Settings.csproj", "{1301BB17-B2A3-4711-BA1A-11BD56800A7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Settings.Avalonia.Tests", "LinkRouter.Settings.Avalonia.Tests\LinkRouter.Settings.Avalonia.Tests.csproj", "{38685A29-44F1-4F36-B451-F64473C59311}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkRouter.Settings.Tests", "tests\LinkRouter.Settings.Tests\LinkRouter.Settings.Tests.csproj", "{38685A29-44F1-4F36-B451-F64473C59311}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

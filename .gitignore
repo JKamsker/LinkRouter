@@ -1,14 +1,27 @@
+# Build outputs
 bin/
 obj/
 /packages/
+artifacts/
+
+# IDE folders
+.idea/
+.vs/
+.vscode/
+.run/
 riderModule.iml
 /_ReSharper.Caches/
+*.user
+*.suo
+*.DotSettings.user
+
+# Temporary files
 .cache/
-.idea/
 .local/
 .dotnet/
-.vs/
+.wix/
+test-msi/
 
+# Logs
 *.binlog
 *.log
-artifacts/

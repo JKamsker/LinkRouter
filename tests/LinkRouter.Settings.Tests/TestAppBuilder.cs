@@ -3,7 +3,7 @@ using Avalonia.Headless;
 using Avalonia.Skia;
 using LinkRouter.Settings;
 
-namespace LinkRouter.Settings.Avalonia.Tests;
+namespace LinkRouter.Settings.Tests;
 
 public static class TestAppBuilder
 {

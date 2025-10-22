@@ -3,7 +3,7 @@ using LinkRouter.Settings;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace LinkRouter.Settings.Avalonia.Tests.Startup;
+namespace LinkRouter.Settings.Tests.Startup;
 
 public class ApplicationStartupTests
 {

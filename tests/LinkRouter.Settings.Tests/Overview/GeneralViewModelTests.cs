@@ -3,7 +3,7 @@ using LinkRouter.Settings.Services.Abstractions;
 using LinkRouter.Settings.ViewModels;
 using Xunit;
 
-namespace LinkRouter.Settings.Avalonia.Tests.Overview;
+namespace LinkRouter.Settings.Tests.Overview;
 
 public class GeneralViewModelTests
 {

@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Markup.Xaml;
 
-namespace LinkRouter.Settings.Avalonia.Tests;
+namespace LinkRouter.Settings.Tests;
 
 public partial class App : Application
 {

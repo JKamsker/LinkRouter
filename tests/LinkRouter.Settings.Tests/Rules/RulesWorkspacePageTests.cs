@@ -3,7 +3,7 @@ using LinkRouter.Settings.Services;
 using LinkRouter.Settings.ViewModels;
 using Xunit;
 
-namespace LinkRouter.Settings.Avalonia.Tests.Rules;
+namespace LinkRouter.Settings.Tests.Rules;
 
 public class RulesWorkspacePageTests
 {

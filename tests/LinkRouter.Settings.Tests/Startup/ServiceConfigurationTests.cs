@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using SettingsApp = LinkRouter.Settings.App;
 
-namespace LinkRouter.Settings.Avalonia.Tests.Startup;
+namespace LinkRouter.Settings.Tests.Startup;
 
 public class ServiceConfigurationTests
 {

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LinkRouter.Settings\LinkRouter.Settings.csproj" />
+    <ProjectReference Include="..\..\src\LinkRouter.Settings\LinkRouter.Settings.csproj" />
   </ItemGroup>
 
 </Project>

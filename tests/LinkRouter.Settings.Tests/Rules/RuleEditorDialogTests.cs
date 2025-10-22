@@ -5,7 +5,7 @@ using LinkRouter.Settings.Views;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace LinkRouter.Settings.Avalonia.Tests.Rules;
+namespace LinkRouter.Settings.Tests.Rules;
 
 public class RuleEditorDialogTests
 {
