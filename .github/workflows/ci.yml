@@ -17,6 +17,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for GitVersion to work properly
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -29,6 +31,24 @@ jobs:
       - name: Restore .NET tools
         run: dotnet tool restore
 
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.0.0
+        with:
+          versionSpec: '6.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.0.0
+        with:
+          useConfigFile: true
+
+      - name: Display GitVersion outputs
+        run: |
+          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+          echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
+          echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
+
       - name: Build
         run: dotnet build LinkRouter.sln -c Release --no-restore
 
@@ -36,7 +56,7 @@ jobs:
         run: ./build/scripts/run-tests.ps1 -Arguments test,-c,Release
 
       - name: Package MSIX
-        run: pwsh ./build/scripts/package-msix.ps1 -Configuration Release -Runtime win-x64 -Version 1.0.${{ github.run_number }}.0
+        run: pwsh ./build/scripts/package-msix.ps1 -Configuration Release -Runtime win-x64 -Version ${{ steps.gitversion.outputs.majorMinorPatch }}.0
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
@@ -54,8 +74,7 @@ jobs:
 
       - name: Package MSI
         run: |
-          $msiPatch = [int]$env:GITHUB_RUN_NUMBER % 65536
-          $msiVersion = "1.0.{0}" -f $msiPatch
+          $msiVersion = "${{ steps.gitversion.outputs.majorMinorPatch }}"
           Write-Host "Packaging MSI version $msiVersion"
           ./build/scripts/package-msi.ps1 -Configuration Release -Runtime win-x64 -Version $msiVersion
 
@@ -65,3 +84,31 @@ jobs:
           name: linkrouter-msi
           path: artifacts/msi/*.msi
           if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.gitversion.outputs.semVer }}
+          name: Release v${{ steps.gitversion.outputs.semVer }}
+          body: |
+            ## LinkRouter v${{ steps.gitversion.outputs.semVer }}
+
+            ### Downloads
+            - MSIX Package: linkrouter-${{ steps.gitversion.outputs.semVer }}.msix
+            - MSI Installer: linkrouter-${{ steps.gitversion.outputs.semVer }}.msi
+
+            ### Version Information
+            - **Version**: ${{ steps.gitversion.outputs.fullSemVer }}
+            - **Commit**: ${{ steps.gitversion.outputs.sha }}
+            - **Branch**: ${{ steps.gitversion.outputs.branchName }}
+
+            See the [CHANGELOG](CHANGELOG.md) for details on what's new in this release.
+          files: |
+            artifacts/msix/*.msix
+            artifacts/msi/*.msi
+          draft: false
+          prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

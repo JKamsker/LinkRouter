@@ -1,0 +1,25 @@
+tag-prefix: '[vV]'
+
+branches:
+  master:
+    regex: ^master$
+    label: ''
+    increment: Patch
+
+  develop:
+    regex: ^dev(elop)?(ment)?$
+    label: prerelease
+    increment: Patch
+
+  feature:
+    regex: ^features?[/-]
+    label: '{BranchName}'
+    increment: Inherit
+
+  pull-request:
+    regex: ^(pull|pull\-requests|pr)[/-]
+    label: PullRequest
+    increment: Inherit
+
+ignore:
+  sha: []
