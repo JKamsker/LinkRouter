@@ -96,6 +96,7 @@ jobs:
             -c Release \
             -r ${{ matrix.runtime }} \
             --self-contained \
+            -p:UseAppHost=true \
             -o publish/Settings
 
       - name: Package Linux binaries
