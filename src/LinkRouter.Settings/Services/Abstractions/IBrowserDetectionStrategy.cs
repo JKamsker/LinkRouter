@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace LinkRouter.Settings.Services.BrowserDetection;
+namespace LinkRouter.Settings.Services.Abstractions;
 
 internal interface IBrowserDetectionStrategy
 {

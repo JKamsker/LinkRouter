@@ -6,6 +6,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using LinkRouter.Settings.Services;
 using LinkRouter.Settings.Services.Abstractions;
+using LinkRouter.Settings.Services.Common;
+using LinkRouter.Settings.Services.Windows;
 using LinkRouter.Settings.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -66,10 +68,19 @@ public partial class App : Application
         services.AddSingleton<IFilePickerService>(_ => new AvaloniaFilePickerService(() => desktop.MainWindow));
         services.AddSingleton<IMessageDialogService>(_ => new AvaloniaMessageDialogService(() => desktop.MainWindow));
         services.AddSingleton<IRuleEditorDialogService>(_ => new RuleEditorDialogService(() => desktop.MainWindow));
-        services.AddSingleton<IRouterPathResolver, RouterPathResolver>();
-        services.AddSingleton<IAutostartService>(_ => OperatingSystem.IsWindows()
-            ? new WindowsAutostartService()
-            : new NoOpAutostartService());
+
+        // Platform-specific services
+        if (OperatingSystem.IsWindows())
+        {
+            services.AddSingleton<IRouterPathResolver, WindowsRouterPathResolver>();
+            services.AddSingleton<IAutostartService, WindowsAutostartService>();
+            services.AddSingleton<IDefaultAppRegistrar, WindowsDefaultAppRegistrar>();
+        }
+        else
+        {
+            services.AddSingleton<IRouterPathResolver, RouterPathResolver>(); // Fallback
+            services.AddSingleton<IAutostartService, NoOpAutostartService>();
+        }
 
         services.AddSingleton<AppInitializationService>();
         services.AddSingleton<SettingsTrayIconService>();
