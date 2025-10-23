@@ -10,6 +10,8 @@
         mc:Ignorable="d"
         d:DesignWidth="1024"
         d:DesignHeight="720"
+        Height="720"
+        Width="1024"
         x:Class="LinkRouter.Settings.MainWindow"
         Title="LinkRouter Settings"
         Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"

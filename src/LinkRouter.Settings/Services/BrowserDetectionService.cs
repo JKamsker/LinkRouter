@@ -66,6 +66,16 @@ public sealed class BrowserDetectionService
     {
         return DefaultBrowserResolver.GetDefaultBrowserExecutablePath();
     }
+
+    public string? GetDefaultBrowserProgId(string scheme = "http")
+    {
+        return DefaultBrowserResolver.GetDefaultBrowserProgId(scheme);
+    }
+
+    public (bool isDefault, string? currentProgId, string? currentPath) CheckIfLinkRouterIsDefault(string? expectedLinkRouterPath = null)
+    {
+        return DefaultBrowserResolver.CheckIfLinkRouterIsDefault(expectedLinkRouterPath);
+    }
 }
 
 public enum BrowserFamily

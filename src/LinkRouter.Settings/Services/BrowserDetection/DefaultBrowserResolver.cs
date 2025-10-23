@@ -36,6 +36,62 @@ internal static class DefaultBrowserResolver
         }
     }
 
+    public static string? GetDefaultBrowserProgId(string scheme = "http")
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return null;
+        }
+
+        try
+        {
+            return ReadUserChoiceProgId(scheme);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static (bool isDefault, string? currentProgId, string? currentPath) CheckIfLinkRouterIsDefault(string? expectedLinkRouterPath = null)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return (false, null, null);
+        }
+
+        try
+        {
+            var httpProgId = ReadUserChoiceProgId("http");
+            var httpsProgId = ReadUserChoiceProgId("https");
+
+            // Both http and https should be set to LinkRouterURL
+            if (httpProgId != "LinkRouterURL" || httpsProgId != "LinkRouterURL")
+            {
+                return (false, httpProgId ?? httpsProgId, null);
+            }
+
+            // If we have an expected path, verify it matches the registered path
+            if (!string.IsNullOrWhiteSpace(expectedLinkRouterPath))
+            {
+                var command = ReadCommandFromProgId("LinkRouterURL");
+                var registeredPath = ExtractExecutablePath(command);
+
+                if (!string.IsNullOrWhiteSpace(registeredPath) &&
+                    !string.Equals(registeredPath, expectedLinkRouterPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (false, "LinkRouterURL", registeredPath);
+                }
+            }
+
+            return (true, "LinkRouterURL", null);
+        }
+        catch
+        {
+            return (false, null, null);
+        }
+    }
+
     [SupportedOSPlatform("windows")]
     private static string? ReadUserChoiceProgId(string scheme)
     {

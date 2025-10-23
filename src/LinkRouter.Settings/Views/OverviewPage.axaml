@@ -46,8 +46,22 @@
                                        TextWrapping="Wrap" />
                         </StackPanel>
                         <StackPanel Classes="SectionContent">
-                            <TextBlock Text="Register as default Browser" FontWeight="SemiBold" />
+                            <TextBlock Text="Default browser status" FontWeight="SemiBold" />
+                            <Border Padding="12,8"
+                                    Margin="0,4,0,8"
+                                    CornerRadius="4"
+                                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding DefaultBrowserStatus}"
+                                               TextWrapping="Wrap" />
+                                    <Button Content="Set LinkRouter as Default Browser"
+                                            Command="{Binding RegisterCommand}"
+                                            HorizontalAlignment="Left"
+                                            IsVisible="{Binding ShowDefaultBrowserWarning}" />
+                                </StackPanel>
+                            </Border>
                             <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Button Content="Refresh Status" Command="{Binding CheckDefaultBrowserStatusCommand}" />
                                 <Button Content="Register" Command="{Binding RegisterCommand}" />
                                 <Button Content="Unregister" Command="{Binding UnregisterCommand}" />
                             </StackPanel>

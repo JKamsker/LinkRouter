@@ -21,6 +21,7 @@ public partial class GeneralViewModel : ObservableObject
     private readonly IClipboardService _clipboardService;
     private readonly IRouterPathResolver _routerPathResolver;
     private readonly IAutostartService _autostartService;
+    private readonly BrowserDetectionService _browserDetectionService;
     private bool _simulationOwnsError;
     private Rule? _lastEffectiveRule;
     private string? _lastLaunchArguments;
@@ -56,6 +57,15 @@ public partial class GeneralViewModel : ObservableObject
     [ObservableProperty]
     private bool _isAutostartEnabled;
 
+    [ObservableProperty]
+    private string? _defaultBrowserStatus;
+
+    [ObservableProperty]
+    private bool _isLinkRouterDefaultBrowser;
+
+    [ObservableProperty]
+    private bool _showDefaultBrowserWarning;
+
     public ObservableCollection<ConfigBackup> Backups { get; } = new();
     public bool HasUnsavedChanges => _state.HasUnsavedChanges;
     public bool CanSave => HasUnsavedChanges && !IsSaving;
@@ -71,7 +81,8 @@ public partial class GeneralViewModel : ObservableObject
         IShellService shellService,
         IClipboardService clipboardService,
         IRouterPathResolver routerPathResolver,
-        IAutostartService autostartService)
+        IAutostartService autostartService,
+        BrowserDetectionService browserDetectionService)
     {
         _configService = configService;
         _ruleTestService = ruleTestService;
@@ -80,11 +91,13 @@ public partial class GeneralViewModel : ObservableObject
         _clipboardService = clipboardService;
         _routerPathResolver = routerPathResolver;
         _autostartService = autostartService;
+        _browserDetectionService = browserDetectionService;
 
         LoadMetadata();
         _state.StateChanged += OnStateChanged;
         SyncAutostartFromState();
         SetLaunchContext(null, null);
+        CheckDefaultBrowserStatus();
     }
 
     private void OnStateChanged(object? sender, EventArgs e)
@@ -297,11 +310,82 @@ public partial class GeneralViewModel : ObservableObject
         {
             await Task.Run(() => DefaultAppRegistrar.RegisterPerUser(routerPath));
             StatusMessage = "Registration command executed. Windows Settings will prompt for defaults.";
+
+            // Recheck status after a short delay to allow registry changes to settle
+            await Task.Delay(1000);
+            CheckDefaultBrowserStatus();
         }
         catch (Exception ex)
         {
             SetOperationError(ex.Message);
         }
+    }
+
+    [RelayCommand]
+    private void CheckDefaultBrowserStatus()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            DefaultBrowserStatus = "Default browser detection is only available on Windows.";
+            IsLinkRouterDefaultBrowser = false;
+            ShowDefaultBrowserWarning = false;
+            return;
+        }
+
+        try
+        {
+            _routerPathResolver.TryGetRouterExecutable(out var expectedPath);
+            var (isDefault, currentProgId, currentPath) = _browserDetectionService.CheckIfLinkRouterIsDefault(expectedPath);
+
+            if (isDefault)
+            {
+                DefaultBrowserStatus = "✓ LinkRouter is set as the default browser for HTTP and HTTPS";
+                IsLinkRouterDefaultBrowser = true;
+                ShowDefaultBrowserWarning = false;
+            }
+            else if (currentProgId == "LinkRouterURL" && !string.IsNullOrWhiteSpace(currentPath))
+            {
+                // LinkRouter is registered but pointing to wrong path
+                DefaultBrowserStatus = $"⚠ LinkRouter is registered but using an incorrect path: {currentPath}";
+                IsLinkRouterDefaultBrowser = false;
+                ShowDefaultBrowserWarning = true;
+            }
+            else if (!string.IsNullOrWhiteSpace(currentProgId))
+            {
+                // Another browser is set as default
+                var browserName = GetFriendlyBrowserName(currentProgId);
+                DefaultBrowserStatus = $"⚠ {browserName} is currently set as the default browser";
+                IsLinkRouterDefaultBrowser = false;
+                ShowDefaultBrowserWarning = true;
+            }
+            else
+            {
+                // No default browser is set
+                DefaultBrowserStatus = "No default browser is currently set";
+                IsLinkRouterDefaultBrowser = false;
+                ShowDefaultBrowserWarning = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            DefaultBrowserStatus = $"Unable to check default browser status: {ex.Message}";
+            IsLinkRouterDefaultBrowser = false;
+            ShowDefaultBrowserWarning = false;
+        }
+    }
+
+    private static string GetFriendlyBrowserName(string progId)
+    {
+        return progId.ToLowerInvariant() switch
+        {
+            var p when p.Contains("chrome") => "Google Chrome",
+            var p when p.Contains("edge") => "Microsoft Edge",
+            var p when p.Contains("firefox") => "Mozilla Firefox",
+            var p when p.Contains("brave") => "Brave",
+            var p when p.Contains("opera") => "Opera",
+            var p when p.Contains("vivaldi") => "Vivaldi",
+            _ => progId
+        };
     }
 
     [RelayCommand]

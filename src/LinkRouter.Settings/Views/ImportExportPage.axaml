@@ -48,7 +48,9 @@
                 <Border Classes="SettingsCard">
                     <StackPanel Classes="SettingsCardContent">
                         <TextBlock Text="Backups" Classes="SectionTitle" />
-                        <ListBox ItemsSource="{Binding Backups}" SelectedItem="{Binding SelectedBackup, Mode=TwoWay}">
+                        <ListBox ItemsSource="{Binding Backups}"
+                                 SelectedItem="{Binding SelectedBackup, Mode=TwoWay}"
+                                 MaxHeight="300">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel>
