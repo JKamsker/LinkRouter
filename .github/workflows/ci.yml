@@ -13,10 +13,18 @@ permissions:
 
 jobs:
   build-test-package:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        runtime: [win-x64, win-arm64]
+        include:
+          - os: windows-latest
+            runtime: win-x64
+          - os: windows-latest
+            runtime: win-arm64
+          - os: ubuntu-latest
+            runtime: linux-x64
+          - os: ubuntu-latest
+            runtime: linux-arm64
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
@@ -59,13 +67,20 @@ jobs:
       - name: Build
         run: dotnet build LinkRouter.sln -c Release --no-restore
 
-      - name: Test
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
         run: ./build/scripts/run-tests.ps1 -Arguments test,-c,Release
 
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        run: dotnet test LinkRouter.sln -c Release --no-build --verbosity normal
+
       - name: Package MSIX
+        if: runner.os == 'Windows'
         run: pwsh ./build/scripts/package-msix.ps1 -Configuration Release -Runtime ${{ matrix.runtime }} -Version ${{ steps.gitversion.outputs.majorMinorPatch }}.0
 
       - name: Upload MSIX artifact
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: linkrouter-msix-${{ matrix.runtime }}
@@ -73,6 +88,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload MSIX layout
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: linkrouter-msix-layout-${{ matrix.runtime }}
@@ -80,12 +96,14 @@ jobs:
           if-no-files-found: warn
 
       - name: Package MSI
+        if: runner.os == 'Windows'
         run: |
           $msiVersion = "${{ steps.gitversion.outputs.majorMinorPatch }}"
           Write-Host "Packaging MSI version $msiVersion"
           ./build/scripts/package-msi.ps1 -Configuration Release -Runtime ${{ matrix.runtime }} -Version $msiVersion
 
       - name: Upload MSI artifact
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: linkrouter-msi-${{ matrix.runtime }}
