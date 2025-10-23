@@ -170,13 +170,30 @@ jobs:
       - name: Prepare release files
         run: |
           New-Item -ItemType Directory -Path release-files -Force
-          Get-ChildItem -Path release-artifacts -Recurse -Include *.msix,*.msi,*.exe | Copy-Item -Destination release-files
+          # Copy MSIX and MSI files
+          Get-ChildItem -Path release-artifacts -Recurse -Include *.msix,*.msi | Copy-Item -Destination release-files
+          # Copy only the bundle Setup.exe (not individual binaries)
+          Get-ChildItem -Path release-artifacts -Recurse -Include *_Setup.exe | Copy-Item -Destination release-files
+
+      - name: Generate release title
+        id: release_title
+        run: |
+          $version = "${{ steps.gitversion.outputs.majorMinorPatch }}"
+          $prerelease = "${{ steps.gitversion.outputs.preReleaseTag }}"
+          if ($prerelease) {
+            # Pad prerelease number to 4 digits for proper sorting
+            $paddedPrerelease = $prerelease.PadLeft(4, '0')
+            $title = "Release v$version-$paddedPrerelease"
+          } else {
+            $title = "Release v$version"
+          }
+          echo "title=$title" >> $env:GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.gitversion.outputs.semVer }}
-          name: Release v${{ steps.gitversion.outputs.semVer }}
+          name: ${{ steps.release_title.outputs.title }}
           body: |
             ## LinkRouter v${{ steps.gitversion.outputs.semVer }}
 
