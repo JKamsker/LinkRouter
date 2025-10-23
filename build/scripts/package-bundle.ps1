@@ -67,14 +67,6 @@ if ($LASTEXITCODE -ne 0) {
     throw "Failed to add WixToolset.Bal extension."
 }
 
-# Find a placeholder logo or use exe icon
-$binDir = Split-Path $MsiX64Path -Parent
-$logoPath = Join-Path $repoRoot "build\windows\assets\Square44x44Logo.png"
-if (-not (Test-Path $logoPath)) {
-    Write-Warning "Logo not found at $logoPath, bundle will use default icon"
-    $logoPath = ""
-}
-
 Write-Host "Building Bundle installer with WiX..."
 $wixArgs = @(
     "tool",
@@ -83,17 +75,11 @@ $wixArgs = @(
     "build",
     (Join-Path $repoRoot "build/msi/Bundle.wxs"),
     "-ext", "WixToolset.Bal.wixext",
-    "-d", "BinDir=$binDir",
     "-d", "MsiX64Path=$MsiX64Path",
     "-d", "MsiArm64Path=$MsiArm64Path",
     "-d", "ProductVersion=$Version",
     "-out", $bundlePath
 )
-
-if (-not [string]::IsNullOrWhiteSpace($logoPath)) {
-    $wixArgs += "-d"
-    $wixArgs += "LogoPath=$logoPath"
-}
 
 dotnet @wixArgs
 if ($LASTEXITCODE -ne 0) {

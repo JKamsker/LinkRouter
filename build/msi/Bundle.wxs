@@ -5,8 +5,7 @@
       Name="LinkRouter"
       Version="$(var.ProductVersion)"
       Manufacturer="LinkRouter"
-      UpgradeCode="{B8E3F2D1-5A7C-4E92-9B1F-8C3D4E5F6A7B}"
-      IconSourceFile="$(var.BinDir)\LinkRouter.Settings.exe">
+      UpgradeCode="{B8E3F2D1-5A7C-4E92-9B1F-8C3D4E5F6A7B}">
 
     <BootstrapperApplication>
       <bal:WixStandardBootstrapperApplication
