@@ -11,8 +11,7 @@
     <BootstrapperApplication>
       <bal:WixStandardBootstrapperApplication
           LicenseUrl=""
-          Theme="standard"
-          LogoFile="$(var.LogoPath)"
+          Theme="none"
           SuppressOptionsUI="yes" />
     </BootstrapperApplication>
 
@@ -21,7 +20,7 @@
       <MsiPackage
           Id="LinkRouterMsi_x64"
           SourceFile="$(var.MsiX64Path)"
-          DisplayInternalUI="yes"
+          Visible="yes"
           Vital="yes"
           InstallCondition="VersionNT64 AND NOT WixBundleInstalledOnARM64" />
 
@@ -29,7 +28,7 @@
       <MsiPackage
           Id="LinkRouterMsi_arm64"
           SourceFile="$(var.MsiArm64Path)"
-          DisplayInternalUI="yes"
+          Visible="yes"
           Vital="yes"
           InstallCondition="WixBundleInstalledOnARM64" />
     </Chain>
