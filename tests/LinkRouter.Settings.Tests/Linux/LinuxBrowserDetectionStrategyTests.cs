@@ -114,33 +114,33 @@ Categories=Network;WebBrowser;
             var applicationsDir = Path.Combine(testDataHome, "applications");
             Directory.CreateDirectory(applicationsDir);
 
-            // Create multiple browser desktop files
+            // Create multiple browser desktop files (using /bin/sh as test executable since it exists on all systems)
             File.WriteAllText(Path.Combine(applicationsDir, "google-chrome.desktop"), @"[Desktop Entry]
-Name=Google Chrome
-Exec=/usr/bin/google-chrome %U
+Name=Google Chrome Test
+Exec=/bin/sh %U
 Type=Application
 ");
 
             File.WriteAllText(Path.Combine(applicationsDir, "firefox.desktop"), @"[Desktop Entry]
-Name=Mozilla Firefox
-Exec=/usr/bin/firefox %u
+Name=Mozilla Firefox Test
+Exec=/bin/sh %u
 Type=Application
 ");
 
             File.WriteAllText(Path.Combine(applicationsDir, "brave-browser.desktop"), @"[Desktop Entry]
-Name=Brave Web Browser
-Exec=/usr/bin/brave %U
+Name=Brave Web Browser Test
+Exec=/bin/sh %U
 Type=Application
 ");
 
             var strategy = new LinuxBrowserDetectionStrategy();
             var browsers = strategy.DetectInstalledBrowsers().ToList();
 
-            // Should find all three browsers
+            // Should find all three test browsers (may also find system browsers)
             Assert.True(browsers.Count >= 3, $"Expected at least 3 browsers, found {browsers.Count}");
-            Assert.Contains(browsers, b => b.Name.Contains("Chrome"));
-            Assert.Contains(browsers, b => b.Name.Contains("Firefox"));
-            Assert.Contains(browsers, b => b.Name.Contains("Brave"));
+            Assert.Contains(browsers, b => b.Name.Contains("Chrome Test"));
+            Assert.Contains(browsers, b => b.Name.Contains("Firefox Test"));
+            Assert.Contains(browsers, b => b.Name.Contains("Brave") && b.Name.Contains("Test"));
         }
         finally
         {
@@ -215,11 +215,11 @@ Type=Application
 ";
             File.WriteAllText(invalidDesktopFile, invalidContent);
 
-            // Create a valid one
+            // Create a valid one (using /bin/sh as test executable)
             var validDesktopFile = Path.Combine(applicationsDir, "firefox.desktop");
             var validContent = @"[Desktop Entry]
-Name=Firefox
-Exec=/usr/bin/firefox %u
+Name=Firefox Test Valid
+Exec=/bin/sh %u
 Type=Application
 ";
             File.WriteAllText(validDesktopFile, validContent);
@@ -227,9 +227,9 @@ Type=Application
             var strategy = new LinuxBrowserDetectionStrategy();
             var browsers = strategy.DetectInstalledBrowsers().ToList();
 
-            // Should only find the valid browser
-            Assert.Single(browsers);
-            Assert.Contains(browsers, b => b.Name.Contains("Firefox"));
+            // Should find the valid browser (may also find system browsers, but not the invalid one)
+            Assert.Contains(browsers, b => b.Name.Contains("Firefox Test Valid"));
+            Assert.DoesNotContain(browsers, b => b.Name.Contains("Invalid App"));
         }
         finally
         {
