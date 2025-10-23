@@ -14,6 +14,9 @@ permissions:
 jobs:
   build-test-package:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        runtime: [win-x64, win-arm64]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
@@ -30,7 +33,7 @@ jobs:
           dotnet-version: '9.0.306'
 
       - name: Restore
-        run: dotnet restore LinkRouter.sln
+        run: dotnet restore LinkRouter.sln -r ${{ matrix.runtime }}
 
       - name: Restore .NET tools
         run: dotnet tool restore
@@ -60,19 +63,19 @@ jobs:
         run: ./build/scripts/run-tests.ps1 -Arguments test,-c,Release
 
       - name: Package MSIX
-        run: pwsh ./build/scripts/package-msix.ps1 -Configuration Release -Runtime win-x64 -Version ${{ steps.gitversion.outputs.majorMinorPatch }}.0
+        run: pwsh ./build/scripts/package-msix.ps1 -Configuration Release -Runtime ${{ matrix.runtime }} -Version ${{ steps.gitversion.outputs.majorMinorPatch }}.0
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linkrouter-msix
+          name: linkrouter-msix-${{ matrix.runtime }}
           path: artifacts/msix/*.msix
           if-no-files-found: error
 
       - name: Upload MSIX layout
         uses: actions/upload-artifact@v4
         with:
-          name: linkrouter-msix-layout
+          name: linkrouter-msix-layout-${{ matrix.runtime }}
           path: artifacts/msix/layout/**
           if-no-files-found: warn
 
@@ -80,17 +83,46 @@ jobs:
         run: |
           $msiVersion = "${{ steps.gitversion.outputs.majorMinorPatch }}"
           Write-Host "Packaging MSI version $msiVersion"
-          ./build/scripts/package-msi.ps1 -Configuration Release -Runtime win-x64 -Version $msiVersion
+          ./build/scripts/package-msi.ps1 -Configuration Release -Runtime ${{ matrix.runtime }} -Version $msiVersion
 
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linkrouter-msi
+          name: linkrouter-msi-${{ matrix.runtime }}
           path: artifacts/msi/*.msi
           if-no-files-found: error
 
+  create-release:
+    needs: build-test-package
+    runs-on: windows-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.0.0
+        with:
+          versionSpec: '6.0.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.0.0
+        with:
+          useConfigFile: true
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Prepare release files
+        run: |
+          New-Item -ItemType Directory -Path release-files -Force
+          Get-ChildItem -Path release-artifacts -Recurse -Include *.msix,*.msi | Copy-Item -Destination release-files
+
       - name: Create GitHub Release
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.gitversion.outputs.semVer }}
@@ -99,8 +131,9 @@ jobs:
             ## LinkRouter v${{ steps.gitversion.outputs.semVer }}
 
             ### Downloads
-            - MSIX Package: linkrouter-${{ steps.gitversion.outputs.semVer }}.msix
-            - MSI Installer: linkrouter-${{ steps.gitversion.outputs.semVer }}.msi
+            Available for Windows x64 and ARM64 architectures:
+            - **MSIX Packages**: Sideload installation
+            - **MSI Installers**: Traditional Windows installer
 
             ### Version Information
             - **Version**: ${{ steps.gitversion.outputs.fullSemVer }}
@@ -108,9 +141,7 @@ jobs:
             - **Branch**: ${{ steps.gitversion.outputs.branchName }}
 
             See the [CHANGELOG](CHANGELOG.md) for details on what's new in this release.
-          files: |
-            artifacts/msix/*.msix
-            artifacts/msi/*.msi
+          files: release-files/*
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
           generate_release_notes: true

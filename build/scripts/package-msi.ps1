@@ -234,6 +234,15 @@ foreach ($target in $layoutTargets) {
 Set-Content -Path $componentFragmentPath -Value $componentsXml -Encoding UTF8
 
 Write-Host "Building MSI package with WiX..."
+
+# Map .NET runtime to WiX architecture
+$wixArch = switch ($Runtime) {
+    "win-x64" { "x64" }
+    "win-x86" { "x86" }
+    "win-arm64" { "arm64" }
+    default { throw "Unsupported runtime: $Runtime" }
+}
+
 $wixArgs = @(
     "tool",
     "run",
@@ -242,7 +251,7 @@ $wixArgs = @(
     (Join-Path $repoRoot "build/msi/Product.wxs"),
     $componentFragmentPath,
     "-ext", "WixToolset.Util.wixext",
-    "-arch", "x64",
+    "-arch", $wixArch,
     "-d", "BinDir=$publishDir",
     "-d", "ConfigDir=$configDir",
     "-d", "ProductVersion=$Version",
