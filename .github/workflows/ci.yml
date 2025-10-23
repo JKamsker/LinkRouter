@@ -265,6 +265,10 @@ jobs:
           Get-ChildItem -Path release-artifacts -Recurse -Include *.msix,*.msi | Copy-Item -Destination release-files
           # Copy only the bundle Setup.exe (not individual binaries)
           Get-ChildItem -Path release-artifacts -Recurse -Include *_Setup.exe | Copy-Item -Destination release-files
+          # Include NativeAOT launcher archives for all platforms
+          Get-ChildItem -Path release-artifacts -Recurse -File |
+            Where-Object { $_.Name -like 'LinkRouter.Launcher-*.zip' -or $_.Name -like 'LinkRouter.Launcher-*.tar.gz' } |
+            Copy-Item -Destination release-files
 
       - name: Generate release title
         id: release_title
