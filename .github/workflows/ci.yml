@@ -75,6 +75,37 @@ jobs:
         if: runner.os == 'Linux'
         run: dotnet test LinkRouter.sln -c Release --no-build --verbosity normal
 
+      - name: Publish Linux binaries
+        if: runner.os == 'Linux'
+        run: |
+          dotnet publish src/LinkRouter.Launcher/LinkRouter.Launcher.csproj -c Release -r ${{ matrix.runtime }} --no-build --self-contained -o publish/Launcher
+          dotnet publish src/LinkRouter.Settings/LinkRouter.Settings.csproj -c Release -r ${{ matrix.runtime }} --no-build --self-contained -o publish/Settings
+
+      - name: Package Linux binaries
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p artifacts/linux
+          cd publish/Launcher
+          tar -czf ../../artifacts/linux/LinkRouter.Launcher-${{ matrix.runtime }}-${{ steps.gitversion.outputs.semVer }}.tar.gz *
+          cd ../Settings
+          tar -czf ../../artifacts/linux/LinkRouter.Settings-${{ matrix.runtime }}-${{ steps.gitversion.outputs.semVer }}.tar.gz *
+
+      - name: Upload Linux Launcher artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkrouter-launcher-${{ matrix.runtime }}
+          path: artifacts/linux/LinkRouter.Launcher-*.tar.gz
+          if-no-files-found: error
+
+      - name: Upload Linux Settings artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkrouter-settings-${{ matrix.runtime }}
+          path: artifacts/linux/LinkRouter.Settings-*.tar.gz
+          if-no-files-found: error
+
       - name: Package MSIX
         if: runner.os == 'Windows'
         run: pwsh ./build/scripts/package-msix.ps1 -Configuration Release -Runtime ${{ matrix.runtime }} -Version ${{ steps.gitversion.outputs.majorMinorPatch }}.0
