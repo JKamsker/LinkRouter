@@ -18,7 +18,8 @@ public class GeneralViewModelTests
 
         var resolver = new NullRouterPathResolver();
         var autostart = new NullAutostartService();
-        var viewModel = new GeneralViewModel(configService, ruleTestService, state, shell, clipboard, resolver, autostart);
+        var browserDetection = new BrowserDetectionService();
+        var viewModel = new GeneralViewModel(configService, ruleTestService, state, shell, clipboard, resolver, autostart, browserDetection);
 
         Assert.False(viewModel.CanSave);
 
