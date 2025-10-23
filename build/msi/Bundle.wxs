@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+  <Bundle
+      Name="LinkRouter"
+      Version="$(var.ProductVersion)"
+      Manufacturer="LinkRouter"
+      UpgradeCode="{B8E3F2D1-5A7C-4E92-9B1F-8C3D4E5F6A7B}"
+      IconSourceFile="$(var.BinDir)\LinkRouter.Settings.exe">
+
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+          LicenseUrl=""
+          Theme="standard"
+          LogoFile="$(var.LogoPath)"
+          SuppressOptionsUI="yes" />
+    </BootstrapperApplication>
+
+    <Chain>
+      <!-- Install x64 MSI on x64 systems (not ARM64) -->
+      <MsiPackage
+          Id="LinkRouterMsi_x64"
+          SourceFile="$(var.MsiX64Path)"
+          DisplayInternalUI="yes"
+          Vital="yes"
+          InstallCondition="VersionNT64 AND NOT WixBundleInstalledOnARM64" />
+
+      <!-- Install ARM64 MSI on ARM64 systems -->
+      <MsiPackage
+          Id="LinkRouterMsi_arm64"
+          SourceFile="$(var.MsiArm64Path)"
+          DisplayInternalUI="yes"
+          Vital="yes"
+          InstallCondition="WixBundleInstalledOnARM64" />
+    </Chain>
+  </Bundle>
+</Wix>

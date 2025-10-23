@@ -92,8 +92,58 @@ jobs:
           path: artifacts/msi/*.msi
           if-no-files-found: error
 
-  create-release:
+  build-bundle:
     needs: build-test-package
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.306'
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.0.0
+        with:
+          versionSpec: '6.0.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.0.0
+        with:
+          useConfigFile: true
+
+      - name: Download MSI artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: linkrouter-msi-*
+          path: msi-artifacts
+
+      - name: List downloaded artifacts
+        run: Get-ChildItem -Path msi-artifacts -Recurse
+
+      - name: Build Bundle
+        run: |
+          $version = "${{ steps.gitversion.outputs.majorMinorPatch }}"
+          $msiX64 = (Get-ChildItem -Path msi-artifacts/linkrouter-msi-win-x64 -Filter *.msi).FullName
+          $msiArm64 = (Get-ChildItem -Path msi-artifacts/linkrouter-msi-win-arm64 -Filter *.msi).FullName
+          Write-Host "Building bundle with MSIs:"
+          Write-Host "  x64: $msiX64"
+          Write-Host "  ARM64: $msiArm64"
+          ./build/scripts/package-bundle.ps1 -Version $version -MsiX64Path $msiX64 -MsiArm64Path $msiArm64
+
+      - name: Upload Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkrouter-bundle
+          path: artifacts/bundle/*.exe
+          if-no-files-found: error
+
+  create-release:
+    needs: build-bundle
     runs-on: windows-latest
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
@@ -120,7 +170,7 @@ jobs:
       - name: Prepare release files
         run: |
           New-Item -ItemType Directory -Path release-files -Force
-          Get-ChildItem -Path release-artifacts -Recurse -Include *.msix,*.msi | Copy-Item -Destination release-files
+          Get-ChildItem -Path release-artifacts -Recurse -Include *.msix,*.msi,*.exe | Copy-Item -Destination release-files
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -131,9 +181,17 @@ jobs:
             ## LinkRouter v${{ steps.gitversion.outputs.semVer }}
 
             ### Downloads
-            Available for Windows x64 and ARM64 architectures:
-            - **MSIX Packages**: Sideload installation
-            - **MSI Installers**: Traditional Windows installer
+
+            **Recommended**: Download the unified installer that automatically detects your system architecture:
+            - **LinkRouter_${{ steps.gitversion.outputs.majorMinorPatch }}_Setup.exe** - Universal installer for all Windows architectures
+
+            **Alternative downloads** (architecture-specific):
+            - **MSIX Packages**: Sideload installation (separate for x64 and ARM64)
+            - **MSI Installers**: Traditional Windows installer (separate for x64 and ARM64)
+
+            ### Supported Architectures
+            - Windows x64 (Intel/AMD 64-bit)
+            - Windows ARM64 (ARM-based Windows devices)
 
             ### Version Information
             - **Version**: ${{ steps.gitversion.outputs.fullSemVer }}
