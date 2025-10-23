@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>LinkRouter.Launcher</AssemblyName>
     <RootNamespace>LinkRouter.Launcher</RootNamespace>
-    <ApplicationIcon>..\LinkRouter.Settings\LinkRouter.ico</ApplicationIcon>
-    <!-- Avoid apphost permission issues on non-Windows during CI/WSL builds -->
+    <ApplicationIcon Condition="'$(OS)' == 'Windows_NT'">..\LinkRouter.Settings\LinkRouter.ico</ApplicationIcon>
     <!-- cross-platform build paths configured in Directory.Build.props -->
   </PropertyGroup>
 

@@ -24,9 +24,25 @@ public sealed class ConfigService
 
     public ConfigService()
     {
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var baseFolder = Path.Combine(appData, "LinkRouter");
-        _rootFolder = Path.Combine(baseFolder, ".config");
+        string baseFolder;
+
+        if (OperatingSystem.IsLinux())
+        {
+            // Use XDG Base Directory specification on Linux
+            var configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME")
+                ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+
+            baseFolder = Path.Combine(configHome, "LinkRouter");
+            _rootFolder = baseFolder;
+        }
+        else
+        {
+            // Windows: use %APPDATA%\LinkRouter\.config
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            baseFolder = Path.Combine(appData, "LinkRouter");
+            _rootFolder = Path.Combine(baseFolder, ".config");
+        }
+
         _settingsPath = Path.Combine(_rootFolder, "settings.json");
         _manifestPath = Path.Combine(_rootFolder, "mappings.json");
         _backupFolder = Path.Combine(_rootFolder, "backups");
