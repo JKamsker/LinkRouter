@@ -11,9 +11,12 @@
     <!-- cross-platform build paths configured in Directory.Build.props -->
   </PropertyGroup>
 
-    <ItemGroup>
-        <None Include="mappings.json" />
-    </ItemGroup>
+  <ItemGroup>
+    <Content Include="mappings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\LinkRouter.Core\LinkRouter.Core.csproj" />
