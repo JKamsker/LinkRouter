@@ -90,7 +90,6 @@ jobs:
             -r ${{ matrix.runtime }} \
             --self-contained \
             -p:PublishAot=true \
-            -p:PublishTrimmed=false \
             -o publish/Launcher
           dotnet publish src/LinkRouter.Settings/LinkRouter.Settings.csproj \
             -c Release \
