@@ -114,7 +114,7 @@ Categories=Network;WebBrowser;
             var applicationsDir = Path.Combine(testDataHome, "applications");
             Directory.CreateDirectory(applicationsDir);
 
-            // Create multiple browser desktop files (using /bin/sh as test executable since it exists on all systems)
+            // Create multiple browser desktop files (using different executables to avoid deduplication)
             File.WriteAllText(Path.Combine(applicationsDir, "google-chrome.desktop"), @"[Desktop Entry]
 Name=Google Chrome Test
 Exec=/bin/sh %U
@@ -123,13 +123,13 @@ Type=Application
 
             File.WriteAllText(Path.Combine(applicationsDir, "firefox.desktop"), @"[Desktop Entry]
 Name=Mozilla Firefox Test
-Exec=/bin/sh %u
+Exec=/bin/ls %u
 Type=Application
 ");
 
             File.WriteAllText(Path.Combine(applicationsDir, "brave-browser.desktop"), @"[Desktop Entry]
 Name=Brave Web Browser Test
-Exec=/bin/sh %U
+Exec=/bin/cat %U
 Type=Application
 ");
 
