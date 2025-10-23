@@ -78,8 +78,8 @@ jobs:
       - name: Publish Linux binaries
         if: runner.os == 'Linux'
         run: |
-          dotnet publish src/LinkRouter.Launcher/LinkRouter.Launcher.csproj -c Release -r ${{ matrix.runtime }} --self-contained -o publish/Launcher
-          dotnet publish src/LinkRouter.Settings/LinkRouter.Settings.csproj -c Release -r ${{ matrix.runtime }} --self-contained -o publish/Settings
+          dotnet publish src/LinkRouter.Launcher/LinkRouter.Launcher.csproj -c Release -r ${{ matrix.runtime }} -o publish/Launcher
+          dotnet publish src/LinkRouter.Settings/LinkRouter.Settings.csproj -c Release -r ${{ matrix.runtime }} -o publish/Settings
 
       - name: Package Linux binaries
         if: runner.os == 'Linux'
