@@ -18,6 +18,10 @@
     </Content>
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(PublishAot)'=='true'">
+    <UseAppHost>true</UseAppHost>
+  </PropertyGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\LinkRouter.Core\LinkRouter.Core.csproj" />
     </ItemGroup>
