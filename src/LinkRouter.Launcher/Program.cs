@@ -37,15 +37,28 @@ class Program
             return 3;
         }
 
-        // Load configuration with fallback to %AppData%\LinkRouter\.config
+        // Load configuration with platform-appropriate search paths
         string? configPath = null;
         var baseDirectoryCandidate = Path.Combine(AppContext.BaseDirectory, "mappings.json");
         if (File.Exists(baseDirectoryCandidate))
         {
             configPath = baseDirectoryCandidate;
         }
+        else if (OperatingSystem.IsLinux())
+        {
+            // Linux: XDG Base Directory specification
+            var configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME")
+                ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+
+            var xdgCandidate = Path.Combine(configHome, "LinkRouter", "mappings.json");
+            if (File.Exists(xdgCandidate))
+            {
+                configPath = xdgCandidate;
+            }
+        }
         else
         {
+            // Windows: %APPDATA%\LinkRouter\.config
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var configRoot = Path.Combine(appData, "LinkRouter");
             var legacyCandidate = Path.Combine(configRoot, "mappings.json");
@@ -102,11 +115,24 @@ class Program
 
     private static void LogArgumentsToFile(string[] args)
     {
-        // Log args to %AppData%\\LinkRouter\\args.log
+        // Log args to platform-appropriate location
         try
         {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var dir = Path.Combine(appData, "LinkRouter");
+            string dir;
+            if (OperatingSystem.IsLinux())
+            {
+                // Linux: use XDG data directory
+                var dataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME")
+                    ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share");
+                dir = Path.Combine(dataHome, "LinkRouter");
+            }
+            else
+            {
+                // Windows: use %APPDATA%\LinkRouter
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                dir = Path.Combine(appData, "LinkRouter");
+            }
+
             Directory.CreateDirectory(dir);
             var togglePath = Path.Combine(dir, "logging.disabled");
             if (File.Exists(togglePath))

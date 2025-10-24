@@ -13,10 +13,18 @@ permissions:
 
 jobs:
   build-test-package:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        runtime: [win-x64, win-arm64]
+        include:
+          - os: windows-latest
+            runtime: win-x64
+          - os: windows-latest
+            runtime: win-arm64
+          - os: ubuntu-latest
+            runtime: linux-x64
+          - os: ubuntu-latest
+            runtime: linux-arm64
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
@@ -59,13 +67,67 @@ jobs:
       - name: Build
         run: dotnet build LinkRouter.sln -c Release --no-restore
 
-      - name: Test
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
         run: ./build/scripts/run-tests.ps1 -Arguments test,-c,Release
 
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        run: dotnet test LinkRouter.sln -c Release --no-build --verbosity normal
+
+      - name: Install NativeAOT prerequisites (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld zlib1g-dev libicu-dev libunwind-dev gcc-aarch64-linux-gnu
+
+      - name: Publish Linux binaries
+        if: runner.os == 'Linux'
+        run: |
+          rm -rf publish/Launcher publish/Settings
+          dotnet publish src/LinkRouter.Launcher/LinkRouter.Launcher.csproj \
+            -c Release \
+            -r ${{ matrix.runtime }} \
+            --self-contained \
+            -p:PublishAot=true \
+            -p:StripSymbols=false \
+            -o publish/Launcher
+          dotnet publish src/LinkRouter.Settings/LinkRouter.Settings.csproj \
+            -c Release \
+            -r ${{ matrix.runtime }} \
+            --self-contained \
+            -p:UseAppHost=true \
+            -o publish/Settings
+
+      - name: Package Linux binaries
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p artifacts/linux
+          tar -czf artifacts/linux/LinkRouter.Launcher-${{ matrix.runtime }}-${{ steps.gitversion.outputs.semVer }}.tar.gz -C publish/Launcher .
+          tar -czf artifacts/linux/LinkRouter.Settings-${{ matrix.runtime }}-${{ steps.gitversion.outputs.semVer }}.tar.gz -C publish/Settings .
+
+      - name: Upload Linux Launcher artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkrouter-launcher-${{ matrix.runtime }}
+          path: artifacts/linux/LinkRouter.Launcher-*.tar.gz
+          if-no-files-found: error
+
+      - name: Upload Linux Settings artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkrouter-settings-${{ matrix.runtime }}
+          path: artifacts/linux/LinkRouter.Settings-*.tar.gz
+          if-no-files-found: error
+
       - name: Package MSIX
+        if: runner.os == 'Windows'
         run: pwsh ./build/scripts/package-msix.ps1 -Configuration Release -Runtime ${{ matrix.runtime }} -Version ${{ steps.gitversion.outputs.majorMinorPatch }}.0
 
       - name: Upload MSIX artifact
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: linkrouter-msix-${{ matrix.runtime }}
@@ -73,6 +135,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload MSIX layout
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: linkrouter-msix-layout-${{ matrix.runtime }}
@@ -80,16 +143,45 @@ jobs:
           if-no-files-found: warn
 
       - name: Package MSI
+        if: runner.os == 'Windows'
         run: |
           $msiVersion = "${{ steps.gitversion.outputs.majorMinorPatch }}"
           Write-Host "Packaging MSI version $msiVersion"
           ./build/scripts/package-msi.ps1 -Configuration Release -Runtime ${{ matrix.runtime }} -Version $msiVersion
 
+      - name: Archive NativeAOT launcher (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $launcherDir = Join-Path "artifacts/msi" "launcher"
+          if (-not (Test-Path $launcherDir)) {
+            throw "NativeAOT launcher directory not found at $launcherDir"
+          }
+          $artifactDir = "artifacts/windows"
+          New-Item -ItemType Directory -Path $artifactDir -Force | Out-Null
+          $archivePath = Join-Path $artifactDir "LinkRouter.Launcher-${{ matrix.runtime }}-${{ steps.gitversion.outputs.semVer }}.zip"
+          if (Test-Path $archivePath) {
+            Remove-Item $archivePath -Force
+          }
+          $items = Get-ChildItem -LiteralPath $launcherDir
+          if (-not $items) {
+            throw "NativeAOT launcher directory $launcherDir is empty."
+          }
+          Compress-Archive -Path ($items | ForEach-Object { $_.FullName }) -DestinationPath $archivePath
+
       - name: Upload MSI artifact
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: linkrouter-msi-${{ matrix.runtime }}
           path: artifacts/msi/*.msi
+          if-no-files-found: error
+
+      - name: Upload Windows Launcher artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkrouter-launcher-${{ matrix.runtime }}
+          path: artifacts/windows/LinkRouter.Launcher-*.zip
           if-no-files-found: error
 
   build-bundle:
@@ -174,6 +266,10 @@ jobs:
           Get-ChildItem -Path release-artifacts -Recurse -Include *.msix,*.msi | Copy-Item -Destination release-files
           # Copy only the bundle Setup.exe (not individual binaries)
           Get-ChildItem -Path release-artifacts -Recurse -Include *_Setup.exe | Copy-Item -Destination release-files
+          # Include NativeAOT launcher archives for all platforms
+          Get-ChildItem -Path release-artifacts -Recurse -File |
+            Where-Object { $_.Name -like 'LinkRouter.Launcher-*.zip' -or $_.Name -like 'LinkRouter.Launcher-*.tar.gz' } |
+            Copy-Item -Destination release-files
 
       - name: Generate release title
         id: release_title

@@ -2,7 +2,7 @@ using System;
 using System.Runtime.Versioning;
 using Microsoft.Win32;
 
-namespace LinkRouter.Settings.Services.BrowserDetection;
+namespace LinkRouter.Settings.Services.Windows.BrowserDetection;
 
 internal static class DefaultBrowserResolver
 {

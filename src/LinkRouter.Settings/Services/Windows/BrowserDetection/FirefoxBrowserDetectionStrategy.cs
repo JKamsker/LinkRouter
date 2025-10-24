@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
+using LinkRouter.Settings.Services.Abstractions;
 using Microsoft.Win32;
 
-namespace LinkRouter.Settings.Services.BrowserDetection;
+namespace LinkRouter.Settings.Services.Windows.BrowserDetection;
 
 internal sealed class FirefoxBrowserDetectionStrategy : IBrowserDetectionStrategy
 {

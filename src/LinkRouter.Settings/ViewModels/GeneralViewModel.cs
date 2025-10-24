@@ -22,6 +22,7 @@ public partial class GeneralViewModel : ObservableObject
     private readonly IRouterPathResolver _routerPathResolver;
     private readonly IAutostartService _autostartService;
     private readonly BrowserDetectionService _browserDetectionService;
+    private readonly IDefaultAppRegistrar? _defaultAppRegistrar;
     private bool _simulationOwnsError;
     private Rule? _lastEffectiveRule;
     private string? _lastLaunchArguments;
@@ -82,7 +83,8 @@ public partial class GeneralViewModel : ObservableObject
         IClipboardService clipboardService,
         IRouterPathResolver routerPathResolver,
         IAutostartService autostartService,
-        BrowserDetectionService browserDetectionService)
+        BrowserDetectionService browserDetectionService,
+        IDefaultAppRegistrar? defaultAppRegistrar = null)
     {
         _configService = configService;
         _ruleTestService = ruleTestService;
@@ -92,6 +94,7 @@ public partial class GeneralViewModel : ObservableObject
         _routerPathResolver = routerPathResolver;
         _autostartService = autostartService;
         _browserDetectionService = browserDetectionService;
+        _defaultAppRegistrar = defaultAppRegistrar;
 
         LoadMetadata();
         _state.StateChanged += OnStateChanged;
@@ -308,7 +311,13 @@ public partial class GeneralViewModel : ObservableObject
 
         try
         {
-            await Task.Run(() => DefaultAppRegistrar.RegisterPerUser(routerPath));
+            if (_defaultAppRegistrar == null)
+            {
+                StatusMessage = "Default browser registration is not supported on this platform.";
+                return;
+            }
+
+            await Task.Run(() => _defaultAppRegistrar.RegisterPerUser(routerPath));
             StatusMessage = "Registration command executed. Windows Settings will prompt for defaults.";
 
             // Recheck status after a short delay to allow registry changes to settle
@@ -396,7 +405,13 @@ public partial class GeneralViewModel : ObservableObject
         StatusMessage = null;
         try
         {
-            await Task.Run(DefaultAppRegistrar.UnregisterPerUser);
+            if (_defaultAppRegistrar == null)
+            {
+                StatusMessage = "Default browser unregistration is not supported on this platform.";
+                return;
+            }
+
+            await Task.Run(_defaultAppRegistrar.UnregisterPerUser);
             StatusMessage = "Unregistration command executed.";
         }
         catch (Exception ex)

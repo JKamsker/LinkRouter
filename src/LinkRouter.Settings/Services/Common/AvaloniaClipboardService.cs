@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using LinkRouter.Settings.Services.Abstractions;
 
-namespace LinkRouter.Settings.Services;
+namespace LinkRouter.Settings.Services.Common;
 
 internal sealed class AvaloniaClipboardService : IClipboardService
 {

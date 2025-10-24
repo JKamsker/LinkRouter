@@ -6,7 +6,7 @@ using LinkRouter.Settings.Views;
 using LinkRouter.Settings.Services.Abstractions;
 using LinkRouter.Settings.ViewModels;
 
-namespace LinkRouter.Settings.Services;
+namespace LinkRouter.Settings.Services.Common;
 
 public sealed class RuleEditorDialogService : IRuleEditorDialogService
 {

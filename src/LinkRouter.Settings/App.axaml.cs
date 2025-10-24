@@ -6,6 +6,11 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using LinkRouter.Settings.Services;
 using LinkRouter.Settings.Services.Abstractions;
+using LinkRouter.Settings.Services.Common;
+using LinkRouter.Settings.Services.Windows;
+using LinkRouter.Settings.Services.Windows.BrowserDetection;
+using LinkRouter.Settings.Services.Linux;
+using LinkRouter.Settings.Services.Linux.BrowserDetection;
 using LinkRouter.Settings.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -56,8 +61,31 @@ public partial class App : Application
     {
         services.AddSingleton<ConfigService>();
         services.AddSingleton<RuleTestService>();
-        services.AddSingleton<BrowserDetectionService>();
         services.AddSingleton<ConfigurationState>();
+
+        // Register browser detection strategies based on platform
+        if (OperatingSystem.IsWindows())
+        {
+            services.AddSingleton<BrowserDetectionService>(_ => new BrowserDetectionService(new IBrowserDetectionStrategy[]
+            {
+                new ChromiumBrowserDetectionStrategy(),
+                new FirefoxBrowserDetectionStrategy()
+            }));
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+#pragma warning disable CA1416 // Platform compatibility - guarded by OperatingSystem.IsLinux()
+            services.AddSingleton<BrowserDetectionService>(_ => new BrowserDetectionService(new IBrowserDetectionStrategy[]
+            {
+                new LinuxBrowserDetectionStrategy()
+            }));
+#pragma warning restore CA1416
+        }
+        else
+        {
+            // Fallback for unsupported platforms
+            services.AddSingleton<BrowserDetectionService>();
+        }
 
         services.AddSingleton<IClassicDesktopStyleApplicationLifetime>(desktop);
 
@@ -66,10 +94,25 @@ public partial class App : Application
         services.AddSingleton<IFilePickerService>(_ => new AvaloniaFilePickerService(() => desktop.MainWindow));
         services.AddSingleton<IMessageDialogService>(_ => new AvaloniaMessageDialogService(() => desktop.MainWindow));
         services.AddSingleton<IRuleEditorDialogService>(_ => new RuleEditorDialogService(() => desktop.MainWindow));
-        services.AddSingleton<IRouterPathResolver, RouterPathResolver>();
-        services.AddSingleton<IAutostartService>(_ => OperatingSystem.IsWindows()
-            ? new WindowsAutostartService()
-            : new NoOpAutostartService());
+
+        // Platform-specific services
+        if (OperatingSystem.IsWindows())
+        {
+            services.AddSingleton<IRouterPathResolver, WindowsRouterPathResolver>();
+            services.AddSingleton<IAutostartService, WindowsAutostartService>();
+            services.AddSingleton<IDefaultAppRegistrar, WindowsDefaultAppRegistrar>();
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            services.AddSingleton<IRouterPathResolver, LinuxRouterPathResolver>();
+            services.AddSingleton<IAutostartService, LinuxAutostartService>();
+            services.AddSingleton<IDefaultAppRegistrar, LinuxDefaultAppRegistrar>();
+        }
+        else
+        {
+            services.AddSingleton<IRouterPathResolver, RouterPathResolver>(); // Fallback
+            services.AddSingleton<IAutostartService, NoOpAutostartService>();
+        }
 
         services.AddSingleton<AppInitializationService>();
         services.AddSingleton<SettingsTrayIconService>();

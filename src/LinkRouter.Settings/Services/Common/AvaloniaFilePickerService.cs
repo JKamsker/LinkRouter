@@ -7,7 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using LinkRouter.Settings.Services.Abstractions;
 
-namespace LinkRouter.Settings.Services;
+namespace LinkRouter.Settings.Services.Common;
 
 internal sealed class AvaloniaFilePickerService : IFilePickerService
 {

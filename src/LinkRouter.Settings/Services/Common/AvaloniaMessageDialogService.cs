@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using FluentAvalonia.UI.Controls;
 using LinkRouter.Settings.Services.Abstractions;
 
-namespace LinkRouter.Settings.Services;
+namespace LinkRouter.Settings.Services.Common;
 
 internal sealed class AvaloniaMessageDialogService : IMessageDialogService
 {
