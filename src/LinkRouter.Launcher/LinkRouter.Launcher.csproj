@@ -11,6 +11,11 @@
     <!-- cross-platform build paths configured in Directory.Build.props -->
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="mappings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -22,8 +27,8 @@
     <UseAppHost>true</UseAppHost>
   </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\LinkRouter.Core\LinkRouter.Core.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LinkRouter.Core\LinkRouter.Core.csproj" />
+  </ItemGroup>
 
 </Project>
