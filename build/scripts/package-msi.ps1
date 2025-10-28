@@ -83,13 +83,7 @@ if (-not (Test-Path $launcherBinary)) {
 }
 Copy-Item $launcherBinary -Destination (Join-Path $publishDir "LinkRouter.Launcher.exe") -Force
 
-# Seed default configuration assets into the new .config directory.
-$defaultMappingsSource = Join-Path $repoRoot "src/LinkRouter.Launcher/mappings.json"
-if (Test-Path $defaultMappingsSource) {
-    Copy-Item $defaultMappingsSource -Destination (Join-Path $configDir "mappings.json") -Force
-} else {
-    Write-Warning "Default mappings.json not found at $defaultMappingsSource; MSI will not include starter config."
-}
+# Config remains user-managed; do not package default mappings.json.
 
 Write-Host "Restoring WiX CLI via dotnet tool..."
 $toolManifest = Join-Path $repoRoot ".config/dotnet-tools.json"
