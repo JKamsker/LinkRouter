@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text.Json;
+using LinkRouter.Settings.Services.Abstractions;
 using Microsoft.Win32;
 
-namespace LinkRouter.Settings.Services.BrowserDetection;
+namespace LinkRouter.Settings.Services.Windows.BrowserDetection;
 
 internal sealed class ChromiumBrowserDetectionStrategy : IBrowserDetectionStrategy
 {
